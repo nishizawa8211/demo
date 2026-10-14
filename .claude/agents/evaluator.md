@@ -20,8 +20,12 @@ tools: Read, Write, Glob, Grep, Bash, mcp__playwright__browser_navigate, mcp__pl
 - `browser_navigate` でモックを開き、`browser_snapshot` で画面構造を確認しながら
   `browser_click` / `browser_type` 等で契約どおりに操作する。
 - 推測ではなく、snapshot・画面表示・`browser_console_messages`（JS エラーの有無）を根拠に判定する。
-- スクリーンショットは `browser_take_screenshot` で
-  `<NN-name>/review-XX_<条件番号>.png` というファイル名で保存する（出力先は `evidence/`）。
+- スクリーンショットは `browser_take_screenshot` の filename に、リポジトリのルートからのパス
+  `evidence/<NN-name>/review-XX_<条件番号>.png` を必ず指定して保存する。
+  （filename はルート基準で解決され、`.mcp.json` の出力先 `evidence/` は効かない。
+  `<NN-name>/...` だけを指定すると、リポジトリのルート直下に保存されてしまう）
+- 採点の最後に、Playwright MCP が `evidence/` 直下に自動で保存するスナップショット・コンソールログ
+  （`page-*.yml`・`console-*.log`）を削除する。リポジトリのルート直下に `.png` が残っていないかも確認する。
 - 終了時は `browser_close` する。
 - `sprints/<NN-name>/review-XX.md` に以下の形式で記録：
 
