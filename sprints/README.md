@@ -4,7 +4,7 @@
 |---|---|---|---|---|---|---|
 | 01 | 一覧画面（デモ操作を含む） | 完了 | 合格 100/100 | 0回 | 2026-10-14 | [contract](01-list-screen/contract.md) / [review-01](01-list-screen/review-01.md) |
 | 02 | ログイン画面 | 完了 | 合格 100/100 | 0回 | 2026-10-14 | [contract](02-login-screen/contract.md) / [review-01](02-login-screen/review-01.md) |
-| 03 | 詳細画面 | 完了 | 合格 100/100 | 0回 | — | [contract](03-detail-screen/contract.md) / [review-01](03-detail-screen/review-01.md) |
+| 03 | 詳細画面 | 完了 | 合格 100/100 | 0回 | 2026-10-14 | [contract](03-detail-screen/contract.md) / [review-01](03-detail-screen/review-01.md) |
 | 04 | フロー前半（ログイン〜CSV 出力） | 未着手 | — | — | — | — |
 | 05 | フロー後半（SharePoint 保存・比較・Teams 投稿） | 未着手 | — | — | — | — |
 
