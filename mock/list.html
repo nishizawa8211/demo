@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>申込管理システム（デモ）- 申込一覧</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="list">
+  <header class="app-header">
+    <p class="app-name" id="app-name">申込管理システム（デモ）</p>
+  </header>
+
+  <main>
+    <!-- 業務エリア（PAD の取得対象） -->
+    <section class="business-area" id="business-area">
+      <h1 class="page-title">申込一覧</h1>
+      <p class="count-line"><span id="application-count" data-count="0"></span></p>
+      <p class="error-message" id="list-error" hidden>データを読み込めませんでした</p>
+      <div class="table-wrap">
+        <table class="data-table" id="application-table">
+          <thead>
+            <tr>
+              <th scope="col">申込番号</th>
+              <th scope="col">申込日</th>
+              <th scope="col">お客さま名</th>
+              <th scope="col">供給地点特定番号</th>
+              <th scope="col">申込種別</th>
+              <th scope="col">変更前容量</th>
+              <th scope="col">変更後容量</th>
+              <th scope="col">ステータス</th>
+              <th scope="col">担当者</th>
+              <th scope="col">詳細</th>
+            </tr>
+          </thead>
+          <tbody id="application-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- デモ操作エリア（デモ操作者のみ使用。PAD は触らない） -->
+    <section class="demo-tools" id="demo-tools">
+      <h2>デモ操作（デモ用の機能です）</h2>
+      <div class="demo-buttons">
+        <button type="button" id="demo-add-button" data-demo-action="add">新規案件を追加</button>
+        <button type="button" id="demo-reset-button" data-demo-action="reset">初期データに戻す</button>
+      </div>
+      <div class="demo-confirm" id="demo-reset-confirm" hidden>
+        <p id="demo-reset-confirm-text">初期データ（20件）に戻します。よろしいですか？</p>
+        <button type="button" id="demo-reset-confirm-button" data-demo-action="reset-confirm">実行する</button>
+        <button type="button" id="demo-reset-cancel-button" data-demo-action="reset-cancel">キャンセル</button>
+      </div>
+      <p class="demo-message" id="demo-message" role="status"></p>
+    </section>
+  </main>
+
+  <script src="js/list.js"></script>
+</body>
+</html>
