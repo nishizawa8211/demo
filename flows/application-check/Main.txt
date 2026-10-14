@@ -1,0 +1,112 @@
+# ===== 申込状況チェック_デモ（Main サブフロー）=====
+# スプリント04：docs/flow.md 手順0〜4 と 手順7（ブラウザを閉じる）
+# 貼り付け方法・UI 要素の登録・アクション表は README.md を参照
+# 手順0. 初期化
+BLOCK Step0_Init
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順0：初期化（実行日時の取得・作業フォルダの作成・データテーブルの準備）に失敗しました'''
+    SET BaseUrl TO $'''http://localhost:8080'''
+    SET LoginId TO $'''demo-user'''
+    SET LoginPassword TO $'''demo-pass'''
+    SET WorkFolderName TO $'''申込状況チェック_デモ'''
+    DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTime=> RunDateTime
+    Text.ConvertDateTimeToText.FromCustomDateTime DateTime: RunDateTime CustomFormat: $'''yyyyMMdd_HHmm''' Result=> RunStamp
+    SET HistoryFileName TO $'''申込状況_%RunStamp%.csv'''
+    Folder.GetSpecialFolder SpecialFolder: System.Environment.SpecialFolder.Personal SpecialFolderPath=> DocumentsFolder
+    SET WorkFolder TO $'''%DocumentsFolder%\%WorkFolderName%'''
+    IF (Folder.IfFolderExists.DoesNotExist Path: WorkFolder) THEN
+        Folder.Create FolderPath: DocumentsFolder FolderName: WorkFolderName Folder=> CreatedFolder
+    END
+    # 見出し14列（docs/screens.md 1-2 の順）。作成時の空行は直後に削除する
+    Variables.CreateNewDatatable InputTable: { ^[$'''申込番号''', $'''申込日''', $'''お客さま名''', $'''供給地点特定番号''', $'''申込種別''', $'''変更前容量''', $'''変更後容量''', $'''ステータス''', $'''担当者''', $'''需要場所住所''', $'''希望日''', $'''工事予定日''', $'''送配電受付番号''', $'''備考'''], [$'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $''''''] } DataTable=> CurrentTable
+    Variables.DeleteRowFromDataTable DataTable: CurrentTable RowIndex: 0
+END
+# 手順1. Edge 起動・ログイン
+BLOCK Step1_Login
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順1-1〜1-2：モック画面に接続できません。server.js が起動しているか確認してください'''
+    WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
+    WAIT (WebAutomation.WaitForWebPageContent.ElementToAppear BrowserInstance: Browser Control: appmask['LoginPage']['login-id']) FOR 30
+    SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
+    WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+    WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-password'] Text: LoginPassword EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+    WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+    SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
+    WAIT (WebAutomation.WaitForWebPageContent.ElementToAppear BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+END
+# 手順2. 一覧から申込番号を全件取得
+BLOCK Step2_GetList
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順2-1：一覧から申込番号を取得できませんでした'''
+    WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var rows = document.querySelectorAll("#application-tbody tr[data-application-no]"); var nos = []; for (var i = 0; i < rows.length; i++) { nos.push(rows[i].getAttribute("data-application-no")); } return nos.join(","); }''' Result=> ApplicationNosText
+    Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelimiter: $''',''' IsRegEx: False Result=> ApplicationNos
+    SET StepMessage TO $'''手順2-2：一覧の件数表示（data-count）を取得できませんでした'''
+    WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''data-count''' AttributeValue=> DataCountText
+    Text.ToNumber Text: DataCountText Number=> DataCount
+    IF ApplicationNos.Count <> DataCount THEN
+        SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取得 %ApplicationNos.Count% 件）。取得した申込番号：%ApplicationNosText%'''
+        GOTO ErrorEnd
+    END
+END
+# 手順3. 各案件の詳細を取得（手順2 で取得した申込番号リストの全件を繰り返す）
+BLOCK Step3_GetDetails
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    LOOP FOREACH CurrentNo IN ApplicationNos
+        SET StepMessage TO $'''手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした'''
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60
+        SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む）'''
+        WAIT (WebAutomation.WaitForWebPageContent.ElementToAppear BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded']) FOR 30
+        SET StepMessage TO $'''手順3-3：申込番号 %CurrentNo% の詳細画面から申込番号を取得できませんでした'''
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationNo
+        IF Val_applicationNo <> CurrentNo THEN
+            SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %Val_applicationNo%）'''
+            GOTO ErrorEnd
+        END
+        SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の項目を取得できませんでした'''
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationDate
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-customerName'] AttributeName: $'''Own Text''' AttributeValue=> Val_customerName
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-supplyPointNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_supplyPointNo
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationType'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationType
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-capacityBefore'] AttributeName: $'''Own Text''' AttributeValue=> Val_capacityBefore
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-capacityAfter'] AttributeName: $'''Own Text''' AttributeValue=> Val_capacityAfter
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-status'] AttributeName: $'''Own Text''' AttributeValue=> Val_status
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-assignee'] AttributeName: $'''Own Text''' AttributeValue=> Val_assignee
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-siteAddress'] AttributeName: $'''Own Text''' AttributeValue=> Val_siteAddress
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-desiredDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_desiredDate
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-scheduledWorkDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_scheduledWorkDate
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-receptionNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_receptionNo
+        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-remarks'] AttributeName: $'''Own Text''' AttributeValue=> Val_remarks
+        # 14項目を docs/screens.md 1-2 の順に並べて1行追加（空の備考も位置で入るので列がずれない）
+        Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTable RowToAdd: [Val_applicationNo, Val_applicationDate, Val_customerName, Val_supplyPointNo, Val_applicationType, Val_capacityBefore, Val_capacityAfter, Val_status, Val_assignee, Val_siteAddress, Val_desiredDate, Val_scheduledWorkDate, Val_receptionNo, Val_remarks]
+        SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30 秒）'''
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60
+        WAIT (WebAutomation.WaitForWebPageContent.ElementToAppear BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+    END
+END
+# 手順4. ローカルに CSV 出力（全件の取得が終わった後だけ実行される）
+BLOCK Step4_WriteCsv
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順4：CSV ファイルを書き出せませんでした。同じ名前のファイルを Excel 等で開いていないか確認してください'''
+    File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\%HistoryFileName%''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+    File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\latest.csv''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+END
+# ===== スプリント05：手順5〜6 はここ（次の「手順7」のブラウザを閉じるアクションの前）に追加する =====
+# 手順7. 終了（正常時）
+WebAutomation.CloseWebBrowser BrowserInstance: Browser
+EXIT Code: 0
+# ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない）=====
+LABEL ErrorEnd
+Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: StepMessage Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
+WebAutomation.CloseWebBrowser BrowserInstance: Browser
+ON ERROR
+END
