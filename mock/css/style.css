@@ -165,3 +165,29 @@ html.auth-redirect body { visibility: hidden; }
   color: #fff;
 }
 .login-box .form-actions button:hover { background: #24405c; }
+
+/* 申込詳細画面 */
+.detail-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  margin: 0 0 16px;
+  border: 1px solid #ccd3da;
+  border-bottom: none;
+  max-width: 720px;
+}
+.detail-list dt,
+.detail-list dd {
+  margin: 0;
+  padding: 6px 10px;
+  border-bottom: 1px solid #ccd3da;
+  min-height: 2.1em;
+}
+.detail-list dt {
+  background: #e6ecf2;
+  font-weight: bold;
+  border-right: 1px solid #ccd3da;
+}
+.detail-actions {
+  display: flex;
+  gap: 8px;
+}

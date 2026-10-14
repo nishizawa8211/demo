@@ -99,7 +99,7 @@
     cancelButton.disabled = busy;
   }
 
-  // 詳細ボタン（遷移先の画面はスプリント03で作成）
+  // 詳細ボタン：同じタブで詳細画面へ遷移
   tbody.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-action="detail"]');
     if (!btn) return;
@@ -147,6 +147,14 @@
         demoMessage.textContent = '初期データに戻せませんでした';
       })
       .then(function () { setDemoBusy(false); });
+  });
+
+  // ブラウザの「戻る」でキャッシュ（bfcache）から表示された場合も、一覧を読み込み直して最新・同じ形で表示する
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted || !window.DemoAuth.isLoggedIn()) return;
+    confirmBox.hidden = true;
+    setDemoBusy(false);
+    loadList();
   });
 
   loadList();
