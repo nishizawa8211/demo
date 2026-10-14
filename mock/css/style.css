@@ -1,0 +1,119 @@
+/* 申込管理システム（デモ） 共通スタイル */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Yu Gothic UI", "Meiryo", sans-serif;
+  font-size: 14px;
+  color: #222;
+  background: #f4f6f8;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #2f4f6f;
+  color: #fff;
+}
+.app-header .app-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+main {
+  padding: 16px 16px 32px;
+}
+
+/* 業務エリア */
+.business-area {
+  background: #fff;
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.page-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.count-line {
+  margin: 0 0 8px;
+}
+.error-message {
+  color: #b00020;
+  font-weight: bold;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.data-table th,
+.data-table td {
+  border: 1px solid #ccd3da;
+  padding: 5px 6px;
+  text-align: left;
+}
+.data-table thead th {
+  background: #e6ecf2;
+}
+.data-table tbody tr:nth-child(even) {
+  background: #f9fbfc;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  padding: 4px 12px;
+  border: 1px solid #2f4f6f;
+  border-radius: 3px;
+  background: #fff;
+  color: #2f4f6f;
+}
+button:hover { background: #eef3f8; }
+button:disabled { opacity: 0.5; cursor: default; }
+
+/* デモ操作エリア（業務エリアと見た目を分ける） */
+.demo-tools {
+  margin-top: 24px;
+  padding: 12px 16px 16px;
+  border: 2px dashed #c77d00;
+  border-radius: 4px;
+  background: #fff7e6;
+}
+.demo-tools h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #8a5600;
+}
+.demo-tools .demo-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.demo-tools button {
+  border-color: #c77d00;
+  color: #8a5600;
+}
+.demo-tools button:hover { background: #ffecc7; }
+.demo-confirm {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid #c77d00;
+  background: #fff;
+}
+.demo-confirm p { margin: 0 0 8px; }
+.demo-message {
+  margin: 12px 0 0;
+  min-height: 1.4em;
+  font-weight: bold;
+}
+
+[hidden] { display: none !important; }

@@ -1,0 +1,54 @@
+{
+  "candidates": [
+    {
+      "customerName": "サンプル 新太",
+      "supplyPointNo": "9900000000000000002001",
+      "applicationType": "契約容量変更",
+      "capacityBefore": "30A",
+      "capacityAfter": "50A",
+      "assignee": "デモ 花子",
+      "siteAddress": "デモ県サンプル市見本町10-1-1",
+      "remarks": "立会い希望あり"
+    },
+    {
+      "customerName": "デモ 若葉",
+      "supplyPointNo": "9900000000000000002002",
+      "applicationType": "契約電力変更",
+      "capacityBefore": "8kW",
+      "capacityAfter": "12kW",
+      "assignee": "サンプル 春子",
+      "siteAddress": "デモ県見本市試験町11-2-3",
+      "remarks": ""
+    },
+    {
+      "customerName": "見本 明日香",
+      "supplyPointNo": "9900000000000000002003",
+      "applicationType": "新設",
+      "capacityBefore": "-",
+      "capacityAfter": "40A",
+      "assignee": "デモ 夏美",
+      "siteAddress": "デモ県デモ市架空台12-4-5",
+      "remarks": "午前中の工事を希望"
+    },
+    {
+      "customerName": "テスト 光",
+      "supplyPointNo": "9900000000000000002004",
+      "applicationType": "契約容量変更",
+      "capacityBefore": "40A",
+      "capacityAfter": "60A",
+      "assignee": "サンプル 秋子",
+      "siteAddress": "デモ県サンプル市例示町13-6-7",
+      "remarks": ""
+    },
+    {
+      "customerName": "サンプル 始",
+      "supplyPointNo": "9900000000000000002005",
+      "applicationType": "契約容量変更",
+      "capacityBefore": "20A",
+      "capacityAfter": "30A",
+      "assignee": "デモ 花子",
+      "siteAddress": "デモ県見本市見本町14-8-9",
+      "remarks": ""
+    }
+  ]
+}
