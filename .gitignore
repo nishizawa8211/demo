@@ -1,0 +1,6 @@
+﻿.claude/settings.local.json
+node_modules/
+.playwright-mcp/
+Thumbs.db
+.DS_Store
+input/brief.md
