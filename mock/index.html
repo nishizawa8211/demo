@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>申し込み管理デモ</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>申込管理システム（デモ）- ログイン</title>
+  <link rel="icon" href="data:,">
+  <!-- 通常は server.js が「/」を login.html へ転送する。index.html を直接開いた場合もログイン画面へ移る -->
+  <meta http-equiv="refresh" content="0; url=login.html">
+  <script>window.location.replace('login.html');</script>
 </head>
-<body>
-  <!-- Generator が実装します（ログイン → 一覧 → 詳細） -->
-  <script src="js/app.js"></script>
+<body data-page="login">
+  <p><a href="login.html">ログイン画面へ</a></p>
 </body>
 </html>
