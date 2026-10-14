@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja" data-auth="required">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>申込管理システム（デモ）- 申込詳細</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/app.js"></script>
+</head>
+<body data-page="detail">
+  <header class="app-header">
+    <p class="app-name" id="app-name">申込管理システム（デモ）</p>
+    <div class="header-user">
+      <span id="current-user"></span>
+      <button type="button" id="logout-button">ログアウト</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 業務エリア（PAD の取得対象） -->
+    <section class="business-area" id="business-area">
+      <h1 class="page-title" id="detail-title">申込詳細</h1>
+      <p class="error-message" id="detail-error" role="alert" hidden></p>
+      <!-- 値の要素（dd）には値だけが入る。表示完了後に data-loaded="true" を付ける -->
+      <dl class="detail-list" id="application-detail">
+        <dt>申込番号</dt>
+        <dd id="field-applicationNo" data-field="applicationNo"></dd>
+        <dt>申込日</dt>
+        <dd id="field-applicationDate" data-field="applicationDate"></dd>
+        <dt>お客さま名</dt>
+        <dd id="field-customerName" data-field="customerName"></dd>
+        <dt>供給地点特定番号</dt>
+        <dd id="field-supplyPointNo" data-field="supplyPointNo"></dd>
+        <dt>申込種別</dt>
+        <dd id="field-applicationType" data-field="applicationType"></dd>
+        <dt>変更前容量</dt>
+        <dd id="field-capacityBefore" data-field="capacityBefore"></dd>
+        <dt>変更後容量</dt>
+        <dd id="field-capacityAfter" data-field="capacityAfter"></dd>
+        <dt>ステータス</dt>
+        <dd id="field-status" data-field="status"></dd>
+        <dt>担当者</dt>
+        <dd id="field-assignee" data-field="assignee"></dd>
+        <dt>需要場所住所</dt>
+        <dd id="field-siteAddress" data-field="siteAddress"></dd>
+        <dt>希望日</dt>
+        <dd id="field-desiredDate" data-field="desiredDate"></dd>
+        <dt>工事予定日</dt>
+        <dd id="field-scheduledWorkDate" data-field="scheduledWorkDate"></dd>
+        <dt>送配電受付番号</dt>
+        <dd id="field-receptionNo" data-field="receptionNo"></dd>
+        <dt>備考</dt>
+        <dd id="field-remarks" data-field="remarks"></dd>
+      </dl>
+      <div class="detail-actions">
+        <button type="button" id="back-to-list-button">一覧へ戻る</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/detail.js"></script>
+</body>
+</html>
