@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@0.0.83", "--output-dir", "evidence"]
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp@0.0.83", "--browser", "msedge", "--output-dir", "evidence"]
     }
   }
 }
