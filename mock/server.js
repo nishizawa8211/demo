@@ -113,7 +113,6 @@ function sendJson(res, status, obj) {
 }
 
 function serveStatic(req, res, pathname) {
-  if (pathname === '/') pathname = '/index.html';
   let decoded;
   try {
     decoded = decodeURIComponent(pathname);
@@ -152,6 +151,12 @@ const server = http.createServer((req, res) => {
     if (p === '/api/demo/reset' && req.method === 'POST') {
       return sendJson(res, 200, resetApplications());
     }
+    if (p === '/' && (req.method === 'GET' || req.method === 'HEAD')) {
+      // ルートはログイン画面へ転送する
+      res.writeHead(302, { Location: '/login.html', 'Cache-Control': 'no-store' });
+      res.end();
+      return;
+    }
     if (p === '/favicon.ico') {
       // アイコンは用意しない（404 をブラウザのコンソールエラーにしないため）
       res.writeHead(204, { 'Cache-Control': 'no-store' });
@@ -172,5 +177,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('申込管理システム（デモ）: http://localhost:' + PORT + '/list.html');
+  console.log('申込管理システム（デモ）: http://localhost:' + PORT + '/login.html');
 });

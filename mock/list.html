@@ -1,15 +1,20 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" data-auth="required">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>申込管理システム（デモ）- 申込一覧</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/app.js"></script>
 </head>
 <body data-page="list">
   <header class="app-header">
     <p class="app-name" id="app-name">申込管理システム（デモ）</p>
+    <div class="header-user">
+      <span id="current-user"></span>
+      <button type="button" id="logout-button">ログアウト</button>
+    </div>
   </header>
 
   <main>

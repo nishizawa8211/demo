@@ -2,6 +2,9 @@
 (function () {
   'use strict';
 
+  // 未ログインの場合は app.js がログイン画面へ移すので、一覧の読み込み・操作は行わない
+  if (!window.DemoAuth || !window.DemoAuth.isLoggedIn()) return;
+
   // 一覧に表示する項目（列順）
   var LIST_FIELDS = [
     'applicationNo',

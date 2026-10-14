@@ -117,3 +117,51 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 
 [hidden] { display: none !important; }
+
+/* ヘッダーのログイン中表示・ログアウト */
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-user button {
+  border-color: #fff;
+  background: transparent;
+  color: #fff;
+}
+.header-user button:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* 未ログインでログイン画面へ移る間は本文を表示しない */
+html.auth-redirect body { visibility: hidden; }
+
+/* ログイン画面 */
+.login-box {
+  max-width: 360px;
+  margin: 48px auto 0;
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.login-box .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.login-box input {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #aab4be;
+  border-radius: 3px;
+}
+.login-box .error-message {
+  margin: 0 0 12px;
+}
+.login-box .form-actions button {
+  width: 100%;
+  padding: 8px 12px;
+  background: #2f4f6f;
+  color: #fff;
+}
+.login-box .form-actions button:hover { background: #24405c; }
