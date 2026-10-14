@@ -26,6 +26,7 @@ tools: Read, Write, Glob, Grep, Bash, mcp__playwright__browser_navigate, mcp__pl
   `<NN-name>/...` だけを指定すると、リポジトリのルート直下に保存されてしまう）
 - 採点の最後に、Playwright MCP が `evidence/` 直下に自動で保存するスナップショット・コンソールログ
   （`page-*.yml`・`console-*.log`）を削除する。リポジトリのルート直下に `.png` が残っていないかも確認する。
+- サーバーは自分が起動したバックグラウンドタスクを止めて終了する。`taskkill /IM node.exe` のように node をまとめて終了するコマンドは使わない（Playwright MCP も node で動いているため）。
 - 終了時は `browser_close` する。
 - `sprints/<NN-name>/review-XX.md` に以下の形式で記録：
 
