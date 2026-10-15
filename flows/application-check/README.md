@@ -15,7 +15,7 @@
 
 - サブフローは Main の1つだけ（ほかのサブフローは作らない）。
 
-> **この手順書の読み方**：`Main.txt` は作成者の知識で書いた定義テキストで、PAD に貼り付けての確認はまだしていない（人のレビュー②で確認する）。末尾の UI 要素の定義は、人が PAD でコピーした実物の形式（UI 要素をコピーしたときに出力されるテキスト）に合わせて作ったが、これも貼り付けでの確認はまだしていない。PAD の版の違い等で貼り付けられない場合は、**UI 要素を手で登録し（3-1）、「7. アクション表」を上から順に見て、同じアクションを手作業で作れば同じフローになる**ように書いてある。確信が持てない構文・名前は「10. レビュー②で要確認」に一覧にした。
+> **この手順書の読み方**：`Main.txt` のアクション行は、この PC の PAD（11.2609.183.0）自身の構文解析器とアクション定義ファイルと照合し、**構文エラー 0・アクション名／パラメーター名／列挙値の不一致 0** にしてある（照合の内容と直した箇所は「10-0」）。末尾の UI 要素の定義は、人が PAD でコピーした実物の形式に合わせてあり、項目名の構成も実物と一致している。ただし **PAD に貼り付けての確認と実行はまだしていない**（人のレビュー②で確認する）。PAD の版の違い等で貼り付けられない場合は、**UI 要素を手で登録し（3-1）、「7. アクション表」を上から順に見て、同じアクションを手作業で作れば同じフローになる**ように書いてある。実機でないと確かめられない点は「10-1. レビュー②で要確認」に一覧にした。
 
 ---
 
@@ -101,7 +101,7 @@
    - 画面が `LoginPage`・`ListPage`・`DetailPage` の **3つ** あり、その下に要素が **計22個**（`LoginPage` 3個・`ListPage` 3個・`DetailPage` 16個）できていること。名前が 2-2 の UI 要素表と同じであること。
    - **U6（`ListPage` の `detail-button`）をダブルクリック** してセレクター ビルダーを開き、カスタム セレクターが `button[data-action="detail"][data-application-no="%CurrentNo%"]` のまま（`%CurrentNo%` が残っている）であること。
    - 何個か（例：U1 `login-id`・U4 `application-table-loaded`）を開き、セレクターが表の「セレクター」列と同じ1つだけであること。
-5. 変数ペインに `StepMessage`・`BaseUrl`・`CurrentTable` などの変数ができていること、アクションが「7. アクション表」と同じ順に並んでいることを確かめる（表の No.1〜3 のように、ブロックの開始とそのエラー時の設定は PAD 上では1つのアクションとして表示される。No.83〜84 も同様）。
+5. 変数ペインに `StepMessage`・`BaseUrl`・`CurrentTable` などの変数ができていること、アクションが「7. アクション表」と同じ順に並んでいることを確かめる（表の No.1〜3 のように、ブロックの開始とそのエラー時の設定は PAD 上では1つのアクションとして表示される。No.83〜85 も同様）。
 6. 「4. 変数設定」の **`LoginPassword` を機密としてマーク** する。
 7. デザイナー上部の［保存］を押す。
 8. エラー ペインに赤いエラーが出ている場合は、該当のアクションをダブルクリックし、「7. アクション表」の設定値どおりに直す（UI 要素名の誤り・列挙値の名前の違いが多い）。
@@ -220,11 +220,22 @@
 
 ## 7. アクション表
 
-- `Main.txt` のアクション行（`#` コメント行・空行・`END` を除く）を上から順に並べた。**表の No と `Main.txt` の行は1対1で同じ順・同じ数（84行）**。
+- `Main.txt` のアクション行（`#` コメント行・空行・`END` を除く）を上から順に並べた。**表の No と `Main.txt` の行は1対1で同じ順・同じ数（85行）**。
 - 「手順」列は `docs/flow.md` の手順番号。「ブロック内」は、どのブロック（BLOCK）の中に入れるか。
 - アクション名は PAD デザイナー（日本語表示）の名前。版によって表記が少し違う場合がある（10 を参照）。
-- 待機（「Web ページのコンテンツを待機」）は `Main.txt` では `WAIT (…ElementToAppear …) FOR 30` と書かれる。これは **要素が出るまで最大 30 秒待つ** 設定（タイムアウト 30 秒）で、固定秒数の待機（「待機」アクション `WAIT <秒>`）ではない。固定秒数の待機は使っていない。
+- 待機（「Web ページのコンテンツを待機」）は `Main.txt` では `WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement …) FOR 30` と書かれる。これは **要素が出るまで最大 30 秒待つ** 設定（タイムアウト 30 秒）で、固定秒数の待機（「待機」アクション `WAIT <秒>`）ではない。固定秒数の待機は使っていない。
 - 「エラー時の設定」が「ブロック Stepx」のアクションは、アクション自体には何も設定せず、ブロックのエラー時処理（ラベル `ErrorEnd` へ移動）で扱う。
+
+**`Main.txt` を手で直すときの注意（文字のエスケープ）**
+
+PAD の貼り付けテキストでは `$'''…'''` の中の次の文字をエスケープする。デザイナーの画面には下の「設定値」の形（`\` や `"` が1つ）で表示されるので、表の値をそのまま `Main.txt` に書くと貼り付け時に構文エラーになる。
+
+| 画面での値 | `Main.txt` での書き方 | 該当箇所 |
+|------------|----------------------|----------|
+| `\`（円記号・バックスラッシュ） | `\\` | No.13（`%DocumentsFolder%\\%WorkFolderName%`）・No.77・78（CSV のファイル パス） |
+| `"`（ダブルクォート） | `\"` | No.34 の JavaScript 内のセレクター |
+
+- とくに `\%` と書くと `%` が「変数の始まり」ではなく文字として扱われ、そこから後ろの行まで読み飛ばされて貼り付けが失敗する。パスの区切りは必ず `\\` にする。
 
 | No | 手順 | ブロック内 | アクション名（PAD デザイナー） | 主な設定値 | 生成される変数 | エラー時の設定 |
 |----|------|-----------|-------------------------------|-----------|---------------|---------------|
@@ -310,10 +321,11 @@
 | 80 | 7 | — | フローを停止する | フローの終了：正常に終了（コード 0） | — | — |
 | 81 | エラー時 | — | ラベル | ラベル名：`ErrorEnd` | — | — |
 | 82 | エラー時 | — | メッセージを表示 | タイトル：`申込状況チェック_デモ（エラーで停止しました）`、表示するメッセージ：`%StepMessage%`、アイコン：エラー、ボタン：OK、常に手前に表示：オン | `ButtonPressed` | — |
-| 83 | エラー時 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | No.84 |
-| 84 | エラー時 | — | （No.83 のエラー時の設定） | エラー発生時：フロー実行を続行する → 次のアクションに進む（Edge が起動していない場合も止まらずに終わる） | — | — |
+| 83 | エラー時 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | No.84〜85 |
+| 84 | エラー時 | — | （No.83 のエラー時の設定） | エラー発生時：フロー実行を続行する（`Main.txt` では `ON ERROR`） | — | — |
+| 85 | エラー時 | — | （No.83 のエラー時の設定の続き） | 次のアクションに進む（`Main.txt` では `NEXT ACTION`。Edge が起動していない場合も止まらずに終わる） | — | — |
 
-**No.34 の JavaScript**（`Main.txt` では1行。中のセレクターは `#application-tbody tr[data-application-no]`）
+**No.34 の JavaScript**（`Main.txt` では1行。中のセレクターは `#application-tbody tr[data-application-no]`。`Main.txt` では文字列の中なのでダブルクォートが `\"` になっている）
 
 ```javascript
 function ExecuteScript() {
@@ -366,30 +378,59 @@ DM-2026-0001,2026/08/03,サンプル 一郎,9900000000000000001038,契約容量�
 
 ---
 
-## 10. レビュー②で要確認
+## 10. 検証状況とレビュー②で要確認
 
-`Main.txt` は PAD に貼り付けての確認をしていない。次の点は作成者の知識で書いたもので、**確定ではない**。レビュー②で PAD に貼り付けて確認し、違っていたら PAD 上で「7. アクション表」の設定値どおりに直す。
+### 10-0. この PC の PAD の定義と照合した結果（2026-10-15）
 
-| # | 対象（アクション表 No.） | 確認すること |
-|---|--------------------------|-------------|
-| R-1 | ブロック（No.1〜3 ほか各ブロック） | `BLOCK <名前>` ／ `ON BLOCK ERROR` ／ `GOTO ErrorEnd` ／ `END` の書き方（ブロック名の引用符の要否、`ON BLOCK ERROR` の後のキーワード〔`all` 等〕の有無）。貼り付けで崩れた場合は、ブロックを手作業で作り、例外処理モードを「フロー実行を続行する → ラベルに移動：ErrorEnd」にする |
-| R-2 | 移動先（No.41・54） | ループ（For each）やブロックの中から、外のラベル `ErrorEnd` に移動できること。できない場合は、ループ・ブロックを抜けた後で移動する形に直す |
-| R-3 | アクションのエラー時の設定（No.83〜84） | `ON ERROR` ／ `END` で「フロー実行を続行する → 次のアクションに進む」になること |
-| R-4 | 待機（No.23・29・49・72） | `WAIT (WebAutomation.WaitForWebPageContent.ElementToAppear …) FOR 30` の書き方と、タイムアウト 30 秒が設定されること |
-| R-5 | Edge 起動（No.22） | `WebAutomation.LaunchEdge.LaunchEdge` のパラメーター名（`WindowState`・`ClearCache`・`Timeout` 等）。新しい版で追加されたパラメーターがあれば既定値でよい |
-| R-6 | テキスト フィールドに入力（No.25・26） | アクション名 `PopulateTextField.PopulateTextField` と `EmulateTyping` 等のパラメーター名 |
-| R-7 | クリック（No.27・47・71） | `WebAutomation.Click.Click` のパラメーター |
-| R-8 | 要素の詳細を取得（No.37・51・56〜68） | 属性名に `data-count` を直接入力できること、`Own Text` で値だけが取れること（空の備考が空文字になること）、出力パラメーター名 `AttributeValue` |
-| R-9 | JavaScript 関数を実行（No.34） | `WebAutomation.ExecuteJavascript` のパラメーター名、関数名 `ExecuteScript` の戻り値が `Result` に入ること |
-| R-10 | テキストの分割（No.35）・テキストを数値に変換（No.38）・If（No.39） | `Text.SplitText.SplitWithDelimiter` の書き方、リストの件数 `%ApplicationNos.Count%` と数値の比較 |
-| R-11 | データ テーブル（No.16・17・69） | `Variables.CreateNewDatatable` の表の書き方（見出しを `$'''…'''` で書いてよいか）、空行の削除 `Variables.DeleteRowFromDataTable`、行の追加 `Variables.AddRowToDataTable.AppendRowToDataTable`。見出しだけ（0行）のデータ テーブルを直接作れる版なら No.17 は不要だが、その場合も No.17 を残すと行が無くエラーになるので、作成時の行の有無に合わせる |
-| R-12 | CSV に書き込む（No.77・78） | 列挙値の名前（`File.CSVEncoding.UTF8`・`File.CSVColumnsSeparator.Comma`・`File.IfFileExists.Overwrite`）、「UTF-8」で BOM が付くこと（5 の 6. で確認）、値がダブルクォートで囲まれるかどうか |
-| R-13 | フォルダー（No.12・14・15） | `System.Environment.SpecialFolder.Personal` がドキュメントになること、`IF (Folder.IfFolderExists.DoesNotExist Path: …) THEN` の書き方 |
-| R-14 | 日時（No.9・10） | `DateTime.GetCurrentDateTime.Local` と `Text.ConvertDateTimeToText.FromCustomDateTime` の書き方。`yyyyMMdd_HHmm` で `20261014_1030` の形になること |
-| R-15 | メッセージ・停止（No.80・82） | `Display.ShowMessageDialog.ShowMessage` のパラメーター、`EXIT Code: 0` |
-| R-16 | UI 要素（U1〜U22） | セレクター エディターで `#id` の書き方が使えること（使えなければ「`#` が使えない場合」列の形）、U6 の `%CurrentNo%` がセレクター内で値に置き換わること |
-| R-17 | アクション名 | 表の日本語のアクション名が、使っている PAD の版の表示と合っているか |
-| R-18 | 実行結果 | 出力 CSV の件数（一覧と同数）・14列・BOM・Excel での文字化け、実行時間（`docs/criteria.md` R1・R5〜R7） |
-| R-19 | UI 要素の定義（`Main.txt` 末尾） | **貼り付けだけで UI 要素が登録されること**（［UI 要素］ペインに3画面・22要素ができ、名前とセレクターが 2-2 の表どおりで、U6 に `%CurrentNo%` が残ること）。登録されない場合は 3-1 の予備手順で登録する |
-| R-20 | UI 要素のスクリーンショット | **スクリーンショット無し（1×1 のダミー画像）で取り込めること**。取り込めない場合は 3-1 の予備手順で登録するか、登録された要素を取り込み直す（2-2「スクリーンショットの扱い」）。あわせて、取り込み直すときのメニュー名（2-2 に書いた［UI 要素の置換］）が PAD の表示と合っているかも確かめる |
-| R-21 | UI 要素の種類の表示名 | 要素の種類（`Input text`・`Definition description` 等。定義の `ElementTypeName`）は作成者が付けた表示用の名前。PAD の表示と違っても、セレクターで要素を探すので実行には影響しない想定。エラーになる場合は該当要素を取り込み直す |
+`Main.txt` のアクション行を、この PC にインストールされている **Power Automate for desktop 11.2609.183.0** 自身のファイルと機械的に照合した。
+
+- **構文**：PAD のフロー テキストの構文解析器（`Microsoft.Flow.RPA.Desktop.Robin.Language.dll`）で解析 → **エラー 0**（96 ステートメント。`#` コメント・`BLOCK` ／ `ON BLOCK ERROR`・`WAIT … FOR`・`LABEL` ／ `GOTO`・`EXIT Code:` がすべて正しい書き方だと確認できた）。
+- **アクション名・パラメーター名・列挙値**：各アクション モジュール（`Microsoft.Flow.RPA.Desktop.Modules.*.Actions.dll`）の定義と照合 → 41 か所のアクション呼び出しで **不一致 0**。
+  - アクション名の決まり方は **`ActionAttribute` の `Name` → `Id` → クラス名** の順（`Name` があればそれが `Main.txt` に書く名前）。根拠：`Database.OpenConnection` クラスは `@ActionAttribute(Name=Connect)` で、その移行用クラスが宣言する完全名が `Database.Connect`（`Excel.AttachToRunningExcel`／`Name=Attach` → `Excel.Attach` も同じ）。
+  - セレクター名（`…Action.<セレクター>` の部分）は、セレクター クラスの `ActionName` プロパティの値（クラス名の `…Selector` ではない）。
+- **書き戻し**：解析した結果を PAD 自身の書式で文字列に戻すと、`Main.txt` の本文と一致した（PAD がコピーするのと同じ書き方になっている）。
+- **UI 要素の定義（末尾の JSON）**：実機でコピーした見本（`input/pad-sample-custom.txt`）と項目名の構成が一致。`appmask['画面']['要素']` の参照 22 件すべてが定義済みの要素に対応し、`InstanceId` も重複なし。
+
+この照合で見つかって直したもの（スプリント04b の追加修正）：
+
+| 直した内容 | 直す前 | 直した後 |
+|------------|--------|----------|
+| パスの `\` のエスケープ（`\%` で貼り付けが壊れる） | `%DocumentsFolder%\%WorkFolderName%` 等 3 か所 | `%DocumentsFolder%\\%WorkFolderName%` |
+| 待機のセレクター名（`ElementToAppear` は存在しない） | `WaitForWebPageContent.ElementToAppear`（4 か所） | `WaitForWebPageContent.WebPageToContainElement` |
+| 特別なフォルダーの列挙値（PAD 独自の enum で .NET のものではない） | `System.Environment.SpecialFolder.Personal` | `Folder.SpecialFolder.Personal` |
+| No.83 のエラー時の設定（中身が空だった） | `ON ERROR` ／ `END` | `ON ERROR` ／ `NEXT ACTION` ／ `END` |
+| JavaScript 内のダブルクォート | `"…"` | `\"…\"` |
+| UI 要素の種類名（`dl` ／ `dd`） | `Definition list` ／ `Definition description` | `Description list` ／ `Description details` |
+
+**照合のときに一度まちがえたこと（記録）**
+
+- アクション名を `ActionAttribute` の `Id` だけで照合し、`Id` が無いときクラス名を正解として扱ったため、`Text.SplitText` ／ `Text.ToNumber` ／ `Text.ConvertDateTimeToText` ／ `File.WriteToCSVFile` ／ `Folder.Create` の 5 件を「クラス名（`…Action` 付き）が正しい」と誤判定し、いったん書き換えてしまった。これらのクラスは `Id` ではなく **`Name`** を持っており、**元の名前が正しい**。別セッションの独立検証で指摘を受け、上の決まり（`Name` → `Id` → クラス名）を確認して元に戻した。
+- 構文解析（`LangParser`）はアクション名を検証しない。書き戻しの一致も「書き方」が同じことしか示さないので、**名前の正しさの根拠にはならない**。名前は必ずモジュールの属性（`Name` ／ `Id`）で確かめる。
+
+### 10-1. レビュー②で要確認
+
+照合できるのは「書き方」までで、**貼り付けたときの PAD の動き・実行結果は実機でしか確認できない**。下の表の「状態」が「実機」の行をレビュー②で確認し、違っていたら PAD 上で「7. アクション表」の設定値どおりに直す。
+
+| # | 対象（アクション表 No.） | 状態 | 確認すること |
+|---|--------------------------|------|-------------|
+| R-1 | ブロック（No.1〜3 ほか各ブロック） | 構文は照合済 | `BLOCK <名前>` ／ `ON BLOCK ERROR` ／ `GOTO ErrorEnd` ／ `END` の書き方（ブロック名に引用符は不要、`ON BLOCK ERROR` の後のキーワードも不要と確認済み）。貼り付けで崩れた場合は、ブロックを手作業で作り、例外処理モードを「フロー実行を続行する → ラベルに移動：ErrorEnd」にする |
+| R-2 | 移動先（No.41・54） | 実機 | ループ（For each）やブロックの中から、外のラベル `ErrorEnd` に移動できること。できない場合は、ループ・ブロックを抜けた後で移動する形に直す |
+| R-3 | アクションのエラー時の設定（No.83〜85） | 構文は照合済 | `ON ERROR` ／ `NEXT ACTION` ／ `END` が「フロー実行を続行する → 次のアクションに進む」として表示されること |
+| R-4 | 待機（No.23・29・49・72） | 照合済 | `WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement …) FOR 30` の書き方と、タイムアウト 30 秒が設定されること |
+| R-5 | Edge 起動（No.22） | 照合済 | `WebAutomation.LaunchEdge.LaunchEdge` のパラメーター名（`WindowState`・`ClearCache`・`Timeout` 等）。新しい版で追加されたパラメーターがあれば既定値でよい |
+| R-6 | テキスト フィールドに入力（No.25・26） | 照合済 | アクション名 `PopulateTextField.PopulateTextField` と `EmulateTyping` 等のパラメーター名 |
+| R-7 | クリック（No.27・47・71） | 照合済 | `WebAutomation.Click.Click` のパラメーター |
+| R-8 | 要素の詳細を取得（No.37・51・56〜68） | 名前は照合済 | 属性名に `data-count` を直接入力できること、`Own Text` で値だけが取れること（空の備考が空文字になること）、出力パラメーター名 `AttributeValue` |
+| R-9 | JavaScript 関数を実行（No.34） | 名前は照合済 | `WebAutomation.ExecuteJavascript` のパラメーター名、関数名 `ExecuteScript` の戻り値が `Result` に入ること |
+| R-10 | テキストの分割（No.35）・テキストを数値に変換（No.38）・If（No.39） | 名前は照合済 | `Text.SplitText.SplitWithDelimiter` ／ `Text.ToNumber` の書き方、リストの件数 `%ApplicationNos.Count%` と数値の比較 |
+| R-11 | データ テーブル（No.16・17・69） | 名前は照合済 | `Variables.CreateNewDatatable` の表の書き方（見出しを `$'''…'''` で書いてよいか）、空行の削除 `Variables.DeleteRowFromDataTable`、行の追加 `Variables.AddRowToDataTable.AppendRowToDataTable`。見出しだけ（0行）のデータ テーブルを直接作れる版なら No.17 は不要だが、その場合も No.17 を残すと行が無くエラーになるので、作成時の行の有無に合わせる |
+| R-12 | CSV に書き込む（No.77・78） | 名前は照合済 | 列挙値の名前（`File.CSVEncoding.UTF8`・`File.CSVColumnsSeparator.Comma`・`File.IfFileExists.Overwrite`）、「UTF-8」で BOM が付くこと（5 の 6. で確認）、値がダブルクォートで囲まれるかどうか |
+| R-13 | フォルダー（No.12・14・15） | 照合済 | `Folder.SpecialFolder.Personal` がドキュメントになること、`IF (Folder.IfFolderExists.DoesNotExist Path: …) THEN` の書き方 |
+| R-14 | 日時（No.9・10） | 名前は照合済 | `DateTime.GetCurrentDateTime.Local` と `Text.ConvertDateTimeToText.FromCustomDateTime` の書き方。`yyyyMMdd_HHmm` で `20261014_1030` の形になること |
+| R-15 | メッセージ・停止（No.80・82） | 照合済 | `Display.ShowMessageDialog.ShowMessage` のパラメーター、`EXIT Code: 0` |
+| R-16 | UI 要素（U1〜U22） | 実機 | セレクター エディターで `#id` の書き方が使えること（使えなければ「`#` が使えない場合」列の形）、U6 の `%CurrentNo%` がセレクター内で値に置き換わること |
+| R-17 | アクション名 | 実機 | 表の日本語のアクション名が、使っている PAD の版の表示と合っているか |
+| R-18 | 実行結果 | 実機 | 出力 CSV の件数（一覧と同数）・14列・BOM・Excel での文字化け、実行時間（`docs/criteria.md` R1・R5〜R7） |
+| R-19 | UI 要素の定義（`Main.txt` 末尾） | 実機 | **貼り付けだけで UI 要素が登録されること**（［UI 要素］ペインに3画面・22要素ができ、名前とセレクターが 2-2 の表どおりで、U6 に `%CurrentNo%` が残ること）。登録されない場合は 3-1 の予備手順で登録する |
+| R-20 | UI 要素のスクリーンショット | 実機 | **スクリーンショット無し（1×1 のダミー画像）で取り込めること**。取り込めない場合は 3-1 の予備手順で登録するか、登録された要素を取り込み直す（2-2「スクリーンショットの扱い」）。あわせて、取り込み直すときのメニュー名（2-2 に書いた［UI 要素の置換］）が PAD の表示と合っているかも確かめる |
+| R-21 | UI 要素の種類の表示名 | 照合済 | 要素の種類（定義の `ElementTypeName`）は PAD の名前に合わせた（`Web Page`・`Input text`・`Input password`・`Button`・`Table`・`Span`・`Description list`・`Description details`）。表示が違ってもセレクターで要素を探すので実行には影響しない想定。エラーになる場合は該当要素を取り込み直す |
