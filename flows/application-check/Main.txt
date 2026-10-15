@@ -110,7 +110,6 @@ LABEL ErrorEnd
 Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: StepMessage Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
 WebAutomation.CloseWebBrowser BrowserInstance: Browser
 ON ERROR
-    NEXT ACTION
 END
 
 # [ControlRepository][PowerAutomateDesktop]
