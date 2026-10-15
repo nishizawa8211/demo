@@ -1,0 +1,177 @@
+# review-01 4b-1〜4b-6・C1・C4 のパース結果（Evaluator 独自スクリプト scratchpad/eval04b/eval-parse.js の出力）
+# 対象コミット: 8a538ec  ブランチ: sprint/04b-flow-ui-elements  実行: 2026-10-15 10:32
+
+== 4b-1 形式とパース ==
+UTF-8 往復一致: true  不正文字(U+FFFD): false  BOM: false  バイト数: 73715  CRLF: 0  LF総数: 137
+マーカー行の出現: 1 回 / 行番号: [115]
+ControlRepository を含む行: [3,115,118]
+マーカー行の次の行〜末尾を JSON.parse: OK
+最上位キー: ["ControlRepositorySymbols","ImageRepositorySymbol","ConnectionReferences"]
+ControlRepositorySymbols 個数: 1  Name: appmask  Repository 型: string  キー: ["IgnoreImagesOnSerialization","Repository","ImportMetadata","Name"]  IgnoreImagesOnSerialization: false
+ImportMetadata: {"DisplayName":"ローカル コンピューター","ConnectionString":"","Type":"Local","DesktopType":"local"}
+Repository 文字列 JSON.parse: OK キー: ["Screens","Version"]  Screens 配列: true  Version: 1
+ImageRepositorySymbol: {"Name":"imgrepo","ImportMetadata":{}}  Repository パース: {"Folders":[],"Images":[],"Version":1}  Images 空配列: true
+ConnectionReferences: []  空配列: true
+見本 ImportMetadata: {"DisplayName":"ローカル コンピューター","ConnectionString":"","Type":"Local","DesktopType":"local"}  Main と一致: true
+
+== 4b-2 構造 ==
+(c) 階層ごとのキー差分（Main にあって見本に無いキー）:
+  見本に無いキー／階層の件数: 0
+  参考（見本にあって Main に無いキー）:
+    $.ControlRepositorySymbols[].Repository.Screens[] → ["ScreenshotPath"]
+    $.ControlRepositorySymbols[].Repository.Screens[].Controls[] → ["ScreenshotPath"]
+画面 LoginPage : ETN= Web Page Tag= domcontainer Proc= msedge Handle= {"value":0} SelCount= 1 / 1 Sel= {"Name":"Default Selector","IsCustom":false,"CustomSelector":null,"Elements":[{"Attributes":[],"CustomValue":"domcontainer","Ignore":false,"Name":"LoginPage","Tag":"domcontainer"}],"Ignore":false,"ImageSelector":null,"IsImageBased":false,"IsPlaceholderSelector":false,"IsWindowsInstance":false,"Properties":[]} Controls= 3
+   画面セレクターが見本と同じ形（domcontainer 要素1個・IsCustom false・Attributes 空）: true
+画面 ListPage : ETN= Web Page Tag= domcontainer Proc= msedge Handle= {"value":0} SelCount= 1 / 1 Sel= {"Name":"Default Selector","IsCustom":false,"CustomSelector":null,"Elements":[{"Attributes":[],"CustomValue":"domcontainer","Ignore":false,"Name":"ListPage","Tag":"domcontainer"}],"Ignore":false,"ImageSelector":null,"IsImageBased":false,"IsPlaceholderSelector":false,"IsWindowsInstance":false,"Properties":[]} Controls= 3
+   画面セレクターが見本と同じ形（domcontainer 要素1個・IsCustom false・Attributes 空）: true
+画面 DetailPage : ETN= Web Page Tag= domcontainer Proc= msedge Handle= {"value":0} SelCount= 1 / 1 Sel= {"Name":"Default Selector","IsCustom":false,"CustomSelector":null,"Elements":[{"Attributes":[],"CustomValue":"domcontainer","Ignore":false,"Name":"DetailPage","Tag":"domcontainer"}],"Ignore":false,"ImageSelector":null,"IsImageBased":false,"IsPlaceholderSelector":false,"IsWindowsInstance":false,"Properties":[]} Controls= 16
+   画面セレクターが見本と同じ形（domcontainer 要素1個・IsCustom false・Attributes 空）: true
+
+UI 要素一覧（画面 / Name / ETN / Tag / AutomationProtocol / SelectorCount / Selectors数 / CustomSelector）:
+   LoginPage / login-id / Input text / input / uia3 / 1 / 1 / #login-id
+   LoginPage / login-password / Input password / input / uia3 / 1 / 1 / #login-password
+   LoginPage / login-button / Button / button / uia3 / 1 / 1 / #login-button
+   ListPage / application-table-loaded / Table / table / uia3 / 1 / 1 / #application-table[data-loaded="true"]
+   ListPage / application-count / Span / span / uia3 / 1 / 1 / #application-count
+   ListPage / detail-button / Button / button / uia3 / 1 / 1 / button[data-action="detail"][data-application-no="%CurrentNo%"]
+   DetailPage / application-detail-loaded / Definition list / dl / uia3 / 1 / 1 / #application-detail[data-loaded="true"]
+   DetailPage / field-applicationNo / Definition description / dd / uia3 / 1 / 1 / #field-applicationNo
+   DetailPage / field-applicationDate / Definition description / dd / uia3 / 1 / 1 / #field-applicationDate
+   DetailPage / field-customerName / Definition description / dd / uia3 / 1 / 1 / #field-customerName
+   DetailPage / field-supplyPointNo / Definition description / dd / uia3 / 1 / 1 / #field-supplyPointNo
+   DetailPage / field-applicationType / Definition description / dd / uia3 / 1 / 1 / #field-applicationType
+   DetailPage / field-capacityBefore / Definition description / dd / uia3 / 1 / 1 / #field-capacityBefore
+   DetailPage / field-capacityAfter / Definition description / dd / uia3 / 1 / 1 / #field-capacityAfter
+   DetailPage / field-status / Definition description / dd / uia3 / 1 / 1 / #field-status
+   DetailPage / field-assignee / Definition description / dd / uia3 / 1 / 1 / #field-assignee
+   DetailPage / field-siteAddress / Definition description / dd / uia3 / 1 / 1 / #field-siteAddress
+   DetailPage / field-desiredDate / Definition description / dd / uia3 / 1 / 1 / #field-desiredDate
+   DetailPage / field-scheduledWorkDate / Definition description / dd / uia3 / 1 / 1 / #field-scheduledWorkDate
+   DetailPage / field-receptionNo / Definition description / dd / uia3 / 1 / 1 / #field-receptionNo
+   DetailPage / field-remarks / Definition description / dd / uia3 / 1 / 1 / #field-remarks
+   DetailPage / back-to-list-button / Button / button / uia3 / 1 / 1 / #back-to-list-button
+見本の ElementTypeName（画面＋要素/AutomationProtocol）: ["Web Page","Button/uia3"]
+Main の要素の ElementTypeName 一覧: ["Input text","Input password","Button","Table","Span","Definition list","Definition description"]
+(a)(b) 不一致件数: 0 []
+(d) InstanceId 数: 25  GUID 形式でない: []  重複: []  見本の GUID(ScreenshotPath 含む 4個)と一致: []
+    Main.txt 全文中の GUID 数: 25  うち見本と一致: 0
+(e) Tag の期待値との不一致: []
+
+== 4b-3 参照と定義 ==
+参照（重複除く）: 22  定義: 22  定義の重複: []
+参照あり定義なし: []
+定義あり参照なし: []
+画面名: ["LoginPage","ListPage","DetailPage"]
+main の UI 要素表: 22 行
+表と定義の差分（大文字小文字区別）: 表にあって定義なし []  定義にあって表なし []
+
+== 4b-4 セレクター ==
+   U1 login-id 一致  CustomSelector= #login-id  基準= #login-id / input[Id="login-id"]
+   U2 login-password 一致  CustomSelector= #login-password  基準= #login-password / input[Id="login-password"]
+   U3 login-button 一致  CustomSelector= #login-button  基準= #login-button / button[Id="login-button"]
+   U4 application-table-loaded 一致  CustomSelector= #application-table[data-loaded="true"]  基準= #application-table[data-loaded="true"] / table[Id="application-table"][data-loaded="true"]
+   U5 application-count 一致  CustomSelector= #application-count  基準= #application-count / span[Id="application-count"]
+   U6 detail-button 一致  CustomSelector= button[data-action="detail"][data-application-no="%CurrentNo%"]  基準= button[data-action="detail"][data-application-no="%CurrentNo%"] / button[data-action="detail"][data-application-no="%CurrentNo%"]
+   U7 application-detail-loaded 一致  CustomSelector= #application-detail[data-loaded="true"]  基準= #application-detail[data-loaded="true"] / dl[Id="application-detail"][data-loaded="true"]
+   U8 field-applicationNo 一致  CustomSelector= #field-applicationNo  基準= #field-applicationNo / dd[Id="field-applicationNo"]
+   U9 field-applicationDate 一致  CustomSelector= #field-applicationDate  基準= #field-applicationDate / dd[Id="field-applicationDate"]
+   U10 field-customerName 一致  CustomSelector= #field-customerName  基準= #field-customerName / dd[Id="field-customerName"]
+   U11 field-supplyPointNo 一致  CustomSelector= #field-supplyPointNo  基準= #field-supplyPointNo / dd[Id="field-supplyPointNo"]
+   U12 field-applicationType 一致  CustomSelector= #field-applicationType  基準= #field-applicationType / dd[Id="field-applicationType"]
+   U13 field-capacityBefore 一致  CustomSelector= #field-capacityBefore  基準= #field-capacityBefore / dd[Id="field-capacityBefore"]
+   U14 field-capacityAfter 一致  CustomSelector= #field-capacityAfter  基準= #field-capacityAfter / dd[Id="field-capacityAfter"]
+   U15 field-status 一致  CustomSelector= #field-status  基準= #field-status / dd[Id="field-status"]
+   U16 field-assignee 一致  CustomSelector= #field-assignee  基準= #field-assignee / dd[Id="field-assignee"]
+   U17 field-siteAddress 一致  CustomSelector= #field-siteAddress  基準= #field-siteAddress / dd[Id="field-siteAddress"]
+   U18 field-desiredDate 一致  CustomSelector= #field-desiredDate  基準= #field-desiredDate / dd[Id="field-desiredDate"]
+   U19 field-scheduledWorkDate 一致  CustomSelector= #field-scheduledWorkDate  基準= #field-scheduledWorkDate / dd[Id="field-scheduledWorkDate"]
+   U20 field-receptionNo 一致  CustomSelector= #field-receptionNo  基準= #field-receptionNo / dd[Id="field-receptionNo"]
+   U21 field-remarks 一致  CustomSelector= #field-remarks  基準= #field-remarks / dd[Id="field-remarks"]
+   U22 back-to-list-button 一致  CustomSelector= #back-to-list-button  基準= #back-to-list-button / button[Id="back-to-list-button"]
+  不一致件数: 0
+  禁止パターン :contains : 0 件
+  禁止パターン Text= : 0 件
+  禁止パターン nth- : 0 件
+  禁止パターン :eq( : 0 件
+  禁止パターン :first/:last : 0 件
+  禁止パターン クラス .xxx : 0 件
+  禁止パターン Class= : 0 件
+  禁止パターン > : 0 件
+  禁止パターン demo-tools : 0 件
+  禁止パターン #demo-/Id="demo- : 0 件
+  禁止パターン data-demo-action : 0 件
+  セレクターに使われている id / data-*: ["login-id(screens.mdにあり)","login-password(screens.mdにあり)","login-button(screens.mdにあり)","application-table(screens.mdにあり)","data-loaded(screens.mdにあり)","application-count(screens.mdにあり)","data-action(screens.mdにあり)","data-application-no(screens.mdにあり)","application-detail(screens.mdにあり)","field-applicationNo(screens.mdにあり)","field-applicationDate(screens.mdに無し)","field-customerName(screens.mdに無し)","field-supplyPointNo(screens.mdに無し)","field-applicationType(screens.mdに無し)","field-capacityBefore(screens.mdに無し)","field-capacityAfter(screens.mdに無し)","field-status(screens.mdに無し)","field-assignee(screens.mdに無し)","field-siteAddress(screens.mdに無し)","field-desiredDate(screens.mdに無し)","field-scheduledWorkDate(screens.mdに無し)","field-receptionNo(screens.mdに無し)","field-remarks(screens.mdに無し)","back-to-list-button(screens.mdにあり)"]
+
+== 4b-5 見本の実データ ==
+   "DM-20" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "detail-button-" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "Button '詳細'" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "Body '" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "Main content '" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "Section '" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "business-area" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "table-wrap" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "controlRepo-screenshots" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "Web Page '" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   "list.html'" : デコードした Repository 0 件 / Main.txt 全文 0 件
+   見本の ScreenshotPath: ["controlRepo-screenshots\\3c20f187-e4e4-4b40-9d35-ffc957f1cd4b.png","controlRepo-screenshots\\14383285-572d-463a-9233-129c22ea37b8.png"]  Main での出現: [false,false]
+  UI 要素の Elements と Ignore:false 属性:
+    login-id  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["login-id","input",false,null]]  有効属性: ["input:Id=login-id"]
+    login-password  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["login-password","input",false,null]]  有効属性: ["input:Id=login-password"]
+    login-button  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["login-button","button",false,null]]  有効属性: ["button:Id=login-button"]
+    application-table-loaded  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["application-table-loaded","table",false,null]]  有効属性: ["table:Id=application-table"]
+    application-count  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["application-count","span",false,null]]  有効属性: ["span:Id=application-count"]
+    detail-button  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["detail-button","button",false,null]]  有効属性: []
+    application-detail-loaded  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["application-detail-loaded","dl",false,null]]  有効属性: ["dl:Id=application-detail"]
+    field-applicationNo  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-applicationNo","dd",false,null]]  有効属性: ["dd:Id=field-applicationNo"]
+    field-applicationDate  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-applicationDate","dd",false,null]]  有効属性: ["dd:Id=field-applicationDate"]
+    field-customerName  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-customerName","dd",false,null]]  有効属性: ["dd:Id=field-customerName"]
+    field-supplyPointNo  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-supplyPointNo","dd",false,null]]  有効属性: ["dd:Id=field-supplyPointNo"]
+    field-applicationType  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-applicationType","dd",false,null]]  有効属性: ["dd:Id=field-applicationType"]
+    field-capacityBefore  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-capacityBefore","dd",false,null]]  有効属性: ["dd:Id=field-capacityBefore"]
+    field-capacityAfter  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-capacityAfter","dd",false,null]]  有効属性: ["dd:Id=field-capacityAfter"]
+    field-status  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-status","dd",false,null]]  有効属性: ["dd:Id=field-status"]
+    field-assignee  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-assignee","dd",false,null]]  有効属性: ["dd:Id=field-assignee"]
+    field-siteAddress  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-siteAddress","dd",false,null]]  有効属性: ["dd:Id=field-siteAddress"]
+    field-desiredDate  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-desiredDate","dd",false,null]]  有効属性: ["dd:Id=field-desiredDate"]
+    field-scheduledWorkDate  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-scheduledWorkDate","dd",false,null]]  有効属性: ["dd:Id=field-scheduledWorkDate"]
+    field-receptionNo  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-receptionNo","dd",false,null]]  有効属性: ["dd:Id=field-receptionNo"]
+    field-remarks  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["field-remarks","dd",false,null]]  有効属性: ["dd:Id=field-remarks"]
+    back-to-list-button  Elements数 1  [Name,Tag,Ignore,CustomValue]: [["back-to-list-button","button",false,null]]  有効属性: ["button:Id=back-to-list-button"]
+  有効属性の問題: []
+
+== 4b-6 スクリーンショット ==
+   画面:LoginPage : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   画面:ListPage : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   画面:DetailPage : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   login-id : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   login-password : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   login-button : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   application-table-loaded : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   application-count : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   detail-button : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   application-detail-loaded : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-applicationNo : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-applicationDate : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-customerName : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-supplyPointNo : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-applicationType : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-capacityBefore : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-capacityAfter : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-status : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-assignee : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-siteAddress : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-desiredDate : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-scheduledWorkDate : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-receptionNo : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   field-remarks : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+   back-to-list-button : base64長 92 デコード 69バイト 先頭 89504e47 見本と一致 false  ScreenshotPath: キー無し
+  異なる ScreenShot 値の数: 1
+
+== C1 / C4 ==
+  flows/application-check/Main.txt (Main はデコードした Repository を含む) URL: ["http://localhost:8080"]
+   メール様: []   C:\Users: 0   ServerAddress: []   ConnectionString: ["ConnectionString\": \"\""]   token: 0   pass系語: ["Password","pass","password"]   TargetDesktop: 0   ryoich/nishizawa/cube: 0
+   demo-user/demo-pass 出現: 1 / 1
+  flows/application-check/README.md (Main はデコードした Repository を含む) URL: ["http://localhost:8080","http://localhost:8080/login.html"]
+   メール様: []   C:\Users: 0   ServerAddress: []   ConnectionString: []   token: 0   pass系語: ["pass","password","Password"]   TargetDesktop: 0   ryoich/nishizawa/cube: 0
+   demo-user/demo-pass 出現: 5 / 5

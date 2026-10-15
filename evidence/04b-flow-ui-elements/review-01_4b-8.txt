@@ -1,0 +1,104 @@
+# review-01 4b-8 回帰確認（Evaluator 独自スクリプト scratchpad/eval04b/eval-4b8.js の出力）
+# 対象コミット: 8a538ec  比較基準: main(375b341) の Main.txt
+
+== (a) アクション行（マーカー行より前、# コメント・空行・END を除く）==
+現行: 84 行 / main(375b341): 84 行
+アクション行の差分件数: 0
+コメント行の差分: 追加 ["# 末尾の ControlRepository の行と JSON は UI 要素（U1〜U22）の定義。末尾まで全文をコピーして貼り付けると UI 要素も登録される","# 貼り付け方法・UI 要素表・アクション表は README.md を参照"]  削除 ["# 貼り付け方法・UI 要素の登録・アクション表は README.md を参照"]
+END 行数 現/旧: 15 / 15
+== 構文チェック ==
+開始と END の対応: 未閉鎖 []  エラー []
+''' の数: 140 （偶数: true ）
+% が奇数の行: []
+定義された変数: ["StepMessage","BaseUrl","LoginId","LoginPassword","WorkFolderName","RunDateTime","RunStamp","HistoryFileName","DocumentsFolder","WorkFolder","CreatedFolder","CurrentTable","Browser","ApplicationNosText","ApplicationNos","DataCountText","DataCount","CurrentNo","Val_applicationNo","Val_applicationDate","Val_customerName","Val_supplyPointNo","Val_applicationType","Val_capacityBefore","Val_capacityAfter","Val_status","Val_assignee","Val_siteAddress","Val_desiredDate","Val_scheduledWorkDate","Val_receptionNo","Val_remarks","ButtonPressed"]
+参照（%X% とパラメーター値）: ["RunDateTime","RunStamp","DocumentsFolder","WorkFolderName","WorkFolder","CurrentTable","BaseUrl","Browser","LoginId","LoginPassword","ApplicationNosText","DataCountText","ApplicationNos","DataCount","CurrentNo","Val_applicationNo","HistoryFileName","StepMessage"]
+参照のうち未定義: []
+== (b) 4-4・4-7〜4-11 の記述 ==
+   BLOCK Step0_Init : 1 件 / main: 1 件
+   BLOCK Step1_Login : 1 件 / main: 1 件
+   BLOCK Step2_GetList : 1 件 / main: 1 件
+   BLOCK Step3_GetDetails : 1 件 / main: 1 件
+   BLOCK Step4_WriteCsv : 1 件 / main: 1 件
+   LOOP FOREACH CurrentNo IN ApplicationNos : 1 件 / main: 1 件
+   appmask['ListPage']['detail-button'] : 1 件 / main: 1 件
+   appmask['ListPage']['application-table-loaded']) FOR 30 : 2 件 / main: 2 件
+   appmask['DetailPage']['application-detail-loaded']) FOR 30 : 1 件 / main: 1 件
+   WebAutomation.CloseWebBrowser BrowserInstance: Browser : 2 件 / main: 2 件
+   LABEL ErrorEnd : 1 件 / main: 1 件
+   GOTO ErrorEnd : 7 件 / main: 7 件
+   %WorkFolder%\%HistoryFileName% : 1 件 / main: 1 件
+   %WorkFolder%\latest.csv : 1 件 / main: 1 件
+   IncludeColumnNames: True : 2 件 / main: 2 件
+   File.CSVEncoding.UTF8 : 2 件 / main: 2 件
+   Display.ShowMessageDialog.ShowMessage : 1 件 / main: 1 件
+手順見出しの位置（昇順なら順序どおり）: [203,1696,3224,4350,8692,9468] true
+詳細14項目の取得順: ["applicationNo","applicationDate","customerName","supplyPointNo","applicationType","capacityBefore","capacityAfter","status","assignee","siteAddress","desiredDate","scheduledWorkDate","receptionNo","remarks"]
+JS 内セレクター: 1 件（main: 1 件）
+
+== git diff --stat main -- flows/application-check/Main.txt ==
+ flows/application-check/Main.txt | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+== git diff main -- mock（行数。0 なら差分なし） ==
+0
+== git diff main -U0 -- README.md のハンク（4〜9 節は変更なし。10 節は R-19〜R-21 の追加のみ） ==
+@@ -14 +14 @@
+@@ -18 +18 @@
+@@ -43 +43 @@
+@@ -45 +45 @@
+@@ -47,11 +47,3 @@
+@@ -60,0 +53,8 @@
+@@ -88,2 +88,3 @@
+@@ -96,2 +97,2 @@
+@@ -99,6 +100,11 @@
+@@ -108,0 +115,18 @@
+@@ -366,0 +391,3 @@ DM-2026-0001,2026/08/03,サンプル 一郎,9900000000000000001038,契約容量
+== 4b-8(d) スプリント04 review-01 の 4-5・4-6 判定 ==
+18:| 4-5 | 【必須】セレクターの書き方（10） |
+19:| 4-6 | 【必須】実画面照合・机上の通し確�
+== mock のタグ照合（4b-2 (e)） ==
+mock/detail.html:26:      <dl class="detail-list" id="application-detail">
+mock/detail.html:28:        <dd id="field-applicationNo" data-field="applicationNo"></dd>
+mock/detail.html:30:        <dd id="field-applicationDate" data-field="applicationDate"></dd>
+mock/detail.html:32:        <dd id="field-customerName" data-field="customerName"></dd>
+mock/detail.html:34:        <dd id="field-supplyPointNo" data-field="supplyPointNo"></dd>
+mock/detail.html:36:        <dd id="field-applicationType" data-field="applicationType"></dd>
+mock/detail.html:38:        <dd id="field-capacityBefore" data-field="capacityBefore"></dd>
+mock/detail.html:40:        <dd id="field-capacityAfter" data-field="capacityAfter"></dd>
+mock/detail.html:42:        <dd id="field-status" data-field="status"></dd>
+mock/detail.html:44:        <dd id="field-assignee" data-field="assignee"></dd>
+mock/detail.html:46:        <dd id="field-siteAddress" data-field="siteAddress"></dd>
+mock/detail.html:48:        <dd id="field-desiredDate" data-field="desiredDate"></dd>
+mock/detail.html:50:        <dd id="field-scheduledWorkDate" data-field="scheduledWorkDate"></dd>
+mock/detail.html:52:        <dd id="field-receptionNo" data-field="receptionNo"></dd>
+mock/detail.html:54:        <dd id="field-remarks" data-field="remarks"></dd>
+mock/detail.html:57:        <button type="button" id="back-to-list-button">一覧へ戻る</button>
+mock/list.html:24:      <p class="count-line"><span id="application-count" data-count="0"></span></p>
+mock/list.html:27:        <table class="data-table" id="application-table">
+mock/login.html:22:          <input type="text" id="login-id" name="login-id">
+mock/login.html:26:          <input type="password" id="login-password" name="login-password">
+mock/login.html:30:          <button type="submit" id="login-button">ログイン</button>
+54:      var btn = document.createElement('button');
+57:      btn.setAttribute('data-action', 'detail');
+== README / Main.txt の確認用 Grep（4b-7） ==
+「すべて登録しておく」: 0件
+1:# ===== 申込状況チェック_デモ（Main サブフロー）=====
+2:# スプリント04：docs/flow.md 手順0〜4 と 手順7（ブラウザを閉じる）
+3:# 末尾の ControlRepository の行と JSON は UI 要素（U1〜U22）の定義。末尾まで全文をコピーして貼り付けると UI 要素も登録される
+4:# 貼り付け方法・UI 要素表・アクション表は README.md を参照
+9:## ファイル構成
+22:## 1. 前提
+37:## 2. 準備
+39:### 2-1. 新しいフローの作成
+43:### 2-2. UI 要素（貼り付けで自動的に登録される）
+95:## 3. 貼り付け手順
+115:### 3-1. 予備手順：UI 要素を手で登録する（貼り付けで UI 要素が登録されない場合だけ）
+135:## 4. 変数設定
+167:## 5. 実行手順
+191:## 6. エラー時のメッセージと対処
+221:## 7. アクション表
+340:## 8. CSV 出力例
+360:## 9. スプリント05 で手順を足す位置
+369:## 10. レビュー②で要確認
+391:| R-19 | UI 要素の定義（`Main.txt` 末尾） | **貼り付けだけで
+392:| R-20 | UI 要素のスクリーンショット | **スクリーンショ�
+393:| R-21 | UI 要素の種類の表示名 | 要素の種類（`Input text`・`
