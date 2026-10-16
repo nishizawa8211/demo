@@ -86,7 +86,9 @@ flowchart TD
 ### 手順2. 一覧から申込番号を取得（スプリント04）
 
 1. `#application-tbody` 内の全行 `tr[data-application-no]` から、申込番号（`data-application-no` 属性値）をリスト `ApplicationNos` として取得する。
-2. `#application-count` の `data-count` と取得件数が一致することを確認する（不一致はエラー扱い）。
+2. `#application-count` の表示文字（「全 N 件」）を読み、数字（N）だけを取り出して、`ApplicationNos` の件数と一致することを確認する（不一致はエラー扱い）。
+   - 理由：PAD 11.2609 の「Web ページ上の要素の詳細を取得します」で属性名に `data-count` を指定すると、エラーにならず空の文字が返る（実機で確認）。属性名を Own Text にすると表示文字「全 20 件」が取れるため、こちらを使う。
+   - モックの `data-count` 属性は画面仕様として残す（`docs/screens.md` S2）が、フローでは読まない。セレクターは `#application-count` のままで、表示文字に依存したセレクターにはしない。
 
 ### 手順3. 各案件の詳細を取得（スプリント04）
 
