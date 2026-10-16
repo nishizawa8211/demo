@@ -33,8 +33,29 @@ END
     WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-id']) FOR 30
     SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
-    WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
-    WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-password'] Text: LoginPassword EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+    # Edge 起動直後の入力失敗の対策：ボタンまで表示されるのを待ち、入力 → 入力欄の値を確認、を最大3回くり返す（3回とも値が入らなければ E2 で止まる）
+    WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-button']) FOR 30
+    SET LoginCheck TO $'''NG'''
+    LOOP LoginTry FROM 1 TO 3 STEP 1
+        IF LoginCheck <> $'''OK''' THEN
+            IF LoginTry > 1 THEN
+                WAIT 2
+            END
+            WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+            ON ERROR
+            END
+            WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-password'] Text: LoginPassword EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+            ON ERROR
+            END
+            WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var id = document.getElementById(\"login-id\"); var pw = document.getElementById(\"login-password\"); if (id && pw && id.value === \"%LoginId%\" && pw.value === \"%LoginPassword%\") { return \"OK\"; } return \"NG\"; }''' Result=> LoginCheck
+            ON ERROR
+            END
+        END
+    END
+    IF LoginCheck <> $'''OK''' THEN
+        SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても入力欄に値が入りません）'''
+        GOTO ErrorEnd
+    END
     WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
     SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
@@ -47,9 +68,11 @@ END
     SET StepMessage TO $'''手順2-1：一覧から申込番号を取得できませんでした'''
     WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var rows = document.querySelectorAll(\"#application-tbody tr[data-application-no]\"); var nos = []; for (var i = 0; i < rows.length; i++) { nos.push(rows[i].getAttribute(\"data-application-no\")); } return nos.join(\",\"); }''' Result=> ApplicationNosText
     Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelimiter: $''',''' IsRegEx: False Result=> ApplicationNos
-    SET StepMessage TO $'''手順2-2：一覧の件数表示（data-count）を取得できませんでした'''
-    WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''data-count''' AttributeValue=> DataCountText
-    Text.ToNumber Text: DataCountText Number=> DataCount
+    SET StepMessage TO $'''手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした'''
+    # 件数表示の文字（例「全 20 件」）を Own Text で読み、数字の部分だけ取り出して数値にする（data-count 属性は PAD では空の文字が返るため）
+    WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''Own Text''' AttributeValue=> DataCountText
+    Text.ParseText.RegexParseForFirstOccurrence Text: DataCountText TextToFind: $'''[0-9]+''' StartingPosition: 0 IgnoreCase: False OccurrencePosition=> DataCountPosition Match=> DataCountDigits
+    Text.ToNumber Text: DataCountDigits Number=> DataCount
     IF ApplicationNos.Count <> DataCount THEN
         SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取得 %ApplicationNos.Count% 件）。取得した申込番号：%ApplicationNosText%'''
         GOTO ErrorEnd
