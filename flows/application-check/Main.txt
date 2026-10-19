@@ -88,28 +88,20 @@ END
         WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60
         SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む）'''
         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded']) FOR 30
-        SET StepMessage TO $'''手順3-3：申込番号 %CurrentNo% の詳細画面から申込番号を取得できませんでした'''
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationNo
-        IF Val_applicationNo <> CurrentNo THEN
-            SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %Val_applicationNo%）'''
+        SET StepMessage TO $'''手順3-3〜3-4：申込番号 %CurrentNo% の詳細画面から項目を取得できませんでした'''
+        # 14項目（#field-<キー>）の表示テキストを JavaScript 1回でまとめて取得する（要素ごとに14回取得すると1件あたり約26〜30秒かかったため）。値はカンマでつなぐ（値にカンマは含まれない：docs/screens.md 1 のデータの制約）
+        WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var keys = [\"applicationNo\", \"applicationDate\", \"customerName\", \"supplyPointNo\", \"applicationType\", \"capacityBefore\", \"capacityAfter\", \"status\", \"assignee\", \"siteAddress\", \"desiredDate\", \"scheduledWorkDate\", \"receptionNo\", \"remarks\"]; var vals = []; for (var i = 0; i < keys.length; i++) { var el = document.getElementById(\"field-\" + keys[i]); if (!el) { return \"NG:field-\" + keys[i]; } vals.push(el.textContent.trim()); } return vals.join(\",\"); }''' Result=> DetailText
+        Text.SplitText.SplitWithDelimiter Text: DetailText CustomDelimiter: $''',''' IsRegEx: False Result=> DetailValues
+        IF DetailValues.Count <> 14 THEN
+            SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の詳細画面から14項目を取得できませんでした（取得できた値は %DetailValues.Count% 個）'''
             GOTO ErrorEnd
         END
-        SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の項目を取得できませんでした'''
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationDate
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-customerName'] AttributeName: $'''Own Text''' AttributeValue=> Val_customerName
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-supplyPointNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_supplyPointNo
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-applicationType'] AttributeName: $'''Own Text''' AttributeValue=> Val_applicationType
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-capacityBefore'] AttributeName: $'''Own Text''' AttributeValue=> Val_capacityBefore
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-capacityAfter'] AttributeName: $'''Own Text''' AttributeValue=> Val_capacityAfter
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-status'] AttributeName: $'''Own Text''' AttributeValue=> Val_status
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-assignee'] AttributeName: $'''Own Text''' AttributeValue=> Val_assignee
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-siteAddress'] AttributeName: $'''Own Text''' AttributeValue=> Val_siteAddress
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-desiredDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_desiredDate
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-scheduledWorkDate'] AttributeName: $'''Own Text''' AttributeValue=> Val_scheduledWorkDate
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-receptionNo'] AttributeName: $'''Own Text''' AttributeValue=> Val_receptionNo
-        WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['DetailPage']['field-remarks'] AttributeName: $'''Own Text''' AttributeValue=> Val_remarks
-        # 14項目を docs/screens.md 1-2 の順に並べて1行追加（空の備考も位置で入るので列がずれない）
-        Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTable RowToAdd: [Val_applicationNo, Val_applicationDate, Val_customerName, Val_supplyPointNo, Val_applicationType, Val_capacityBefore, Val_capacityAfter, Val_status, Val_assignee, Val_siteAddress, Val_desiredDate, Val_scheduledWorkDate, Val_receptionNo, Val_remarks]
+        IF DetailValues[0] <> CurrentNo THEN
+            SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %DetailValues[0]%）'''
+            GOTO ErrorEnd
+        END
+        # 14項目を docs/screens.md 1-2 の順に並べたリストのまま1行追加（空の備考も空の値として位置で入るので列がずれない）
+        Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTable RowToAdd: DetailValues
         SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30 秒）'''
         WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60
         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
@@ -130,7 +122,13 @@ WebAutomation.CloseWebBrowser BrowserInstance: Browser
 EXIT Code: 0
 # ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない）=====
 LABEL ErrorEnd
-Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: StepMessage Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
+# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる
+ERROR => LastError Reset: True
+SET ErrorDetail TO $'''（取得できませんでした）'''
+Text.Replace.ReplaceTextWithRegex Text: $'''%LastError%''' TextToFind: $'''(?m)[A-Za-z]:\\\\Users\\\\.*?(?=申込状況チェック_デモ|$)''' IgnoreCase: True ReplaceWith: $'''<ユーザー フォルダー>''' ActivateEscapeSequences: False Result=> ErrorDetail
+ON ERROR
+END
+Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: $'''%StepMessage%（PAD のエラー情報：%ErrorDetail%）''' Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
 WebAutomation.CloseWebBrowser BrowserInstance: Browser
 ON ERROR
 END

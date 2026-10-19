@@ -15,7 +15,7 @@
 
 - サブフローは Main の1つだけ（ほかのサブフローは作らない）。
 
-> **この手順書の読み方**：`Main.txt` のアクション行は、この PC の PAD（11.2609.183.0）自身の構文解析器とアクション定義ファイルと照合し、**構文エラー 0・アクション名／パラメーター名／列挙値の不一致 0** にしてある（照合の内容と直した箇所は「10-0」）。末尾の UI 要素の定義は、人が PAD でコピーした実物の形式に合わせてあり、項目名の構成も実物と一致している。さらに **PAD 11.2609 の実機に貼り付けて、エラー 0・3画面22要素の登録まで確認済み**（10-0b）。スプリント04c で **実機で実行もして**、エラー時に `ErrorEnd` へ移動して止まること（R-2）を確かめ、実行で分かった2つの問題（手順2-2 の件数が取れない・Edge 起動直後のログイン入力の失敗）を直した（10-0c）。**直した後の `Main.txt` の保存・連続実行・CSV の中身はまだ実機で確かめていない**（10-0c の表で「未確認」と書いたもの）。PAD の版の違い等で貼り付けられない場合は、**UI 要素を手で登録し（3-1）、「7. アクション表」を上から順に見て、同じアクションを手作業で作れば同じフローになる**ように書いてある。実機でないと確かめられない点は「10-1. レビュー②で要確認」に一覧にした。
+> **この手順書の読み方**：`Main.txt` のアクション行は、この PC の PAD（11.2609.183.0）自身の構文解析器とアクション定義ファイルと照合し、**構文エラー 0・アクション名／パラメーター名／列挙値の不一致 0** にしてある（照合の内容と直した箇所は「10-0」）。末尾の UI 要素の定義は、人が PAD でコピーした実物の形式に合わせてあり、項目名の構成も実物と一致している。スプリント04c で実機で実行し、分かった2つの問題（手順2-2 の件数が取れない・Edge 起動直後のログイン入力の失敗）を直した（10-0c）。**直した版（コミット `1f6091f`）は、2026-10-19 に PAD 11.2609 の実機で、貼り付け（113 アクション・エラー 0・3画面22要素）・保存・連続3回の実行・初期20件と21件の CSV 出力（件数・14列・BOM・Excel で文字化けなし）まで確認済み**（10-0d）。ただし **実行時間が約10分**（目安は3分）で、**5回中1回、原因不明のエラーで止まった**。そのため、**詳細画面の14項目をまとめて取る速度の修正と、止まったときにエラーの詳細を表示する修正を入れた（今の版。10-0e）。今の版は机上の照合だけで、実機ではまだ確かめていない**（10-1 の「状態」に「今の版は実機未確認」と書いたもの）。PAD の版の違い等で貼り付けられない場合は、**UI 要素を手で登録し（3-1）、「7. アクション表」を上から順に見て、同じアクションを手作業で作れば同じフローになる**ように書いてある。実機でないと確かめられない点は「10-1. レビュー②で要確認」に一覧にした。
 
 ---
 
@@ -69,26 +69,28 @@
 | U5 | ListPage | application-count | S2 一覧 | `#application-count` | `span[Id="application-count"]` | 件数表示の文字（「全 20 件」）を `Own Text` で取得し、数字だけ取り出す（属性 `data-count` は PAD では空の文字が返るので使わない。10-0c） |
 | U6 | ListPage | detail-button | S2 一覧（どれか1行の「詳細」ボタンを取り込む） | `button[data-action="detail"][data-application-no="%CurrentNo%"]` | （同じ） | ループ中の申込番号の「詳細」ボタンのクリック |
 | U7 | DetailPage | application-detail-loaded | S3 詳細 `/detail.html?no=...`（一覧の「詳細」から開く） | `#application-detail[data-loaded="true"]` | `dl[Id="application-detail"][data-loaded="true"]` | 詳細の読み込み完了の待機 |
-| U8 | DetailPage | field-applicationNo | S3 詳細 | `#field-applicationNo` | `dd[Id="field-applicationNo"]` | 申込番号（一致確認にも使う） |
-| U9 | DetailPage | field-applicationDate | S3 詳細 | `#field-applicationDate` | `dd[Id="field-applicationDate"]` | 申込日 |
-| U10 | DetailPage | field-customerName | S3 詳細 | `#field-customerName` | `dd[Id="field-customerName"]` | お客さま名 |
-| U11 | DetailPage | field-supplyPointNo | S3 詳細 | `#field-supplyPointNo` | `dd[Id="field-supplyPointNo"]` | 供給地点特定番号 |
-| U12 | DetailPage | field-applicationType | S3 詳細 | `#field-applicationType` | `dd[Id="field-applicationType"]` | 申込種別 |
-| U13 | DetailPage | field-capacityBefore | S3 詳細 | `#field-capacityBefore` | `dd[Id="field-capacityBefore"]` | 変更前容量 |
-| U14 | DetailPage | field-capacityAfter | S3 詳細 | `#field-capacityAfter` | `dd[Id="field-capacityAfter"]` | 変更後容量 |
-| U15 | DetailPage | field-status | S3 詳細 | `#field-status` | `dd[Id="field-status"]` | ステータス |
-| U16 | DetailPage | field-assignee | S3 詳細 | `#field-assignee` | `dd[Id="field-assignee"]` | 担当者 |
-| U17 | DetailPage | field-siteAddress | S3 詳細 | `#field-siteAddress` | `dd[Id="field-siteAddress"]` | 需要場所住所 |
-| U18 | DetailPage | field-desiredDate | S3 詳細 | `#field-desiredDate` | `dd[Id="field-desiredDate"]` | 希望日 |
-| U19 | DetailPage | field-scheduledWorkDate | S3 詳細 | `#field-scheduledWorkDate` | `dd[Id="field-scheduledWorkDate"]` | 工事予定日（「未定」もそのまま取得） |
-| U20 | DetailPage | field-receptionNo | S3 詳細 | `#field-receptionNo` | `dd[Id="field-receptionNo"]` | 送配電受付番号（「未採番」もそのまま取得） |
-| U21 | DetailPage | field-remarks | S3 詳細 | `#field-remarks` | `dd[Id="field-remarks"]` | 備考（空欄は空文字） |
+| U8 | DetailPage | field-applicationNo | S3 詳細 | `#field-applicationNo` | `dd[Id="field-applicationNo"]` | 申込番号（一致確認にも使う）。**今の版ではアクションから参照しない**（No.65 の JavaScript が同じ `#field-applicationNo` を読む。下の注を参照） |
+| U9 | DetailPage | field-applicationDate | S3 詳細 | `#field-applicationDate` | `dd[Id="field-applicationDate"]` | 申込日（今の版では参照しない。U8 と同じ） |
+| U10 | DetailPage | field-customerName | S3 詳細 | `#field-customerName` | `dd[Id="field-customerName"]` | お客さま名（同上） |
+| U11 | DetailPage | field-supplyPointNo | S3 詳細 | `#field-supplyPointNo` | `dd[Id="field-supplyPointNo"]` | 供給地点特定番号（同上） |
+| U12 | DetailPage | field-applicationType | S3 詳細 | `#field-applicationType` | `dd[Id="field-applicationType"]` | 申込種別（同上） |
+| U13 | DetailPage | field-capacityBefore | S3 詳細 | `#field-capacityBefore` | `dd[Id="field-capacityBefore"]` | 変更前容量（同上） |
+| U14 | DetailPage | field-capacityAfter | S3 詳細 | `#field-capacityAfter` | `dd[Id="field-capacityAfter"]` | 変更後容量（同上） |
+| U15 | DetailPage | field-status | S3 詳細 | `#field-status` | `dd[Id="field-status"]` | ステータス（同上） |
+| U16 | DetailPage | field-assignee | S3 詳細 | `#field-assignee` | `dd[Id="field-assignee"]` | 担当者（同上） |
+| U17 | DetailPage | field-siteAddress | S3 詳細 | `#field-siteAddress` | `dd[Id="field-siteAddress"]` | 需要場所住所（同上） |
+| U18 | DetailPage | field-desiredDate | S3 詳細 | `#field-desiredDate` | `dd[Id="field-desiredDate"]` | 希望日（同上） |
+| U19 | DetailPage | field-scheduledWorkDate | S3 詳細 | `#field-scheduledWorkDate` | `dd[Id="field-scheduledWorkDate"]` | 工事予定日（「未定」もそのまま取得。同上） |
+| U20 | DetailPage | field-receptionNo | S3 詳細 | `#field-receptionNo` | `dd[Id="field-receptionNo"]` | 送配電受付番号（「未採番」もそのまま取得。同上） |
+| U21 | DetailPage | field-remarks | S3 詳細 | `#field-remarks` | `dd[Id="field-remarks"]` | 備考（空欄は空文字。同上） |
 | U22 | DetailPage | back-to-list-button | S3 詳細 | `#back-to-list-button` | `button[Id="back-to-list-button"]` | 一覧へ戻るボタンのクリック |
 
 - 「画面（取り込むとき開く画面）」列は、予備手順で手で登録する場合と、取り込み直す場合に使う。
 - U4・U7 は、`table` / `dl` 要素のセレクターに `[data-loaded="true"]` を付けた形（読み込み完了の目印が付くまで「待機」が終わらないようにするため）。
 - U6 の `%CurrentNo%` はフローの変数（ループ中の申込番号）。PAD はセレクター内の `%変数名%` を実行時に値に置き換える。この形にしてあるので、件数や並び順が変わっても同じ UI 要素で全行を扱える（手で取り込む場合は、どの行の「詳細」ボタンでもよく、セレクターを表の形に書き換える）。
-- UI 要素ではなく JavaScript の中で使うセレクターが3つある：`#application-tbody tr[data-application-no]`（アクション表 No.47。一覧の全行から属性 `data-application-no` を取り出す）と、`login-id`・`login-password`（No.35。`document.getElementById` で入力欄の値を確かめる）。
+- UI 要素ではなく JavaScript の中で使うセレクターがある：`#application-tbody tr[data-application-no]`（アクション表 No.47。一覧の全行から属性 `data-application-no` を取り出す）、`login-id`・`login-password`（No.35。`document.getElementById` で入力欄の値を確かめる）、`field-<キー>` の14個（No.65。`document.getElementById("field-" + キー)` で詳細画面の14項目の表示テキストを読む。U8〜U21 と同じ `id`）。
+- **U8〜U21 は今の版ではアクションから参照していないが、定義は `Main.txt` 末尾に残している**（04c の review-01 を受けた速度の修正で、14項目を1つずつ取る「要素の詳細を取得」14回を、No.65 の JavaScript 1回にまとめたため。10-0e）。残す理由：(1) 手順3-4 で読む要素（`#field-<キー>`）は同じで、UI 要素表が「詳細画面のどの要素を読むか」の一覧として役に立つ、(2) 末尾の定義（22個の `CustomSelector`）を `ba8d543` から変えないため（スプリント04c 契約 4c-9 (a)）、(3) 速度の修正を戻すときに UI 要素を作り直さなくてよい。参照されない UI 要素があってもエラーにはならない見込み（PAD の［UI 要素］ペインには「使用していない UI 要素を削除する」というメニューがあり、参照されない要素がある状態は PAD で普通に起きる。今の版を実機に貼り付けたときに、エラー ペインが 0 件であることで確かめる：10-1 R-23）。不要なら、貼り付け後に［UI 要素］ペインの「使用していない UI 要素を削除する」で消してよい（フローの動きは変わらない）。
+- そのため、契約 4c-9 (a) の「`appmask['X']['Y']` の参照と定義が完全に一致」は、今の版では **参照（8要素：U1〜U7・U22）⊂ 定義（22要素）** になり、完全一致ではない（参照しているのに定義が無い要素は 0）。10-0e を参照。
 
 ---
 
@@ -101,7 +103,7 @@
    - 画面が `LoginPage`・`ListPage`・`DetailPage` の **3つ** あり、その下に要素が **計22個**（`LoginPage` 3個・`ListPage` 3個・`DetailPage` 16個）できていること。名前が 2-2 の UI 要素表と同じであること。
    - **U6（`ListPage` の `detail-button`）をダブルクリック** してセレクター ビルダーを開き、カスタム セレクターが `button[data-action="detail"][data-application-no="%CurrentNo%"]` のまま（`%CurrentNo%` が残っている）であること。
    - 何個か（例：U1 `login-id`・U4 `application-table-loaded`）を開き、セレクターが表の「セレクター」列と同じ1つだけであること。
-5. 変数ペインに `StepMessage`・`BaseUrl`・`CurrentTable` などの変数ができていること、アクションが「7. アクション表」と同じ順に並んでいることを確かめる（表の No.1〜3 のように、ブロックの開始とそのエラー時の設定は PAD 上では1つのアクションとして表示される。No.97〜98 も同様）。PAD のステータス バーの表示は、04b の版（表 84 行）で **96 アクション** だった（PAD はコメントも1アクションとして数え、ブロックのエラー時の設定は開始と1つにまとめるため、表の行数とは数え方が違う）。04c の版（表 98 行）は、PAD の構文解析器で数えると **113**（If・Loop の終わり（End）も1つと数える）なので、113 前後になる見込み（実機では未確認）。
+5. 変数ペインに `StepMessage`・`BaseUrl`・`CurrentTable` などの変数ができていること、アクションが「7. アクション表」と同じ順に並んでいることを確かめる（表の No.1〜3 のように、ブロックの開始とそのエラー時の設定は PAD 上では1つのアクションとして表示される。No.88〜89・No.91〜92 も同様）。PAD のステータス バーの表示は、04b の版（表 84 行）で **96 アクション**、04c の `1f6091f` の版（表 98 行）で **113 アクション**（実機で確認。PAD の構文解析器で数えた 113 と一致）だった（PAD はコメントも1アクションとして数え、ブロックのエラー時の設定は開始と1つにまとめ、If・Loop の終わり（End）も1つと数えるため、表の行数とは数え方が違う）。今の版（表 92 行）は、PAD の構文解析器で数えると **109** なので、109 アクションと表示される見込み（実機では未確認）。
 6. 「4. 変数設定」の **`LoginPassword` を機密としてマーク** する。
 7. デザイナー上部の［保存］を押す。
 8. エラー ペインに赤いエラーが出ている場合は、該当のアクションをダブルクリックし、「7. アクション表」の設定値どおりに直す（UI 要素名の誤り・列挙値の名前の違いが多い）。
@@ -110,7 +112,7 @@
 - **貼り付けに失敗した場合**（何も貼り付けられない、エラーが多くて直せない等）：貼り付けた分を削除し、「3-1. 予備手順」で UI 要素を登録したうえで、**「7. アクション表」を No.1 から順に見て、同じアクションを左のアクション一覧からドラッグして手作業で作る**。表の「主な設定値」「生成される変数」「エラー時の設定」をそのまま入力すれば、`Main.txt` と同じフローになる。
 
 - 「ブロック エラー発生時」（BLOCK）は、ブロックの中にアクションを入れる入れ物になる。表で「ブロック内」と書いたアクションは、そのブロックの中に入れる。
-- ブロックのエラー時の設定（No.2〜3 など）：ブロックのアクションを開き →［例外処理モード］（または［エラー発生時］）で **［フロー実行を続行する］→［ラベルに移動］→ `ErrorEnd`** を選ぶ。ラベル `ErrorEnd`（No.95）は先に作っておくと選べる。
+- ブロックのエラー時の設定（No.2〜3 など）：ブロックのアクションを開き →［例外処理モード］（または［エラー発生時］）で **［フロー実行を続行する］→［ラベルに移動］→ `ErrorEnd`** を選ぶ。ラベル `ErrorEnd`（No.85）は先に作っておくと選べる。
 
 ### 3-1. 予備手順：UI 要素を手で登録する（貼り付けで UI 要素が登録されない場合だけ）
 
@@ -149,7 +151,7 @@
 | `DocumentsFolder` | ドキュメント フォルダのパス（ログイン中のユーザーのもの。パスは直書きしない） | 特別なフォルダーを取得（No.12、ドキュメント） | 例：`<ドキュメント>` |
 | `WorkFolder` | 作業フォルダ `<ドキュメント>\申込状況チェック_デモ` | 変数の設定（No.13）。無ければ作成（No.14〜15） | 例：`<ドキュメント>\申込状況チェック_デモ` |
 | `CreatedFolder` | 作成したフォルダ（以後は使わない） | フォルダーを作成（No.15） | — |
-| `CurrentTable` | 今回取得した全件（14列のデータ テーブル） | 新しいデータ テーブルを作成（No.16）→ 空行の削除（No.17）→ 1件ごとに行を追加（No.83） | 見出し14列・0行で開始 |
+| `CurrentTable` | 今回取得した全件（14列のデータ テーブル） | 新しいデータ テーブルを作成（No.16）→ 空行の削除（No.17）→ 1件ごとに行を追加（No.73） | 見出し14列・0行で開始 |
 | `Browser` | 起動した Edge のインスタンス | 新しい Microsoft Edge を起動する（No.22） | — |
 | `ApplicationNosText` | 一覧の申込番号をカンマでつないだテキスト | JavaScript 関数を実行（No.47） | 例：`DM-2026-0020,DM-2026-0019,…` |
 | `ApplicationNos` | 申込番号のリスト（一覧の表示順。全件） | テキストの分割（No.48） | — |
@@ -160,8 +162,13 @@
 | `DataCountPosition` | 数字が見つかった位置（以後は使わない） | テキストの解析（No.51） | 例：`2` |
 | `DataCount` | `DataCountDigits` を数値にしたもの（画面の件数） | テキストを数値に変換（No.52） | 例：`20` |
 | `CurrentNo` | ループ中の申込番号（ループ変数） | For each（No.59） | — |
-| `Val_applicationNo` 〜 `Val_remarks`（14個） | 詳細画面から取得した14項目の値（表示テキストのまま） | 要素の詳細を取得（No.65、No.70〜82） | — |
-| `ButtonPressed` | メッセージの押されたボタン（以後は使わない） | メッセージを表示（No.96） | — |
+| `DetailText` | 詳細画面の14項目の表示テキストを、見出しと同じ順にカンマでつないだテキスト（今の版で追加） | JavaScript 関数を実行（No.65） | 例：`DM-2026-0020,2026/09/29,テスト 十郎,…,未定,未採番,`（備考が空なら最後がカンマで終わる） |
+| `DetailValues` | `DetailText` をカンマで分けた14個のリスト（表示テキストのまま。空の備考は空の値として残る）。`%DetailValues[0]%` が申込番号 | テキストの分割（No.66） | 14個のリスト |
+| `ButtonPressed` | メッセージの押されたボタン（以後は使わない） | メッセージを表示（No.90） | — |
+| `LastError` | PAD が記録した最後のエラー（エラーの種類の変数。今の版で追加） | 最後のエラーを取得（No.86） | テキストにすると「サブフロー: Main、アクション: <番号>、アクション名: <アクション名>」＋改行＋「エラー メッセージ: <内容>」。エラーが無ければ「エラーはありません」 |
+| `ErrorDetail` | `LastError` をテキストにして、ユーザー名を含むパスを伏せたもの。エラー時のメッセージに足す（今の版で追加） | 変数の設定（No.87）→ テキストを置換する（No.88） | 例：`サブフロー: Main、アクション: 23、アクション名: Web ページのコンテンツを待機`（改行）`エラー メッセージ: …` |
+
+- `Val_applicationNo` 〜 `Val_remarks`（14個）は `1f6091f` の版まで使っていた（14項目を1つずつ取得していた）。今の版では `DetailValues` にまとめたので無い。
 
 - 件数（20件・21件など）や申込番号はどこにも直書きしていない。件数は毎回画面から取得する。
 - SharePoint・Teams 関係の変数（`SharePointSite` 等）はスプリント05 で作る。値はその時に PAD 上で設定し、`flows/` には書かない。
@@ -199,6 +206,10 @@
 - メッセージ画面のタイトル：**申込状況チェック_デモ（エラーで停止しました）**
 - 手順ごとにブロック（「ブロック エラー発生時」）を分け、エラーになったらラベル `ErrorEnd` に移動してメッセージを表示する。メッセージ文言は変数 `StepMessage` に、その手順を始める前に入れてある。
 - `<申込番号>`・`<件数>` などは実行時の値が入る。
+- **今の版では、表の文言の後ろに「（PAD のエラー情報：…）」が付く**（No.86〜88。10-0e）。中身は PAD が記録した最後のエラーで、「サブフロー: Main、アクション: <番号>、アクション名: <アクション名>」と「エラー メッセージ: <PAD のエラーの内容>」の2行。**どの手順で止まったかは表の文言（`StepMessage`）で、どのアクションで・どんなエラーかは「PAD のエラー情報」で分かる**。アクションの番号は PAD デザイナーの左に出る番号（コメントも1つと数える）にあたる見込みで、下の「7. アクション表」の No とは違う（アクション名で表と突き合わせる）。
+  - 止まったときは、**メッセージの文言をそのまま書き写すか、スクリーンショットを撮ってから［OK］を押す**（［OK］を押すとブラウザーが閉じてフローが終わり、文言は残らない）。
+  - エラー メッセージの中のファイルのパスに、ユーザー名を含む部分（`<ドライブ>:\Users\<名前>\…`）があれば、作業フォルダ名（`申込状況チェック_デモ`）の前まで、またはその行の終わりまでを `<ユーザー フォルダー>` に置き換えて表示する（No.88）。置き換えに失敗した場合は「（取得できませんでした）」と表示する（ユーザー名を含む文字は出さない）。
+  - 条件の確認で止めた場合（E2 の3回失敗・E6・E10・E11）は、PAD のアクション自体はエラーになっていないので、「PAD のエラー情報」は「エラーはありません」か、それより前に記録されたエラー（例：ログインの入力のやり直しで、止めずに続けた入力のエラー）になる。その場合も、止まった理由は表の文言で分かる。
 
 | No | どこで止まったか | 表示されるメッセージ（`StepMessage`） | 表示されたときに人がすること |
 |----|------------------|---------------------------------------|------------------------------|
@@ -212,9 +223,9 @@
 | E6 | 手順2-2（件数の不一致） | 手順2-2：件数が一致しません（画面の件数 `<件数>` 件／取得 `<件数>` 件）。取得した申込番号：`<申込番号の一覧>` | 実行中にデモ操作をしていないか確認する。一覧を再読み込みして件数表示と行数が合っていることを確認して再実行 |
 | E7 | 手順3-1（「詳細」ボタンのクリック） | 手順3-1：申込番号 `<申込番号>` の「詳細」ボタンをクリックできませんでした | U6 のセレクター（`%CurrentNo%` を含む形）を確認する。実行中に一覧のデータが変わっていないか確認して再実行 |
 | E8 | 手順3-2（詳細画面が 30 秒以内に表示されない。該当なしで `#detail-error` が出た場合も含む） | 手順3-2：申込番号 `<申込番号>` の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む） | Edge に「該当する申込が見つかりません」が出ていれば、実行中に［初期データに戻す］等でデータが変わっていないか確認して再実行。U7 のセレクターも確認 |
-| E9 | 手順3-3（詳細画面の申込番号の取得） | 手順3-3：申込番号 `<申込番号>` の詳細画面から申込番号を取得できませんでした | U8 のセレクターを確認して再実行 |
-| E10 | 手順3-3（申込番号の不一致） | 手順3-3：申込番号が一致しません（対象 `<申込番号>`／詳細画面 `<申込番号>`） | 別の行の「詳細」が押されていないか（U6 のセレクターが表のとおりか）を確認して再実行 |
-| E11 | 手順3-4（14項目の取得） | 手順3-4：申込番号 `<申込番号>` の項目を取得できませんでした | U9〜U21 のセレクターと名前を確認して再実行 |
+| E9 | 手順3-3〜3-4（14項目の取得：No.65 の JavaScript・No.66 の分割・No.73 の行の追加が失敗） | 手順3-3〜3-4：申込番号 `<申込番号>` の詳細画面から項目を取得できませんでした | 「PAD のエラー情報」のアクション名を見る。JavaScript なら No.65 の JavaScript が表のとおりか・PAD の Edge 拡張機能が有効かを確認して再実行 |
+| E10 | 手順3-3（申込番号の不一致：No.65 で読んだ `#field-applicationNo` の値と、対象の申込番号が違う） | 手順3-3：申込番号が一致しません（対象 `<申込番号>`／詳細画面 `<申込番号>`） | 別の行の「詳細」が押されていないか（U6 のセレクターが表のとおりか）を確認して再実行 |
+| E11 | 手順3-4（14項目が14個そろわない：No.67） | 手順3-4：申込番号 `<申込番号>` の詳細画面から14項目を取得できませんでした（取得できた値は `<個数>` 個） | `1` 個なら、詳細画面に `#field-<キー>` の要素が無い（JavaScript が `NG:field-<キー>` を返した）。モックの `detail.html` が変わっていないか確認する。`15` 個以上なら、値にカンマが入っている（`docs/screens.md` 1 のデータの制約に反する）ので、データを確認して再実行 |
 | E12 | 手順3-5（一覧へ戻る・一覧の再表示が 30 秒以内に終わらない） | 手順3-5：申込番号 `<申込番号>` の詳細画面から一覧画面に戻れませんでした（30 秒） | U22・U4 のセレクター、モックが止まっていないかを確認して再実行 |
 | E13 | 手順4（CSV の書き出し） | 手順4：CSV ファイルを書き出せませんでした。同じ名前のファイルを Excel 等で開いていないか確認してください | `latest.csv` や履歴ファイルを Excel で開いていれば閉じて再実行（このエラーのときは履歴ファイルだけ書き出されている場合がある。再実行で上書きされる） |
 
@@ -225,7 +236,7 @@
 
 ## 7. アクション表
 
-- `Main.txt` のアクション行（`#` コメント行・空行・`END` を除く）を上から順に並べた。**表の No と `Main.txt` の行は1対1で同じ順・同じ数（98行）**。
+- `Main.txt` のアクション行（`#` コメント行・空行・`END` を除く）を上から順に並べた。**表の No と `Main.txt` の行は1対1で同じ順・同じ数（92行）**。（`1f6091f` の版は98行。今の版で手順3-3〜3-4 と エラー時の処理を変えた：10-0e）
 - 「手順」列は `docs/flow.md` の手順番号。「ブロック内」は、どのブロック（BLOCK）の中に入れるか。
 - アクション名は PAD デザイナー（日本語表示）の名前。版によって表記が少し違う場合がある（10 を参照）。
 - 待機（「Web ページのコンテンツを待機」）は `Main.txt` では `WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement …) FOR 30` と書かれる。これは **要素が出るまで最大 30 秒待つ** 設定（タイムアウト 30 秒）で、固定秒数の待機（「待機」アクション `WAIT <秒>`）ではない。固定秒数の待機は **No.30 の `WAIT 2`（2 秒）の1か所だけ** で、ログインの入力を2回目以降にやり直す前の間隔として使う（要素の待機の代わりにはしていない。1回目の入力の前は No.23・25 の要素の待機だけ）。
@@ -237,8 +248,8 @@ PAD の貼り付けテキストでは `$'''…'''` の中の次の文字をエ�
 
 | 画面での値 | `Main.txt` での書き方 | 該当箇所 |
 |------------|----------------------|----------|
-| `\`（円記号・バックスラッシュ） | `\\` | No.13（`%DocumentsFolder%\\%WorkFolderName%`）・No.91・92（CSV のファイル パス） |
-| `"`（ダブルクォート） | `\"` | No.35・No.47 の JavaScript 内の文字列 |
+| `\`（円記号・バックスラッシュ） | `\\` | No.13（`%DocumentsFolder%\\%WorkFolderName%`）・No.81・82（CSV のファイル パス）・No.88（正規表現。画面での `\\Users\\` は `Main.txt` では `\\\\Users\\\\`） |
+| `"`（ダブルクォート） | `\"` | No.35・No.47・No.65 の JavaScript 内の文字列 |
 
 - とくに `\%` と書くと `%` が「変数の始まり」ではなく文字として扱われ、そこから後ろの行まで読み飛ばされて貼り付けが失敗する。パスの区切りは必ず `\\` にする。
 
@@ -307,41 +318,35 @@ PAD の貼り付けテキストでは `$'''…'''` の中の次の文字をエ�
 | 61 | 3-1 | Step3_GetDetails（ループ内） | Web ページのリンクをクリックします | UI 要素：`ListPage` › `detail-button`（`button[data-action="detail"][data-application-no="%CurrentNo%"]`）、ページ読み込みのタイムアウト：60 秒 | — | ブロック Step3_GetDetails |
 | 62 | 3-2 | Step3_GetDetails（ループ内） | 変数の設定 | `StepMessage` ＝ E8 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
 | 63 | 3-2 | Step3_GetDetails（ループ内） | Web ページのコンテンツを待機 | 要素が表示される、UI 要素：`DetailPage` › `application-detail-loaded`（`#application-detail[data-loaded="true"]`）、タイムアウト：30 秒 | — | ブロック Step3_GetDetails |
-| 64 | 3-3 | Step3_GetDetails（ループ内） | 変数の設定 | `StepMessage` ＝ E9 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
-| 65 | 3-3 | Step3_GetDetails（ループ内） | Web ページ上の要素の詳細を取得します | UI 要素：`DetailPage` › `field-applicationNo`（`#field-applicationNo`）、属性名：`Own Text` | `Val_applicationNo` | ブロック Step3_GetDetails |
-| 66 | 3-3 | Step3_GetDetails（ループ内） | If | `%Val_applicationNo%` と等しくない（<>） `%CurrentNo%` | — | ブロック Step3_GetDetails |
-| 67 | 3-3 | Step3_GetDetails（No.66 の中） | 変数の設定 | `StepMessage` ＝ E10 の文言（`手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %Val_applicationNo%）`） | — | ブロック Step3_GetDetails |
-| 68 | 3-3 | Step3_GetDetails（No.66 の中） | 移動先（Go to） | ラベル：`ErrorEnd` | — | — |
-| 69 | 3-4 | Step3_GetDetails（ループ内） | 変数の設定 | `StepMessage` ＝ E11 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
-| 70 | 3-4 | Step3_GetDetails（ループ内） | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-applicationDate`（`#field-applicationDate`）、属性名：`Own Text` | `Val_applicationDate` | ブロック Step3_GetDetails |
-| 71 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-customerName`（`#field-customerName`）、`Own Text` | `Val_customerName` | ブロック Step3_GetDetails |
-| 72 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-supplyPointNo`（`#field-supplyPointNo`）、`Own Text` | `Val_supplyPointNo` | ブロック Step3_GetDetails |
-| 73 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-applicationType`（`#field-applicationType`）、`Own Text` | `Val_applicationType` | ブロック Step3_GetDetails |
-| 74 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-capacityBefore`（`#field-capacityBefore`）、`Own Text` | `Val_capacityBefore` | ブロック Step3_GetDetails |
-| 75 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-capacityAfter`（`#field-capacityAfter`）、`Own Text` | `Val_capacityAfter` | ブロック Step3_GetDetails |
-| 76 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-status`（`#field-status`）、`Own Text` | `Val_status` | ブロック Step3_GetDetails |
-| 77 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-assignee`（`#field-assignee`）、`Own Text` | `Val_assignee` | ブロック Step3_GetDetails |
-| 78 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-siteAddress`（`#field-siteAddress`）、`Own Text` | `Val_siteAddress` | ブロック Step3_GetDetails |
-| 79 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-desiredDate`（`#field-desiredDate`）、`Own Text` | `Val_desiredDate` | ブロック Step3_GetDetails |
-| 80 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-scheduledWorkDate`（`#field-scheduledWorkDate`）、`Own Text` | `Val_scheduledWorkDate` | ブロック Step3_GetDetails |
-| 81 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-receptionNo`（`#field-receptionNo`）、`Own Text` | `Val_receptionNo` | ブロック Step3_GetDetails |
-| 82 | 3-4 | 同上 | Web ページ上の要素の詳細を取得します | `DetailPage` › `field-remarks`（`#field-remarks`）、`Own Text`（空欄は空文字になる） | `Val_remarks` | ブロック Step3_GetDetails |
-| 83 | 3-4 | 同上 | データ テーブルに行を挿入 | データ テーブル：`%CurrentTable%`、挿入場所：データ テーブルの末尾、新しい値：`[Val_applicationNo, Val_applicationDate, Val_customerName, Val_supplyPointNo, Val_applicationType, Val_capacityBefore, Val_capacityAfter, Val_status, Val_assignee, Val_siteAddress, Val_desiredDate, Val_scheduledWorkDate, Val_receptionNo, Val_remarks]`（14個を見出しと同じ順に位置で並べる。空の備考でも列がずれない） | — | ブロック Step3_GetDetails |
-| 84 | 3-5 | 同上 | 変数の設定 | `StepMessage` ＝ E12 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
-| 85 | 3-5 | 同上 | Web ページのリンクをクリックします | UI 要素：`DetailPage` › `back-to-list-button`（`#back-to-list-button`）、ページ読み込みのタイムアウト：60 秒 | — | ブロック Step3_GetDetails |
-| 86 | 3-5 | 同上 | Web ページのコンテンツを待機 | 要素が表示される、UI 要素：`ListPage` › `application-table-loaded`（`#application-table[data-loaded="true"]`）、タイムアウト：30 秒（次の行の「詳細」を押す前に一覧の読み込み完了を待つ） | — | ブロック Step3_GetDetails |
-| 87 | 4 | — | ブロック エラー発生時（ブロックの開始） | 名前：`Step4_WriteCsv` | — | No.88〜89 |
-| 88 | 4 | Step4_WriteCsv | （No.87 のエラー時の設定） | 例外処理モード：フロー実行を続行する | — | — |
-| 89 | 4 | Step4_WriteCsv | （No.87 のエラー時の設定の続き） | ラベルに移動：`ErrorEnd` | — | — |
-| 90 | 4 | Step4_WriteCsv | 変数の設定 | `StepMessage` ＝ E13 の文言 | — | ブロック Step4_WriteCsv |
-| 91 | 4-1 | Step4_WriteCsv | CSV ファイルに書き込む | 書き込む変数：`%CurrentTable%`、ファイル パス：`%WorkFolder%\%HistoryFileName%`、エンコード：UTF-8、［詳細］列名を含める：オン、ファイルが存在する場合：上書き、列区切り記号：コンマ | — | ブロック Step4_WriteCsv |
-| 92 | 4-2 | Step4_WriteCsv | CSV ファイルに書き込む | ファイル パス：`%WorkFolder%\latest.csv`、他は No.91 と同じ（UTF-8・列名を含める・上書き・コンマ） | — | ブロック Step4_WriteCsv |
-| 93 | 7 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | なし（既定：フローを停止） |
-| 94 | 7 | — | フローを停止する | フローの終了：正常に終了（コード 0） | — | — |
-| 95 | エラー時 | — | ラベル | ラベル名：`ErrorEnd` | — | — |
-| 96 | エラー時 | — | メッセージを表示 | タイトル：`申込状況チェック_デモ（エラーで停止しました）`、表示するメッセージ：`%StepMessage%`、アイコン：エラー、ボタン：OK、常に手前に表示：オン | `ButtonPressed` | — |
-| 97 | エラー時 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | No.98 |
-| 98 | エラー時 | — | （No.97 のエラー時の設定） | エラー処理：フロー実行を続行する、例外処理モード：次のアクションに移動（Edge が起動していない場合も止まらずに終わる）。`Main.txt` では `ON ERROR` ／ `END` だけを書き、**中には何も書かない**（キーワードを入れるとエラーになる。10-0 を参照） | — | — |
+| 64 | 3-3〜3-4 | Step3_GetDetails（ループ内） | 変数の設定 | `StepMessage` ＝ E9 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
+| 65 | 3-3〜3-4 | Step3_GetDetails（ループ内） | Web ページで JavaScript 関数を実行します | ブラウザー インスタンス：`%Browser%`、JavaScript 関数：下の「No.65 の JavaScript」（詳細画面の `#field-<キー>` 14個の表示テキストを、`docs/screens.md` 1-2 の順にカンマでつないで返す。今の版で追加：14回の「要素の詳細を取得」を1回にまとめた） | `DetailText` | ブロック Step3_GetDetails |
+| 66 | 3-3〜3-4 | Step3_GetDetails（ループ内） | テキストの分割 | 分割するテキスト：`%DetailText%`、区切り記号の種類：カスタム、カスタム区切り記号：`,`（カンマ）、正規表現：オフ（No.48 と同じ設定。空の備考は空の値として残る） | `DetailValues` | ブロック Step3_GetDetails |
+| 67 | 3-4 | Step3_GetDetails（ループ内） | If | `%DetailValues.Count%` と等しくない（<>） `14`（14項目がそろったか） | — | ブロック Step3_GetDetails |
+| 68 | 3-4 | Step3_GetDetails（No.67 の中） | 変数の設定 | `StepMessage` ＝ E11 の文言（`手順3-4：申込番号 %CurrentNo% の詳細画面から14項目を取得できませんでした（取得できた値は %DetailValues.Count% 個）`） | — | ブロック Step3_GetDetails |
+| 69 | 3-4 | Step3_GetDetails（No.67 の中） | 移動先（Go to） | ラベル：`ErrorEnd` | — | — |
+| 70 | 3-3 | Step3_GetDetails（ループ内） | If | `%DetailValues[0]%`（詳細画面の申込番号 `#field-applicationNo`）と等しくない（<>） `%CurrentNo%` | — | ブロック Step3_GetDetails |
+| 71 | 3-3 | Step3_GetDetails（No.70 の中） | 変数の設定 | `StepMessage` ＝ E10 の文言（`手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %DetailValues[0]%）`） | — | ブロック Step3_GetDetails |
+| 72 | 3-3 | Step3_GetDetails（No.70 の中） | 移動先（Go to） | ラベル：`ErrorEnd` | — | — |
+| 73 | 3-4 | Step3_GetDetails（ループ内） | データ テーブルに行を挿入 | データ テーブル：`%CurrentTable%`、挿入場所：データ テーブルの末尾、新しい値：`%DetailValues%`（14個のリストをそのまま渡す。見出しと同じ順なので、空の備考でも列がずれない） | — | ブロック Step3_GetDetails |
+| 74 | 3-5 | 同上 | 変数の設定 | `StepMessage` ＝ E12 の文言（`%CurrentNo%` を含む） | — | ブロック Step3_GetDetails |
+| 75 | 3-5 | 同上 | Web ページのリンクをクリックします | UI 要素：`DetailPage` › `back-to-list-button`（`#back-to-list-button`）、ページ読み込みのタイムアウト：60 秒 | — | ブロック Step3_GetDetails |
+| 76 | 3-5 | 同上 | Web ページのコンテンツを待機 | 要素が表示される、UI 要素：`ListPage` › `application-table-loaded`（`#application-table[data-loaded="true"]`）、タイムアウト：30 秒（次の行の「詳細」を押す前に一覧の読み込み完了を待つ） | — | ブロック Step3_GetDetails |
+| 77 | 4 | — | ブロック エラー発生時（ブロックの開始） | 名前：`Step4_WriteCsv` | — | No.78〜79 |
+| 78 | 4 | Step4_WriteCsv | （No.77 のエラー時の設定） | 例外処理モード：フロー実行を続行する | — | — |
+| 79 | 4 | Step4_WriteCsv | （No.77 のエラー時の設定の続き） | ラベルに移動：`ErrorEnd` | — | — |
+| 80 | 4 | Step4_WriteCsv | 変数の設定 | `StepMessage` ＝ E13 の文言 | — | ブロック Step4_WriteCsv |
+| 81 | 4-1 | Step4_WriteCsv | CSV ファイルに書き込む | 書き込む変数：`%CurrentTable%`、ファイル パス：`%WorkFolder%\%HistoryFileName%`、エンコード：UTF-8、［詳細］列名を含める：オン、ファイルが存在する場合：上書き、列区切り記号：コンマ | — | ブロック Step4_WriteCsv |
+| 82 | 4-2 | Step4_WriteCsv | CSV ファイルに書き込む | ファイル パス：`%WorkFolder%\latest.csv`、他は No.81 と同じ（UTF-8・列名を含める・上書き・コンマ） | — | ブロック Step4_WriteCsv |
+| 83 | 7 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | なし（既定：フローを停止） |
+| 84 | 7 | — | フローを停止する | フローの終了：正常に終了（コード 0） | — | — |
+| 85 | エラー時 | — | ラベル | ラベル名：`ErrorEnd` | — | — |
+| 86 | エラー時 | — | 最後のエラーを取得 | エラーを消去する：オン（`Main.txt` では `ERROR => LastError Reset: True`。今の版で追加） | `LastError` | — |
+| 87 | エラー時 | — | 変数の設定 | `ErrorDetail` ＝ `（取得できませんでした）`（No.88 が失敗したときに表示する文字） | `ErrorDetail` | — |
+| 88 | エラー時 | — | テキストを置換する | 解析するテキスト：`%LastError%`、検索するテキスト：下の「No.88 の正規表現」、正規表現を使って検索と置換を行う：オン、大文字と小文字を区別しない：オン、置き換え先のテキスト：`<ユーザー フォルダー>`、エスケープ シーケンスをアクティブ化：オフ（ユーザー名を含むパスを、作業フォルダ名の前まで（無ければその行の終わりまで）伏せる。今の版で追加） | `ErrorDetail` | No.89 |
+| 89 | エラー時 | — | （No.88 のエラー時の設定） | エラー処理：フロー実行を続行する、例外処理モード：次のアクションに移動（失敗しても止めずにメッセージを表示する。`ErrorDetail` は No.87 の文字のまま）。`Main.txt` では `ON ERROR` ／ `END` だけ（No.92 と同じ書き方） | — | — |
+| 90 | エラー時 | — | メッセージを表示 | タイトル：`申込状況チェック_デモ（エラーで停止しました）`、表示するメッセージ：`%StepMessage%（PAD のエラー情報：%ErrorDetail%）`、アイコン：エラー、ボタン：OK、常に手前に表示：オン | `ButtonPressed` | — |
+| 91 | エラー時 | — | Web ブラウザーを閉じる | ブラウザー インスタンス：`%Browser%` | — | No.92 |
+| 92 | エラー時 | — | （No.91 のエラー時の設定） | エラー処理：フロー実行を続行する、例外処理モード：次のアクションに移動（Edge が起動していない場合も止まらずに終わる）。`Main.txt` では `ON ERROR` ／ `END` だけを書き、**中には何も書かない**（キーワードを入れるとエラーになる。10-0 を参照） | — | — |
 
 **No.47 の JavaScript**（`Main.txt` では1行。中のセレクターは `#application-tbody tr[data-application-no]`。`Main.txt` では文字列の中なのでダブルクォートが `\"` になっている）
 
@@ -353,6 +358,36 @@ function ExecuteScript() {
   return nos.join(",");
 }
 ```
+
+**No.65 の JavaScript**（`Main.txt` では1行。`Main.txt` ではダブルクォートが `\"` になっている）
+
+```javascript
+function ExecuteScript() {
+  var keys = ["applicationNo", "applicationDate", "customerName", "supplyPointNo", "applicationType", "capacityBefore", "capacityAfter", "status", "assignee", "siteAddress", "desiredDate", "scheduledWorkDate", "receptionNo", "remarks"];
+  var vals = [];
+  for (var i = 0; i < keys.length; i++) {
+    var el = document.getElementById("field-" + keys[i]);
+    if (!el) { return "NG:field-" + keys[i]; }
+    vals.push(el.textContent.trim());
+  }
+  return vals.join(",");
+}
+```
+
+- `keys` の順は `docs/screens.md` 1-2 の14項目の順（＝ `CurrentTable` の見出しの順、モックの `mock/js/detail.js` の `DETAIL_FIELDS` の順）。
+- 値は各 `#field-<キー>` の表示テキスト（`textContent` の前後の空白を除いたもの）。モックは値をそのまま `textContent` に入れる（空の備考は空、「未定」「未採番」も文字のまま。`mock/js/detail.js` の `render`）。`dummy.json`・`candidates.json` の値には、カンマ・改行・タブ・前後の空白・空白の連続が無い（机上で確認）ので、`1f6091f` の版の `Own Text` と同じ値になる（`1f6091f` の実機の CSV が `dummy.json` と不一致 0 だった）。
+- 区切りはカンマ。値にカンマは含まれない（`docs/screens.md` 1 のデータの制約：CSV で崩れないよう、値にカンマ・改行・ダブルクォートを含めない）。万一含まれると No.66 で15個以上に分かれるので、No.67 で E11 として止まる（列がずれた CSV は書き出さない）。
+- 「テキストの分割」（No.66）は、区切りの間が空でも空の値として残す（`a,b,,` → `a`・`b`・空・空の4個。この PC の PAD のテキスト アクションの実装を呼び出して確認）。備考が空の行も14個になる。
+- 詳細画面に要素が無い場合は `NG:field-<キー>` を返す（分割すると1個になり、No.67 で E11）。
+
+**No.88 の正規表現**（`Main.txt` ではバックスラッシュが2倍の `\\\\Users\\\\` になっている）
+
+```text
+(?m)[A-Za-z]:\\Users\\.*?(?=申込状況チェック_デモ|$)
+```
+
+- `C:\Users\<名前>\…` のようなパスを見つけ、作業フォルダ名 `申込状況チェック_デモ` の直前まで（無ければその行の終わりまで）を `<ユーザー フォルダー>` に置き換える。OneDrive のフォルダー名（組織名を含むことがある）も一緒に伏せる。
+- 例：`ファイル 'C:\Users\<名前>\OneDrive - <組織名>\ドキュメント\申込状況チェック_デモ\latest.csv' に…` → `ファイル '<ユーザー フォルダー>申込状況チェック_デモ\latest.csv' に…`（この PC の PAD の「テキストを置換する」の実装を呼び出して確認。パスの無いエラー メッセージ、「エラーはありません」は変わらない）。
 
 **No.35 の JavaScript**（`Main.txt` では1行。`%LoginId%`・`%LoginPassword%` は PAD が実行時に変数の値に置き換える。`Main.txt` ではダブルクォートが `\"` になっている）
 
@@ -373,16 +408,25 @@ function ExecuteScript() {
 - フロー全体を自動で再実行することはしない（`docs/flow.md` 4）。やり直すのは手順1-3 の入力だけ。
 - ログインボタンのクリック（No.40）は、入力を確かめた後に1回だけ行う。失敗したら E2 で止まる。
 
-**CSV の設定（No.91・92）について**
+**エラー時の処理（No.85〜92）について**
+- どこで止まっても、ラベル `ErrorEnd`（No.85）へ移動する。今の版では、メッセージを出す前に「最後のエラーを取得」（No.86）で PAD が記録したエラーを取り、ユーザー名を含むパスを伏せて（No.87〜88）、`StepMessage` の後ろに足して表示する（No.90）。
+- 04c の 2026-10-19 の実行で、5回中1回、手順1〜2 のどこかで止まったが、メッセージの文言を記録できず原因が分からなかった（10-0d）。次に止まったときに **どの手順（`StepMessage`）・どのアクション・どんなエラーか** が画面で分かるようにするため。
+- 「最後のエラーを取得」の［エラーを消去する］はオン（取得した後にエラーを消す）。エラー時の処理の中だけで使うので、どちらでも動きは変わらない。
+- No.88 が失敗しても止めない（No.89）。そのときは No.87 の「（取得できませんでした）」が表示される。
+- メッセージ（No.90）とブラウザーを閉じる処理（No.91〜92）は今までと同じ。
+
+**CSV の設定（No.81・82）について**
 - エンコード：**UTF-8**（PAD の選択肢の「UTF-8」。`Main.txt` では `File.CSVEncoding.UTF8`）。PAD（.NET）の「UTF-8」は書き出し時にファイルの先頭に BOM（`EF BB BF`）を付ける。BOM があると Excel が UTF-8 と判断して日本語が文字化けしない。版によって「UTF-8（BOM なし）」のような選択肢がある場合は、そちらは **選ばない**。実行後に 5 の 6. の方法で BOM を確かめる。
 - 列区切り記号：**コンマ**を明示して選ぶ（「システムの既定」は選ばない。地域設定によって区切りが変わるのを避けるため）。
 - 列名を含める：オン（1行目が見出しになる）。ファイルが存在する場合：上書き。
-- CSV の書き出しは手順3 の全件ループが最後まで終わった後だけ実行される。手順0〜3 のどこかでエラーになると、ラベル `ErrorEnd` に移動するため No.91・92 は実行されない。
+- CSV の書き出しは手順3 の全件ループが最後まで終わった後だけ実行される。手順0〜3 のどこかでエラーになると、ラベル `ErrorEnd` に移動するため No.81・82 は実行されない。
+- 実機（`1f6091f` の版、2026-10-19）の出力：先頭3バイトが `EF BB BF`（BOM）、改行は CRLF、最終行の後に改行は付かない、値はダブルクォートで囲まれない。Excel で開いて日本語の文字化けなし（10-0d）。
 
 **全件ループについて**
 - 手順3 は手順2 で取得した申込番号リスト `ApplicationNos` の全件に対する For each で、件数・申込番号・行番号はどこにも直書きしていない。デモ操作で追加した案件（一覧の先頭行）も、手順2 で取得されるので同じループで取得される。
 - 詳細画面への移動は、一覧の「詳細」ボタン（U6）のクリックだけで行う。URL（`detail.html?no=`）を直接開くアクションは使わない。
 - 各回の最後に「一覧へ戻る」（U22）を押し、一覧の読み込み完了（U4）を待ってから次の申込番号の「詳細」を押す。
+- 1件ごとのブラウザー操作は、「詳細」のクリック（No.61）→ 詳細の読み込み完了の待機（No.63）→ 14項目の取得（No.65 の JavaScript 1回）→「一覧へ戻る」のクリック（No.75）→ 一覧の読み込み完了の待機（No.76）の **5つ**。`1f6091f` の版は14項目を「要素の詳細を取得」で1つずつ取っていたため **18個**（1件あたり約26〜30秒）だった（10-0e）。
 
 ---
 
@@ -402,13 +446,15 @@ DM-2026-0001,2026/08/03,サンプル 一郎,9900000000000000001038,契約容量�
 - 1行目の DM-2026-0020 のように備考が空の行は、行末がカンマで終わる（14列目が空）。
 - 「未定」「未採番」は画面の表示どおりの文字列で出る。
 - 供給地点特定番号は22桁の数字をそのまま書く（Excel では指数表示になる。5 の注意を参照）。
-- 値にカンマ・改行・ダブルクォートは含まれない（`docs/screens.md` 1 の制約）。PAD が値をダブルクォートで囲んで書き出すかどうかは、まだ実機で確かめていない（04c の実行で確認する。囲まれていても Excel での表示・スプリント05 の読み込みには影響しない）。
+- 値にカンマ・改行・ダブルクォートは含まれない（`docs/screens.md` 1 の制約）。**値はダブルクォートで囲まれない**（04c の実機で確認：`1f6091f` の版、2026-10-19。上の例のとおりの形で出る）。
+- 改行は CRLF で、最終行（最後のデータ行）の後に改行は付かない（同じ実行の出力ファイルで確認）。
+- 実機の出力は、初期20件で 4,135 バイト（見出し＋20行）、21件で 4,344 バイト（見出し＋21行）だった。今の版（14項目を JavaScript でまとめて取る）でも、取る値が同じなので出力は同じになる見込み（実機では未確認：10-1 R-18）。
 
 ---
 
 ## 9. スプリント05 で手順を足す位置
 
-- 手順5〜6（SharePoint から前回 `latest.csv` の取得・新規判定・SharePoint への保存・Teams 投稿）は、**No.92（`latest.csv` の書き出し）の後、No.93（Web ブラウザーを閉じる）の前** に追加する。`Main.txt` では次のコメント行の位置：
+- 手順5〜6（SharePoint から前回 `latest.csv` の取得・新規判定・SharePoint への保存・Teams 投稿）は、**No.82（`latest.csv` の書き出し）の後、No.83（Web ブラウザーを閉じる）の前** に追加する。`Main.txt` では次のコメント行の位置：
   `# ===== スプリント05：手順5〜6 はここ（次の「手順7」のブラウザを閉じるアクションの前）に追加する =====`
 - 追加する手順も、手順ごとに「ブロック エラー発生時」で囲み、エラー時はラベル `ErrorEnd` に移動する（メッセージ表示とブラウザを閉じる処理を共通で使う）。
 - SharePoint の保存先・Teams の投稿先・接続情報は PAD 上で設定し、`flows/` には `<作成時に設定>` のようなプレースホルダーだけを書く。
@@ -421,12 +467,29 @@ DM-2026-0001,2026/08/03,サンプル 一郎,9900000000000000001038,契約容量�
 
 `Main.txt` のアクション行を、この PC にインストールされている **Power Automate for desktop 11.2609.183.0** 自身のファイルと機械的に照合した。
 
-- **構文**：PAD のフロー テキストの構文解析器（`Microsoft.Flow.RPA.Desktop.Robin.Language.dll`）で解析 → **エラー 0**（04b の版で 96 ステートメント。04c の版は 113 ステートメントで、同じくエラー 0・書き戻し一致・名前の不一致 0〔44 か所〕。`#` コメント・`BLOCK` ／ `ON BLOCK ERROR`・`WAIT … FOR`・`LABEL` ／ `GOTO`・`EXIT Code:` がすべて正しい書き方だと確認できた）。
+- **構文**：PAD のフロー テキストの構文解析器（`Microsoft.Flow.RPA.Desktop.Robin.Language.dll`）で解析 → **エラー 0**（04b の版で 96 ステートメント。04c の `1f6091f` の版は 113 ステートメントで、同じくエラー 0・書き戻し一致・名前の不一致 0〔44 か所〕。今の版は 109 ステートメントで、エラー 0・書き戻し一致・名前の不一致 0〔33 か所〕：下の「今の版の照合（2026-10-19）」。`#` コメント・`BLOCK` ／ `ON BLOCK ERROR`・`WAIT … FOR`・`LABEL` ／ `GOTO`・`EXIT Code:`・`ERROR =>` がすべて正しい書き方だと確認できた）。
 - **アクション名・パラメーター名・列挙値**：各アクション モジュール（`Microsoft.Flow.RPA.Desktop.Modules.*.Actions.dll`）の定義と照合 → 41 か所のアクション呼び出しで **不一致 0**。
   - アクション名の決まり方は **`ActionAttribute` の `Name` → `Id` → クラス名** の順（`Name` があればそれが `Main.txt` に書く名前）。根拠：`Database.OpenConnection` クラスは `@ActionAttribute(Name=Connect)` で、その移行用クラスが宣言する完全名が `Database.Connect`（`Excel.AttachToRunningExcel`／`Name=Attach` → `Excel.Attach` も同じ）。
   - セレクター名（`…Action.<セレクター>` の部分）は、セレクター クラスの `ActionName` プロパティの値（クラス名の `…Selector` ではない）。
 - **書き戻し**：解析した結果を PAD 自身の書式で文字列に戻すと、`Main.txt` の本文と一致した（PAD がコピーするのと同じ書き方になっている）。
 - **UI 要素の定義（末尾の JSON）**：実機でコピーした見本（`input/pad-sample-custom.txt`）と項目名の構成が一致。`appmask['画面']['要素']` の参照 22 件すべてが定義済みの要素に対応し、`InstanceId` も重複なし。
+
+**今の版の照合（2026-10-19、04c の review-01 を受けた修正の後）**
+
+| 確認したこと | 結果 |
+|--------------|------|
+| 構文解析器（`LangParser.GetStatements`） | **エラー 0**、109 ステートメント（PAD のステータス バーの表示は 109 アクションの見込み） |
+| 書き戻し（解析結果を PAD の書式で文字列に戻す） | `Main.txt` の本文と一致 |
+| アクション名・パラメーター名・列挙値・セレクター名（各 `*.Actions.dll` の `ActionAttribute` の `Name` → `Id` → クラス名、セレクターの `ActionName`） | 33 か所で **不一致 0** |
+| 各セレクターが書き出す引数（セレクターの `Arguments`）に、`Main.txt` の引数が含まれるか | **含まれない引数 0**（例：`Text.Replace.ReplaceTextWithRegex` の引数は `Text`・`TextToFind`・`IgnoreCase`・`ReplaceWith`・`ActivateEscapeSequences`・`Result` で、`IsRegEx` はセレクターが固定するので書かない。`Text.SplitText.SplitWithDelimiter` は `Text`・`CustomDelimiter`・`IsRegEx`・`Result` で No.48 と同じ） |
+| 新しく使ったもの：JavaScript 関数を実行（No.65） | `WebAutomation.ExecuteJavascript`（`Name`・`Id` なし → クラス名）。入力 `BrowserInstance`・`Javascript`、出力 `Result`（テキスト）。No.35・47 と同じ書き方 |
+| 新しく使ったもの：テキストの分割（No.66） | `Text.SplitText.SplitWithDelimiter`（No.48 と同じ）。PAD の実装（`SplitTextAction.Execute`）を呼び出して、`a,b,,` → 4個（空の値を残す）、前後の空白も削らないことを確認 |
+| 新しく使ったもの：データ テーブルに行を挿入（No.73） | `Variables.AddRowToDataTable.AppendRowToDataTable` の `RowToAdd` の型はリスト（`List`）なので、リストの変数 `DetailValues` をそのまま渡せる（`1f6091f` までは `[Val_…, …]` の書き方） |
+| 新しく使ったもの：最後のエラーを取得（No.86） | アクション モジュールではなく構文の文（`GetLastErrorStatement`）。`ERROR => LastError Reset: True` が解析エラー 0・書き戻し一致になることを確認（`ERROR => LastError` だけや `GET LAST ERROR` は構文エラー）。入力名 `Reset` は PAD のリソース（`GetLastError_Reset_FriendlyName` ＝「エラーを消去する」、要約の `<if(Reset)>`）と一致 |
+| 新しく使ったもの：エラーの変数をテキストにしたときの形 | エラーの型（`ErrorObject`）のテキストは「`{場所}`＋改行＋エラー メッセージ: `{メッセージ}`」、場所は「サブフロー: `{0}`、アクション: `{1}`、アクション名: `{2}`」、エラーが無いときは「エラーはありません」（PAD の日本語リソース `ErrorObject_ToString`・`ErrorObject_Location`・`ErrorObject_Empty_ToString`） |
+| 新しく使ったもの：テキストを置換する（No.88） | `Text.Replace.ReplaceTextWithRegex`（`Name=Replace`、セレクター `ReplaceTextWithRegex`）。`Main.txt` の検索テキストを構文解析器で読んだ値が、7 の「No.88 の正規表現」と同じ（バックスラッシュが1つずつ減る）であること、PAD の実装（`ReplaceTextAction.Execute`）を呼び出してユーザー名を含むパスが伏せられることを確認 |
+| No.65 の JavaScript | Node で `dummy.json` の20件と `candidates.json` の5件（追加される案件）について、`detail.js` と同じく `textContent` に値を入れた要素から実行 → 14個に分けた値が元のデータと **25件とも一致**（空の備考 13件も空の値で14個） |
+| `NEXT ACTION` のような、構文解析器は通すがデザイナーが受け付けない書き方 | 使っていない（`ON ERROR` の中は5か所〔No.32・34・36・89・92〕とも空） |
 
 この照合で見つかって直したもの（スプリント04b の追加修正）：
 
@@ -441,7 +504,7 @@ DM-2026-0001,2026/08/03,サンプル 一郎,9900000000000000001038,契約容量�
 **照合のときに一度まちがえたこと（記録）**
 
 - アクション名を `ActionAttribute` の `Id` だけで照合し、`Id` が無いときクラス名を正解として扱ったため、`Text.SplitText` ／ `Text.ToNumber` ／ `Text.ConvertDateTimeToText` ／ `File.WriteToCSVFile` ／ `Folder.Create` の 5 件を「クラス名（`…Action` 付き）が正しい」と誤判定し、いったん書き換えてしまった。これらのクラスは `Id` ではなく **`Name`** を持っており、**元の名前が正しい**。別セッションの独立検証で指摘を受け、上の決まり（`Name` → `Id` → クラス名）を確認して元に戻した。
-- No.97 のエラー時の設定に `NEXT ACTION` を書き足してしまった。構文解析器は通すが、**デザイナーは受け付けない**（貼り付けると［例外処理モード］が空になり「このステートメントは例外処理内に置けません。」のエラーになる）。実機確認で判明し、元の「`ON ERROR` ／ `END` だけ」に戻した（下の 10-0b）。
+- No.97（今の版の No.91）のエラー時の設定に `NEXT ACTION` を書き足してしまった。構文解析器は通すが、**デザイナーは受け付けない**（貼り付けると［例外処理モード］が空になり「このステートメントは例外処理内に置けません。」のエラーになる）。実機確認で判明し、元の「`ON ERROR` ／ `END` だけ」に戻した（下の 10-0b）。
 - 構文解析（`LangParser`）はアクション名を検証せず、`NEXT ACTION` のようにデザイナーが受け付けない書き方も通す。書き戻しの一致も「書き方」が同じことしか示さないので、**名前や設定の正しさの根拠にはならない**。名前はモジュールの属性（`Name` ／ `Id`）で、設定は実機の貼り付けで確かめる。
 
 ### 10-0b. PAD 実機での貼り付け確認（2026-10-15）
@@ -455,7 +518,7 @@ Power Automate for desktop 11.2609.183.0 に新しいフローを作り、`Main.
 | UI 要素（R-19） | **貼り付けだけで登録された**。`LoginPage`・`ListPage`・`DetailPage` の3画面ができ、`appmask` の参照 22 件すべてがエラーなく解決（1つでも欠ければ該当アクションがエラーになる） |
 | スクリーンショット（R-20） | 1×1 のダミー画像・`ScreenshotPath` 省略のままで取り込めた |
 | セレクターの変数（R-16） | U6 のカスタム セレクターに `%CurrentNo%` が残っていることを確認 |
-| No.97 のエラー時の設定（R-3） | `ON ERROR` ／ `END`（中は空）が、PAD では「エラー処理：**フロー実行を続行する**」＋「例外処理モード：**次のアクションに移動**」として表示される＝ドキュメントの意図どおり |
+| No.97（今の版の No.91）のエラー時の設定（R-3） | `ON ERROR` ／ `END`（中は空）が、PAD では「エラー処理：**フロー実行を続行する**」＋「例外処理モード：**次のアクションに移動**」として表示される＝ドキュメントの意図どおり |
 
 - 変数の値も正しく入っていた（例：`BaseUrl` ＝ `'http://localhost:8080'`、`yyyyMMdd_HHmm` → `RunStamp`）。
 - この貼り付けに使ったフローは保存していない。実行して分かったことは 10-0c。
@@ -471,39 +534,97 @@ PAD 11.2609.183.0・Microsoft Edge・PAD の Edge 拡張機能が有効、モッ
 | 手順2-2（件数の取得、R-8） | 「Web ページ上の要素の詳細を取得します」で属性名を `data-count` にすると、**エラーにならず空の文字が返り**、続く「テキストを数値に変換」で「テキスト '' を有効な数値に変換できません」になって止まった | 方式 B'（人の決定）：属性名を `Own Text` にして表示の文字「全 20 件」を読み（No.50）、正規表現 `[0-9]+` で数字だけを取り出し（No.51）、数値にして（No.52）`%ApplicationNos.Count%` と比べる（No.53） |
 | 属性名の選択肢（R-8） | 属性名の一覧に出るのは **Own Text／Title／Source Link／HRef／Exists／Disabled の6つだけ**。それ以外の名前も自由に入力できるが、`data-*` 属性に対しては空の文字が返る（エラーにはならない）。**Own Text なら「全 20 件」が取れた** | 件数は `Own Text` で読む |
 | 属性名の入力欄に手で入力したとき | 先頭が自動で大文字になる（`data-count` と打つと `Data-count` になる） | `Main.txt` を貼り付ければ影響しない。**手作業で作り直すときは、一覧から選べる `Own Text` を選ぶ**（手で打たない） |
-| 修正後の `Main.txt` の貼り付け・保存・連続3回の実行・初期20件の CSV・21件の CSV・実行時間 | **未確認**（修正後の版を実機で試すのはこれから） | — |
+| 修正後の `Main.txt`（`1f6091f`）の貼り付け・保存・連続3回の実行・初期20件の CSV・21件の CSV・実行時間 | **確認済**（2026-10-19。10-0d）。貼り付け・保存・連続3回・20件・21件の CSV はすべて期待どおり。ただし **実行時間が約10分**（目安3分）、**5回中1回、手順1〜2 のどこかで止まった**（文言は記録できず、原因は不明） | 速度とエラーの詳細の表示を直した（今の版。10-0e。実機は未確認） |
 
 **`docs/flow.md` 手順2-2 との違い**
 - `docs/flow.md` 手順2-2 は「`data-count` と取得件数の一致を確認」と書いているが、PAD の「Web ページ上の要素の詳細を取得します」では `data-count` が読めない（空の文字が返る）。同じ要素 `#application-count` に表示されている「全 N 件」の文字は、モックが `data-count` と同じ件数から作っている（`mock/js/list.js`）ので、**表示の文字から数字を取り出しても同じ件数を照合できる**。そのため表示の文字を読む方式にした（`docs/flow.md` は Planner が B' に合わせて直す予定）。
 - JavaScript（No.47 と同じ「JavaScript 関数を実行」）で `data-count` を読む方法もあるが、人の決定で B'（表示の文字を読む）にした。
 
 **固定秒数の待機について**
-- フロー全体で固定秒数の待機は No.30 の `WAIT 2` の1か所だけ。ログインの入力を2回目以降にやり直す前の間隔で、1回目の入力の前は要素の待機（No.23・25）だけにしている（`docs/criteria.md` 4-4）。
+- フロー全体で固定秒数の待機は No.30 の `WAIT 2` の1か所だけ。ログインの入力を2回目以降にやり直す前の間隔で、1回目の入力の前は要素の待機（No.23・25）だけにしている（`docs/criteria.md` 4-4）。今の版（10-0e）でも変わらない。
+
+### 10-0d. 修正後の版（`1f6091f`）の PAD 実機での確認結果（2026-10-19）
+
+Claude デスクトップ版のセッションで、PAD を操作して確かめてもらった結果（スプリント04c の review-01 の実機の報告）。**ここに書いた結果は `1f6091f` の版のもので、今の版（10-0e）ではまだ確かめていない。**
+
+| 項目 | 内容 |
+|------|------|
+| 日付 | 2026-10-19（10:07〜11:16） |
+| PAD | Power Automate for desktop **11.2609.183.0**（コンソールの表示 2.73.155.26278）、Microsoft Edge、PAD の Edge 拡張機能は有効、実行遅延は既定の 50 ミリ秒 |
+| 試した `Main.txt` | コミット **`1f6091f`**（全文 73,173 文字） |
+| モック | `node mock/server.js`（ポート 8080）。データの準備（20件に戻す・1件追加）は、一覧のデモ操作のボタンと同じ処理を呼ぶサーバーの API（`/api/demo/reset`・`/api/demo/add`）で行い、各実行の前に件数を確かめた（フローから見たデータはボタンで操作したときと同じ） |
+
+| 確認したこと | 結果 |
+|--------------|------|
+| 貼り付け・保存 | 新しいフローに全文を貼り付け → ステータス バー **113 アクション／1 サブフロー**、エラー ペイン **0 件**、［UI 要素］は `LoginPage`・`ListPage`・`DetailPage` の **3画面**・`appmask` の参照 22 件がすべて解決、**保存成功** |
+| 連続3回の実行（初期20件。1回目は Edge のウィンドウが 0 の状態から開始し、毎回フローが Edge を新しく起動。3回の間に設定は変えていない） | 1回目 開始 10:14:23 → CSV 出力 10:24:22、2回目 開始 10:25:45 → 10:35:44、3回目 開始 10:37:06 → 10:46:58。**3回ともエラーなしで最後まで終わった**（CSV を書いた数秒後にブラウザーを閉じて終了）。ログインの入力のやり直し（No.27〜39）が実際に何回動いたかは、報告に無いので分からない |
+| 初期20件の結果 | 手順2-2 で件数が一致（「全 20 件」→ `20`、取得した申込番号も20件。E5・E6 なし）。手順3 で DM-2026-0020 → DM-2026-0001 の **20件すべての詳細画面に移り**、申込番号の一致確認（E10）も通った（U6 のセレクターの `%CurrentNo%` が実行時に置き換わった：R-16） |
+| 初期20件の CSV | `<ドキュメント>\申込状況チェック_デモ\申込状況_20261019_1014.csv`・`_1025.csv`・`_1037.csv`（各回の開始時刻）と `latest.csv`。いずれも **4,135 バイト**、先頭 `EF BB BF`（BOM）、改行 CRLF、見出し1行＋**データ20行**、14列は契約の順、申込番号は 0020→0001 で重複・欠けなし、`dummy.json` との **不一致 0**（「未定」「未採番」は表示どおり、空の備考 10件は空）、**値はダブルクォートで囲まれない** |
+| 21件（1件追加。先頭 DM-2026-0021） | 開始 10:51:03 → CSV 出力 11:01:40 で正常終了。「全 21 件」→ `21`。`latest.csv` と `申込状況_20261019_1051.csv` は **4,344 バイト**、見出し＋**21行**、先頭行 DM-2026-0021、不一致 0。確認後に20件へ戻した |
+| Excel | 20件版（`申込状況_20261019_1037.csv`）・21件版（`latest.csv`）とも、開くだけで **14列（A〜N）に分かれ、見出しもデータの日本語も文字化けなし**。供給地点特定番号は `9.9E+21` の指数表示（5 の注意どおり）、日付の列は列幅が狭く `######` と表示される（文字化けではない） |
+| **実行時間** | 20件で **約9分59秒／約9分59秒／約9分52秒**、21件で **約10分37秒**。手順0〜2 が約40秒、その後は **1件あたり約26〜30秒**。`docs/criteria.md` R7 の目安（3分以内）を **超えている**（→ 10-0e で直した） |
+| **安定性（未解決）** | この日の実行は **5回中4回成功、1回失敗**。失敗したのは21件での最初の試行（10:48:29 開始、**約100秒で終了**）。終了時の変数は `ApplicationNos` が空・`DataCount` が 0・`CurrentTable` が0行・`ButtonPressed` が OK で、**手順1〜2 のどこかで `ErrorEnd` に入った** とみられる。**メッセージの文言は記録できず、どのアクションで止まったか・原因は分かっていない**。直後の再実行（10:51:03）は成功。（約100秒という時間は、手順1 の 30 秒の要素の待機が1〜2回タイムアウトした場合や、ログインの入力のやり直しが3回とも失敗した場合と同じくらいだが、推測）→ 10-0e で、次に止まったときに原因が分かるよう、メッセージに PAD のエラー情報を足した |
+
+### 10-0e. 速度の修正とエラーの詳細の表示（今の版。スプリント04c の review-01 を受けて、2026-10-19）
+
+**今の版は、机上の照合（10-0 の「今の版の照合」）だけで、PAD の実機ではまだ確かめていない。** 10-0d の結果は `1f6091f` の版のもので、今の版の結果ではない。
+
+| 直した内容 | `1f6091f` の版 | 今の版 |
+|------------|----------------|--------|
+| 詳細画面の14項目の取得（手順3-3〜3-4） | 「Web ページ上の要素の詳細を取得します」（`Own Text`）を14回（U8〜U21） | 「Web ページで JavaScript 関数を実行します」1回（No.65）で14個の `#field-<キー>` の表示テキストをカンマでつないで取り、「テキストの分割」（No.66）で14個のリストにして、そのまま1行追加（No.73） |
+| 申込番号の一致確認（E10） | U8 の `Own Text` と `%CurrentNo%` を比べる | No.65 で読んだ `#field-applicationNo` の値（`%DetailValues[0]%`）と `%CurrentNo%` を比べる（No.70〜72） |
+| 14項目がそろったかの確認 | なし（1つずつ取るので不要） | 14個でなければ E11 で止まる（No.67〜69） |
+| エラー時のメッセージ | `StepMessage` だけ | `StepMessage` の後ろに「（PAD のエラー情報：…）」（最後のエラーを取得：どのアクションで・どんなエラーか。ユーザー名を含むパスは伏せる）。No.86〜89 |
+| アクション表の行数／PAD のアクション数 | 98 行／113（実機） | 92 行／109（構文解析器で数えた値。実機は未確認） |
+| 変数 | `Val_applicationNo` 〜 `Val_remarks`（14個） | `DetailText`・`DetailValues`・`LastError`・`ErrorDetail` |
+
+**変えていないこと**
+- 「詳細」ボタン（U6）のクリックで詳細画面に移る（URL を直接開かない）。`data-loaded` の待機（No.63・76、手順1 の No.42）は3か所とも `FOR 30`。
+- `#field-applicationNo` と対象の申込番号の一致確認（E10）。
+- 値は画面に表示されたテキストのまま（「未定」「未採番」、空の備考は空文字）。14項目の順（`docs/screens.md` 1-2）、CSV の設定（UTF-8・列名を含める・上書き・コンマ）。
+- 一覧へは「一覧へ戻る」（U22）のクリックで戻り、`#application-table[data-loaded="true"]`（U4）を待つ。
+- 固定秒数の待機は No.30 の `WAIT 2` の1か所だけ（要素の待機を固定秒数の待機に置き換えていない）。
+- 末尾の UI 要素の定義（3画面・22要素、22個の `CustomSelector`）は `ba8d543` と1文字も変えていない。
+
+**`docs/flow.md` 手順3 との関係**
+- 手順3-4「14項目を `#field-<キー>` から取得し、`CurrentTable` に1行追加する。値は画面に表示されたテキストのまま」は、取得する要素（`#field-<キー>` の14個）も値（表示テキスト）も同じで、取得に使う PAD のアクションが「要素の詳細を取得」14回から「JavaScript 関数を実行」1回に変わっただけ。手順3-1（「詳細」ボタンで遷移）・3-2（`data-loaded` を待つ）・3-3（申込番号の一致確認）・3-5（`#back-to-list-button` をクリックし、一覧の `data-loaded` を待つ）も変えていない。
+
+**速度の見込み（根拠つき。実機は未確認）**
+- `1f6091f` の版の1件あたりのブラウザー操作は18個（「詳細」のクリック・詳細の待機・要素の詳細の取得14回・「一覧へ戻る」のクリック・一覧の待機）で、1件あたり約26〜30秒 → **1個あたり約1.4〜1.7秒**。
+- 今の版は1件あたり **5個**（クリック・待機・JavaScript 1回・クリック・待機）。JavaScript の実行も1回あたり同じくらいかかるとすると、1件あたり **約7〜9秒**（ブラウザーを使わないアクション〔変数の設定・分割・If・行の追加〕は、実行遅延 50 ミリ秒を含めても1件あたり1秒未満）。
+- 20件で約2分20秒〜3分、手順0〜2 の約40秒を足して **約3〜3分40秒**（`1f6091f` の約10分の3分の1ほど）の見込み。目安の3分にぎりぎり届くかどうかで、実機で測って確かめる（10-1 R-18）。
+- これ以上縮めるには、要素の待機（No.63・76）や「詳細」ボタンのクリックを省く必要があり、`docs/flow.md` 手順3 の「詳細」ボタンで遷移すること・`data-loaded` を待つことに反するので、今回は行っていない。3分を超える場合のデモの見せ方（件数・説明をはさむ等）は人が決める（`docs/criteria.md` R7 は目安）。
+
+**使わなくなった UI 要素（U8〜U21）の扱い**
+- 定義は残した（理由は 2-2 の UI 要素表の下の注）。参照されない UI 要素があってもエラーにならない見込み（PAD に「使用していない UI 要素を削除する」メニューがある）だが、今の版の貼り付けでエラー ペインが 0 件か、実機で確かめる（10-1 R-23）。
+- スプリント04c 契約 4c-9 (a) の「`appmask['X']['Y']` の参照と定義が完全に一致」との関係：今の版では参照が 8要素（U1〜U7・U22、延べ11か所）、定義が 22要素で、**参照はすべて定義済み（定義の無い参照 0）だが、参照されない定義が 14要素（U8〜U21）ある**。「22個の `CustomSelector` が `ba8d543` と同じ」を守るために定義を消さなかった（消すと末尾の JSON が変わる）。完全一致を必須とする場合は、貼り付け後に PAD の「使用していない UI 要素を削除する」で消せば一致する（フローの動きは変わらない）。
 
 ### 10-1. レビュー②で要確認
 
-名前・書き方の照合（10-0）と貼り付け（10-0b）は済んでいる。04c の実行で分かったこと（10-0c）も反映した。残るのは**修正後の版を実行してみないと分からないこと**。下の表の「状態」が「実機」の行を確認し、違っていたら PAD 上で「7. アクション表」の設定値どおりに直す。
+名前・書き方の照合（10-0）と貼り付け（10-0b）は済んでいる。04c の実行で分かったこと（10-0c）と、`1f6091f` の版の実機の結果（10-0d）も反映した。**今の版（10-0e：速度の修正とエラーの詳細の表示）は実機ではまだ確かめていない**ので、下の表の「状態」に「今の版は実機未確認」と書いた行を、今の版で実行して確かめる。違っていたら PAD 上で「7. アクション表」の設定値どおりに直す。
 
 | # | 対象（アクション表 No.） | 状態 | 確認すること |
 |---|--------------------------|------|-------------|
-| R-1 | ブロック（No.1〜3 ほか各ブロック） | 構文は照合済 | `BLOCK <名前>` ／ `ON BLOCK ERROR` ／ `GOTO ErrorEnd` ／ `END` の書き方（ブロック名に引用符は不要、`ON BLOCK ERROR` の後のキーワードも不要と確認済み）。貼り付けで崩れた場合は、ブロックを手作業で作り、例外処理モードを「フロー実行を続行する → ラベルに移動：ErrorEnd」にする |
-| R-2 | 移動先（No.39・55・68）・ブロックのエラー時処理 | **実機で確認済** | ブロックの中でエラーになると、外のラベル `ErrorEnd` に移動し、メッセージを表示し、ブラウザーを閉じて終わることを確認した（モックのサーバーを止めて実行。10-0c）。If の中の「移動先」（No.39・55・68）は、その条件になる場面を試していないので通っていない（同じ `GOTO ErrorEnd` の書き方） |
-| R-3 | アクションのエラー時の設定（No.97〜98） | **実機で確認済** | `ON ERROR` ／ `END`（中は空）が「フロー実行を続行する」＋「例外処理モード：次のアクションに移動」として表示されることを確認（10-0b）。中にキーワードを書くとエラーになる |
-| R-4 | 待機（No.23・25・42・63・86。固定秒数の待機は No.30 だけ） | 照合済 | `WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement …) FOR 30` の書き方と、タイムアウト 30 秒が設定されること |
-| R-5 | Edge 起動（No.22） | 照合済 | `WebAutomation.LaunchEdge.LaunchEdge` のパラメーター名（`WindowState`・`ClearCache`・`Timeout` 等）。新しい版で追加されたパラメーターがあれば既定値でよい |
-| R-6 | テキスト フィールドに入力（No.31・33）とやり直し（No.25〜39） | 照合済。やり直しは未確認 | アクション名 `PopulateTextField.PopulateTextField` と `EmulateTyping` 等のパラメーター名。04b の版では Edge 起動直後の1回目の実行で手順1-3〜1-4 が失敗した（10-0c）。04c で入れたやり直し（最大3回）で、Edge を新しく起動する実行でも止まらないかは**未確認**（連続3回の実行で確かめる） |
-| R-7 | クリック（No.40・61・85） | 照合済 | `WebAutomation.Click.Click` のパラメーター |
-| R-8 | 要素の詳細を取得（No.50・65・70〜82） | **一部実機で確認済** | 属性名の一覧は Own Text／Title／Source Link／HRef／Exists／Disabled の6つ。それ以外も自由に入力できるが、`data-count` を入力すると**空の文字が返る**（エラーにはならない）。`Own Text` で一覧の件数表示「全 20 件」が取れた（10-0c）。手で入力すると先頭が大文字になる（`Data-count`）。詳細画面の14項目（No.65・70〜82）を `Own Text` で取れるか（空の備考が空文字になるか）は**未確認** |
-| R-9 | JavaScript 関数を実行（No.35・47） | 名前は照合済 | `WebAutomation.ExecuteJavascript` のパラメーター名、関数名 `ExecuteScript` の戻り値が `Result` に入ること |
-| R-10 | テキストの分割（No.48）・テキストの解析（No.51）・テキストを数値に変換（No.52）・If（No.53） | 名前は照合済。実行は未確認 | `Text.ParseText.RegexParseForFirstOccurrence`（正規表現 `[0-9]+`）で「全 20 件」から `20` だけが取れること（同じ正規表現を Node と .NET で「全 9 件」「全 20 件」「全 100 件」に当て、`9`・`20`・`100` になることは机上で確認）、`Text.ToNumber` で数値になること、リストの件数 `%ApplicationNos.Count%` との比較。04b の版（属性 `data-count`）では空の文字が返って No.52 で止まった（10-0c）。修正後の版での実行は**未確認** |
-| R-11 | データ テーブル（No.16・17・83） | 名前は照合済 | `Variables.CreateNewDatatable` の表の書き方（見出しを `$'''…'''` で書いてよいか）、空行の削除 `Variables.DeleteRowFromDataTable`、行の追加 `Variables.AddRowToDataTable.AppendRowToDataTable`。見出しだけ（0行）のデータ テーブルを直接作れる版なら No.17 は不要だが、その場合も No.17 を残すと行が無くエラーになるので、作成時の行の有無に合わせる |
-| R-12 | CSV に書き込む（No.91・92） | 名前は照合済 | 列挙値の名前（`File.CSVEncoding.UTF8`・`File.CSVColumnsSeparator.Comma`・`File.IfFileExists.Overwrite`）、「UTF-8」で BOM が付くこと（5 の 6. で確認）、値がダブルクォートで囲まれるかどうか |
-| R-13 | フォルダー（No.12・14・15） | 照合済 | `Folder.SpecialFolder.Personal` がドキュメントになること、`IF (Folder.IfFolderExists.DoesNotExist Path: …) THEN` の書き方 |
-| R-14 | 日時（No.9・10） | 名前は照合済 | `DateTime.GetCurrentDateTime.Local` と `Text.ConvertDateTimeToText.FromCustomDateTime` の書き方。`yyyyMMdd_HHmm` で `20261014_1030` の形になること |
-| R-15 | メッセージ・停止（No.94・96） | 照合済 | `Display.ShowMessageDialog.ShowMessage` のパラメーター、`EXIT Code: 0` |
-| R-16 | UI 要素（U1〜U22） | 一部確認済 | `#id` の書き方で登録できること・U6 に `%CurrentNo%` が残ることは確認済（10-0b）。**実行時に値へ置き換わるか**は未確認（04c の実行は手順2-2 で止まり、手順3 まで進んでいない） |
-| R-17 | アクション名 | 実機 | 表の日本語のアクション名が、使っている PAD の版の表示と合っているか |
-| R-18 | 実行結果 | 未確認 | 出力 CSV の件数（一覧と同数）・14列・BOM・Excel での文字化け・値がダブルクォートで囲まれるか、実行時間（`docs/criteria.md` R1・R5〜R7）。04c の実行は手順2-2 で止まり、CSV はまだ出力されていない |
-| R-19 | UI 要素の定義（`Main.txt` 末尾） | **実機で確認済** | 貼り付けだけで3画面・22要素が登録された（10-0b）。予備手順 3-1 は不要 |
+| R-1 | ブロック（No.1〜3 ほか各ブロック） | **実機で確認済**（`1f6091f`） | `BLOCK <名前>` ／ `ON BLOCK ERROR` ／ `GOTO ErrorEnd` ／ `END` の書き方（ブロック名に引用符は不要、`ON BLOCK ERROR` の後のキーワードも不要）。`1f6091f` の版で貼り付け・実行できた（10-0d）。貼り付けで崩れた場合は、ブロックを手作業で作り、例外処理モードを「フロー実行を続行する → ラベルに移動：ErrorEnd」にする |
+| R-2 | 移動先（No.39・55・69・72）・ブロックのエラー時処理 | **実機で確認済** | ブロックの中でエラーになると、外のラベル `ErrorEnd` に移動し、メッセージを表示し、ブラウザーを閉じて終わることを確認した（モックのサーバーを止めて実行。10-0c）。If の中の「移動先」（No.39・55・69・72）は、その条件になる場面を試していないので通っていない（同じ `GOTO ErrorEnd` の書き方） |
+| R-3 | アクションのエラー時の設定（No.32・34・36・89・91〜92） | **実機で確認済**（No.88〜89 は今の版で追加、実機未確認） | `ON ERROR` ／ `END`（中は空）が「フロー実行を続行する」＋「例外処理モード：次のアクションに移動」として表示されることを確認（10-0b）。中にキーワードを書くとエラーになる。今の版で足した No.88〜89（テキストを置換する）も同じ書き方 |
+| R-4 | 待機（No.23・25・42・63・76。固定秒数の待機は No.30 だけ） | **実機で確認済**（`1f6091f`） | `WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement …) FOR 30` の書き方。`1f6091f` の版で20件・21件の実行が最後まで通った（10-0d）。今の版でも変えていない |
+| R-5 | Edge 起動（No.22） | **実機で確認済**（`1f6091f`） | `WebAutomation.LaunchEdge.LaunchEdge` のパラメーター名（`WindowState`・`ClearCache`・`Timeout` 等）。Edge のウィンドウが無い状態からの起動を含め、5回とも起動した（10-0d） |
+| R-6 | テキスト フィールドに入力（No.31・33）とやり直し（No.25〜39） | **連続3回の実行は成功**（`1f6091f`）。やり直しが動いた回数は不明 | 04b の版では Edge 起動直後の1回目の実行で手順1-3〜1-4 が失敗した（10-0c）。04c で入れたやり直し（最大3回）を入れた `1f6091f` の版で、Edge を新しく起動する連続3回の実行は3回とも成功した（10-0d）。やり直しが実際に何回動いたかは報告に無いので分からない。同じ日の別の実行（21件の最初の試行）は手順1〜2 のどこかで止まり、原因は不明（10-0d）。今の版では止まったときにメッセージに PAD のエラー情報が出るので、出たら文言を記録する（R-22） |
+| R-7 | クリック（No.40・61・75） | **実機で確認済**（`1f6091f`） | `WebAutomation.Click.Click` のパラメーター。ログインボタン・「詳細」ボタン（20件・21件すべて）・「一覧へ戻る」が押せた（10-0d） |
+| R-8 | 要素の詳細を取得（No.50） | **実機で確認済** | 属性名の一覧は Own Text／Title／Source Link／HRef／Exists／Disabled の6つ。それ以外も自由に入力できるが、`data-count` を入力すると**空の文字が返る**（エラーにはならない）。`Own Text` で一覧の件数表示「全 20 件」「全 21 件」が取れた（10-0c・10-0d）。手で入力すると先頭が大文字になる（`Data-count`）。`1f6091f` の版では詳細画面の14項目（当時の No.65・70〜82）も `Own Text` で取れ、CSV の値が `dummy.json` と不一致 0、空の備考 10件は空文字になった（10-0d）。**今の版では14項目は「要素の詳細を取得」ではなく No.65 の JavaScript で取る**（R-9） |
+| R-9 | JavaScript 関数を実行（No.35・47・65） | No.35・47 は **実機で確認済**（`1f6091f`）。**No.65 は今の版で追加、実機未確認** | `WebAutomation.ExecuteJavascript` のパラメーター名、関数名 `ExecuteScript` の戻り値が `Result` に入ること。No.47 で20件・21件の申込番号が取れ、No.35 を通ってログインできた（10-0d）。**No.65 が14項目をカンマでつないだ文字を返し、No.66〜73 で CSV の値が `1f6091f` の版と同じ（`dummy.json` と不一致 0・空の備考は空）になること**を今の版で確かめる |
+| R-10 | テキストの分割（No.48・66）・テキストの解析（No.51）・テキストを数値に変換（No.52）・If（No.53・67・70） | No.48・51〜53 は **実機で確認済**（`1f6091f`）。No.66・67・70 は今の版で追加、実機未確認 | 「全 20 件」から `20`、「全 21 件」から `21` を取り出して数値にし、`%ApplicationNos.Count%`（20・21）と一致した（E6 は出なかった。10-0d）。正規表現 `[0-9]+` は「全 9 件」「全 100 件」でも数字だけになる（机上で確認）。No.66 は No.48 と同じ設定で、空の値を残すことは PAD の実装で確認済み（10-0）。`%DetailValues.Count%` と `%DetailValues[0]%`（リストの件数と1つ目）の書き方は構文解析器で確認済み |
+| R-11 | データ テーブル（No.16・17・73） | **実機で確認済**（`1f6091f`）。No.73 の書き方は今の版で変更、実機未確認 | `Variables.CreateNewDatatable` の表の書き方、空行の削除 `Variables.DeleteRowFromDataTable`、行の追加 `Variables.AddRowToDataTable.AppendRowToDataTable` で、見出し14列・20行（21行）の CSV になった（10-0d）。**今の版では No.73 の新しい値にリストの変数 `%DetailValues%` をそのまま渡す**（`RowToAdd` の型はリストなので渡せる見込み）。列がずれずに14列になるか確かめる |
+| R-12 | CSV に書き込む（No.81・82） | **実機で確認済**（`1f6091f`） | 列挙値の名前（`File.CSVEncoding.UTF8`・`File.CSVColumnsSeparator.Comma`・`File.IfFileExists.Overwrite`）、「UTF-8」で BOM（`EF BB BF`）が付くこと、改行は CRLF、**値はダブルクォートで囲まれない**（10-0d） |
+| R-13 | フォルダー（No.12・14・15） | **実機で確認済**（`1f6091f`） | `Folder.SpecialFolder.Personal` がドキュメントになり、`<ドキュメント>\申込状況チェック_デモ` に CSV が出た（10-0d） |
+| R-14 | 日時（No.9・10） | **実機で確認済**（`1f6091f`） | `yyyyMMdd_HHmm` で `20261019_1014` のような履歴ファイル名になった（各回の開始時刻と一致。10-0d） |
+| R-15 | メッセージ・停止（No.84・90） | **実機で確認済**（No.90 のメッセージの文言は今の版で変更、実機未確認） | `Display.ShowMessageDialog.ShowMessage` のパラメーター、`EXIT Code: 0`。今の版の No.90 は、表示するメッセージが `%StepMessage%（PAD のエラー情報：%ErrorDetail%）` になる（R-22） |
+| R-16 | UI 要素（U1〜U22） | **実機で確認済**（`1f6091f`） | `#id` の書き方で登録できること・U6 に `%CurrentNo%` が残ること（10-0b）、**実行時に `%CurrentNo%` が申込番号に置き換わり、20件（21件）すべての「詳細」ボタンが押せて詳細画面に移り、申込番号の一致確認（E10）も通った**（10-0d） |
+| R-17 | アクション名 | 実機 | 表の日本語のアクション名が、使っている PAD の版の表示と合っているか（今の版で足した「最後のエラーを取得」「テキストを置換する」を含む） |
+| R-18 | 実行結果 | 件数・14列・BOM・Excel は **実機で確認済**（`1f6091f`）。**実行時間は目安を超えていた**。今の版は実機未確認 | `1f6091f` の版：出力 CSV は初期20件で見出し＋20行（4,135 バイト）、21件で見出し＋21行（4,344 バイト）、14列、BOM（`EF BB BF`）、CRLF、ダブルクォートなし、`dummy.json` と不一致 0、Excel で文字化けなし（供給地点特定番号の指数表示・日付の列の `######` は文字化けではない）。**実行時間は約10分**（20件で 9分52秒〜9分59秒、21件で 10分37秒、1件あたり約26〜30秒）で、`docs/criteria.md` R7 の目安（3分）を超えていた（10-0d）。今の版は速度の修正（10-0e）を入れたので、**初期20件での実行時間（見込み約3〜3分40秒）と、CSV の中身が `1f6091f` の版と同じになること**を確かめる |
+| R-19 | UI 要素の定義（`Main.txt` 末尾） | **実機で確認済** | 貼り付けだけで3画面・22要素が登録された（10-0b・10-0d）。予備手順 3-1 は不要。末尾の定義は今の版でも変えていない |
 | R-20 | UI 要素のスクリーンショット | **実機で確認済** | 1×1 のダミー画像・`ScreenshotPath` 省略のまま取り込めた（10-0b）。取り込み直すときのメニュー名（2-2 の［UI 要素の置換］）だけは未確認 |
 | R-21 | UI 要素の種類の表示名 | 照合済 | 要素の種類（定義の `ElementTypeName`）は PAD の名前に合わせた（`Web Page`・`Input text`・`Input password`・`Button`・`Table`・`Span`・`Description list`・`Description details`）。表示が違ってもセレクターで要素を探すので実行には影響しない想定。エラーになる場合は該当要素を取り込み直す |
+| R-22 | エラー時の PAD のエラー情報（No.86〜90） | **今の版で追加、実機未確認** | 貼り付けで「最後のエラーを取得」（`ERROR => LastError Reset: True`）と「テキストを置換する」がエラーにならないこと。止まったときのメッセージに「（PAD のエラー情報：サブフロー: Main、アクション: …、アクション名: …（改行）エラー メッセージ: …）」が出ること（例：モックのサーバーを止めて実行すると、手順1-1〜1-2 の文言の後ろに Edge 起動または待機のエラーが出るはず）。ユーザー名を含むパスが出ないこと。**5回中1回止まった件（10-0d）がまた起きたら、メッセージの文言をそのまま記録する** |
+| R-23 | 参照されない UI 要素（U8〜U21） | **今の版で発生、実機未確認** | 今の版を貼り付けたとき、参照されない UI 要素（U8〜U21）があってもエラー ペインが 0 件で、保存・実行できること（2-2 の UI 要素表の下の注・10-0e） |
