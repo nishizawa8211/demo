@@ -1,0 +1,411 @@
+# review-02 机上確認（Evaluator の scratchpad の Node スクリプト static3.js の出力）
+# 対象: sprint/04d-login-stability @ 495b937  比較の基準: cb098e1  実行: 2026/10/19 22:13:52
+
+== 形式 ==
+UTF-8 往復一致: true  U+FFFD: false  BOM: false  CR: 0  文字数: 36775
+マーカー行の出現: 1 回 / 行番号: 163
+アクション行の数: 107
+
+== 4c-9 (a) JSON・Repository・UI 要素 ==
+JSON.parse（マーカーの次の行〜末尾）: OK  Repository JSON.parse: OK  ImageRepository JSON.parse: OK
+ControlRepositorySymbols: 1  Name: appmask  ConnectionString: ""
+画面数: 3 (LoginPage:3 ListPage:3 DetailPage:2)  要素数: 8
+appmask 参照: 延べ 13 件 / 異なり 8 件  定義: 8 件
+参照にあって定義に無い: []  定義にあって参照に無い: []
+   LoginPage / login-id / #login-id
+   LoginPage / login-password / #login-password
+   LoginPage / login-button / #login-button
+   ListPage / application-table-loaded / #application-table[data-loaded="true"]
+   ListPage / application-count / #application-count
+   ListPage / detail-button / button[data-action="detail"][data-application-no="%CurrentNo%"]
+   DetailPage / application-detail-loaded / #application-detail[data-loaded="true"]
+   DetailPage / back-to-list-button / #back-to-list-button
+CustomSelector が cb098e1 と異なる要素: 0  要素数 cb098e1: 8  セレクター1個・IsCustom でない／禁止パターン: []
+cb098e1 にあって HEAD で削除された要素: 0 []
+削除された要素が HEAD のアクション行から参照されていない: true  削除された要素のうち cb098e1 では参照されていたもの: 0/0
+HEAD で新しく増えた要素: []
+cb098e1 の Repository から削除要素を除いたものと HEAD の Repository が（JSON として）完全一致: true
+InstanceId（画面＋要素）: 11 個 / 重複 0
+README 2-2 の UI 要素表: 8 行 U1:LoginPage/login-id `#login-id` ; U2:LoginPage/login-password `#login-password` ; U3:LoginPage/login-button `#login-button` ; U4:ListPage/application-table-loaded `#application-table[data-loaded="true"]` ; U5:ListPage/application-count `#application-count` ; U6:ListPage/detail-button `button[data-action="detail"][data-application-no="%CurrentNo%"]` ; U7:DetailPage/application-detail-loaded `#application-detail[data-loaded="true"]` ; U22:DetailPage/back-to-list-button `#back-to-list-button`
+README の UI 要素表と HEAD の定義が一致（画面・要素名・セレクター）: true
+マーカー行以降の文字列が cb098e1 と完全一致（要素を削除したので false が正常）: true
+
+== 4c-1 手順2-2 の B' ==
+Main.txt で "data-count" を含む行: [96]
+  L97: ListPage/application-count AttributeName=Own Text
+  [Step2 L88] BLOCK Step2_GetList
+  [Step2 L89] ON BLOCK ERROR
+  [Step2 L90] GOTO ErrorEnd
+  [Step2 L91] END
+  [Step2 L92] SET StepMessage TO $'''手順2-1：一覧から申込番号を取得できませんでした'''
+  [Step2 L93] WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var rows = document.querySelectorAll(\"#application-tbody tr[data-application-no]\"); var nos = []; 
+  [Step2 L94] Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelimiter: $''',''' IsRegEx: False Result=> ApplicationNos
+  [Step2 L95] SET StepMessage TO $'''手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした'''
+  [Step2 L96] # 件数表示の文字（例「全 20 件」）を Own Text で読み、数字の部分だけ取り出して数値にする（data-count 属性は PAD では空の文字が返るため）
+  [Step2 L97] WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''Own Text''' AttributeValue=> DataCountText
+  [Step2 L98] Text.ParseText.RegexParseForFirstOccurrence Text: DataCountText TextToFind: $'''[0-9]+''' StartingPosition: 0 IgnoreCase: False OccurrencePosition=> DataCountPosition Match=> DataCountDigits
+  [Step2 L99] Text.ToNumber Text: DataCountDigits Number=> DataCount
+  [Step2 L100] IF ApplicationNos.Count <> DataCount THEN
+  [Step2 L101] SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取得 %ApplicationNos.Count% 件）。取得した申込番号：%ApplicationNosText%'''
+  [Step2 L102] GOTO ErrorEnd
+  [Step2 L103] END
+  [Step2 L104] END
+  [Step2 L105] # 手順3. 各案件の詳細を取得（手順2 で取得した申込番号リストの全件を繰り返す）
+正規表現: [0-9]+
+  "全 9 件" → "9"
+  "全 20 件" → "20"
+  "全 21 件" → "21"
+  "全 100 件" → "100"
+  "全 1000 件" → "1000"
+Regex 結果 DataCountDigits を ToNumber に渡す: true  順序 GetDetails<Regex<ToNumber<IF: true
+IF ApplicationNos.Count <> DataCount の中: ["SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取","GOTO ErrorEnd","END"]
+件数の直書き（手順2 の中の 20/21 の数字）: []
+  変数 DataCountText の生成行: L97（Step2 内: true）
+  変数 DataCountDigits の生成行: L98（Step2 内: true）
+  変数 DataCountPosition の生成行: L98（Step2 内: true）
+  変数 DataCount の生成行: L99（Step2 内: true）
+  変数 DetailText の生成行: L120（Step2 内: false）
+  変数 DetailValues の生成行: L121（Step2 内: false）
+  変数 LastError の生成行: L156（Step2 内: false）
+  変数 ErrorDetail の生成行: L157（Step2 内: false）
+cb098e1 に無いアクション行（追加・変更）:
+  No.27 L41 SET ListCheck TO $'''NG'''
+  No.29 L43 IF ListCheck <> $'''OK''' THEN
+  No.32 L48 UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  No.41 L61 IF LoginCheck = $'''OK''' THEN
+  No.46 L70 IF (WebAutomation.IfWebPageContains.WebPageContainsElement BrowserInstance: Browser Control: appmask['ListPage']['applic
+  No.47 L71 SET ListCheck TO $'''OK'''
+  No.48 L75 IF ListCheck <> $'''OK''' THEN
+  No.50 L77 SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても一覧画面に進めず、最後の回は入力欄に値が入りませんでした）'''
+  No.52 L80 SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧画面が表示されませんでした（3 回試しました。クリックに失敗したか、30 秒待っても一覧の読み込みが完了しません）。ID・パスワードと一覧画
+  No.74 L112 UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  No.90 L133 UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+cb098e1 のアクション行数: 90 → HEAD: 107
+cb098e1 にあって HEAD に無いアクション行:
+  SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても入力欄に値が入りません）'''
+
+== 4d-1・4d-2 手順1（Step1_Login）==
+  [Step1 L28] BLOCK Step1_Login
+  [Step1 L29] ON BLOCK ERROR
+  [Step1 L30]     GOTO ErrorEnd
+  [Step1 L31] END
+  [Step1 L32]     SET StepMessage TO $'''手順1-1〜1-2：モック画面に接続できません。server.js が起動しているか確認してください'''
+  [Step1 L33]     WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Time
+  [Step1 L34]     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-id']) FOR 30
+  [Step1 L35]     SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
+  [Step1 L36]     # Edge 起動直後のログインの失敗の対策（04c・04d）：ボタンまで表示されるのを待ってから、次を最大3回くり返す（一覧画面が表示されたら抜ける）
+  [Step1 L37]     # Edge のウィンドウを前面に出す → ID・パスワードの入力 → 入力欄の値を確認 → 確認できたらログインボタンをクリック → 一覧画面の読み込み完了を待つ（30 秒）→ 一覧画面が表示されたかを確認
+  [Step1 L38]     # 前面に出す・入力・確認・クリック・一覧の待機の1回ごとのエラーは、その場では止めずに次の回でやり直す。3回とも一覧画面が表示されなければ E2（入力できない）または E3（一覧が出ない）で止まる
+  [Step1 L39]     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-button']) FOR 30
+  [Step1 L40]     SET LoginCheck TO $'''NG'''
+  [Step1 L41]     SET ListCheck TO $'''NG'''
+  [Step1 L42]     LOOP LoginTry FROM 1 TO 3 STEP 1
+  [Step1 L43]         IF ListCheck <> $'''OK''' THEN
+  [Step1 L44]             IF LoginTry > 1 THEN
+  [Step1 L45]                 WAIT 2
+  [Step1 L46]             END
+  [Step1 L47]             # フローが起動した Edge のウィンドウ（ブラウザー インスタンス Browser の Handle プロパティ＝ウィンドウ ハンドル）を前面に出す。失敗しても止めない
+  [Step1 L48]             UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  [Step1 L49]             ON ERROR
+  [Step1 L50]             END
+  [Step1 L51]             SET LoginCheck TO $'''NG'''
+  [Step1 L52]             WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: Web
+  [Step1 L53]             ON ERROR
+  [Step1 L54]             END
+  [Step1 L55]             WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-password'] Text: LoginPassword EmulateTyping: True UnfocusAfterPopulate: Fal
+  [Step1 L56]             ON ERROR
+  [Step1 L57]             END
+  [Step1 L58]             WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var id = document.getElementById(\"login-id\"); var pw = document.getElementById(\"login
+  [Step1 L59]             ON ERROR
+  [Step1 L60]             END
+  [Step1 L61]             IF LoginCheck = $'''OK''' THEN
+  [Step1 L62]                 WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+  [Step1 L63]                 ON ERROR
+  [Step1 L64]                 END
+  [Step1 L65]                 WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+  [Step1 L66]                 ON ERROR
+  [Step1 L67]                 END
+  [Step1 L68]             END
+  [Step1 L69]             # 一覧画面の読み込みが完了していれば（前の回のクリックで遅れて表示された場合も含む）やり直しを抜ける
+  [Step1 L70]             IF (WebAutomation.IfWebPageContains.WebPageContainsElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) THEN
+  [Step1 L71]                 SET ListCheck TO $'''OK'''
+  [Step1 L72]             END
+  [Step1 L73]         END
+  [Step1 L74]     END
+  [Step1 L75]     IF ListCheck <> $'''OK''' THEN
+  [Step1 L76]         IF LoginCheck <> $'''OK''' THEN
+  [Step1 L77]             SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても一覧画面に進めず、最後の回は入力欄に値が入りませんでした）'''
+  [Step1 L78]             GOTO ErrorEnd
+  [Step1 L79]         END
+  [Step1 L80]         SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧画面が表示されませんでした（3 回試しました。クリックに失敗したか、30 秒待っても一覧の読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
+  [Step1 L81]         GOTO ErrorEnd
+  [Step1 L82]     END
+  [Step1 L83]     # ここに来るのは一覧画面が表示された場合だけ。念のため一覧の読み込み完了をもう一度確かめてから手順2 へ進む（表示済みなのですぐに終わる）
+  [Step1 L84]     SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
+  [Step1 L85]     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+  [Step1 L86] END
+  [Step1 L87] # 手順2. 一覧から申込番号を全件取得
+固定秒数の待機（WAIT <秒>）: 1 か所 ["L45:WAIT 2"]
+要素の待機（WAIT (WaitForWebPageContent…) FOR n）: 6 か所 ["L34:login-id FOR 30","L39:login-button FOR 30","L65:application-table-loaded FOR 30","L85:application-table-loaded FOR 30","L117:application-detail-loaded FOR 30","L137:application-table-loaded FOR 30"]
+LOOP の行: ["L42:LOOP LoginTry FROM 1 TO 3 STEP 1","L110:LOOP FOREACH CurrentNo IN ApplicationNos"]
+GOTO の行と直前の行: ["L8:GOTO ErrorEnd ← L7:ON BLOCK ERROR","L30:GOTO ErrorEnd ← L29:ON BLOCK ERROR","L78:GOTO ErrorEnd ← L77:SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを","L81:GOTO ErrorEnd ← L80:SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧","L90:GOTO ErrorEnd ← L89:ON BLOCK ERROR","L102:GOTO ErrorEnd ← L101:SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %Data","L108:GOTO ErrorEnd ← L107:ON BLOCK ERROR","L124:GOTO ErrorEnd ← L123:SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の詳細画","L128:GOTO ErrorEnd ← L127:SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %Curre","L143:GOTO ErrorEnd ← L142:ON BLOCK ERROR"]
+ON ERROR（アクション単位）の行: ["L49","L53","L56","L59","L63","L66","L113","L134","L160"]
+FocusWindow の行: ["L48:UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle → 次: ON ERROR/END → その次: SET LoginCheck TO $'''NG'''","L112:UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle → 次: ON ERROR/END → その次: WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-bu","L133:UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle → 次: ON ERROR/END → その次: WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to"]
+ON ERROR の中身が空（次の行が END）: true
+NEXT ACTION の出現: 0
+ループの上限: 3  ループ L42
+ループの END: L74
+順序 Edge起動 L33 < 前面 L48 < 最初の入力 L52 < クリック L62 < 一覧待機 L65 < 一覧確認 L70: true
+前面・入力・クリック・一覧待機・一覧確認がすべてループ内: true
+前面に出す処理の行: UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle  直後: ON ERROR / END
+login-button を参照する行: ["L39:WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainEl","L62:WebAutomation.Click.Click BrowserInstance: Browser Control: ","L169:\"Repository\": \"{\\r\\n  \\\"Screens\\\": [\\r\\n    {\\r\\n      \\\"Con"]
+application-table-loaded を参照する行: ["L65:WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainEl","L70:IF (WebAutomation.IfWebPageContains.WebPageContainsElement B","L85:WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainEl","L137:WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainEl","L169:\"Repository\": \"{\\r\\n  \\\"Screens\\\": [\\r\\n    {\\r\\n      \\\"Con"]
+クリックは IF LoginCheck = OK の中: true
+ループの各回は IF ListCheck <> OK の中（一覧確認後は何もしない）: true
+ループ後：IF ListCheck <> OK → (IF LoginCheck <> OK → E2 → GOTO) → E3 → GOTO: true
+ループ後〜Step1 の END の後の要素待機（手順2 の前に一覧を確認）: WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage'][
+変数 ListCheck の出現行: [41,43,71,75]  すべて Step1 内: true
+手順0 や Edge 起動に戻る（GOTO で Step0/Step1 の前のラベル・LABEL の追加）: ["L154:LABEL ErrorEnd"]  CALL/RunSubflow: false
+
+== 4c-9 (b) 構文チェック ==
+開始（BLOCK/IF/LOOP/ON BLOCK ERROR/ON ERROR）と END の対応: 残り 0  エラー []
+開始の数: BLOCK 5  IF 10  LOOP 2  ON BLOCK ERROR 5  ON ERROR 9  END 31
+''' が奇数の行: []
+% が奇数の文字列リテラル: []
+変数の定義行: {"StepMessage":10,"BaseUrl":11,"LoginId":12,"LoginPassword":13,"WorkFolderName":14,"RunDateTime":15,"RunStamp":16,"HistoryFileName":17,"DocumentsFolder":18,"WorkFolder":19,"CreatedFolder":21,"CurrentTable":24,"Browser":33,"LoginCheck":40,"ListCheck":41,"LoginTry":42,"ApplicationNosText":93,"ApplicationNos":94,"DataCountText":97,"DataCountPosition":98,"DataCountDigits":98,"DataCount":99,"CurrentNo":110,"DetailText":120,"DetailValues":121,"LastError":156,"ErrorDetail":157,"ButtonPressed":158}
+未定義（または定義より前で使用）の変数: []
+
+== 4c-9 (c) 構成 ==
+手順0→1→2→3→4→7（閉じる・EXIT）→ErrorEnd→メッセージ の位置: [222,1713,5771,7206,9980,10733,10788,10861,11290]  昇順: true
+LOOP FOREACH CurrentNo IN ApplicationNos: true
+詳細ボタンのクリック（ListPage/detail-button）: true  URL を直接開く（detail.html?no / GoToWebPage）: false
+data-loaded 待機 FOR 30: ["L65 application-table-loaded FOR 30","L85 application-table-loaded FOR 30","L117 application-detail-loaded FOR 30","L137 application-table-loaded FOR 30"]
+No.65 の JavaScript の keys: 14 ["applicationNo","applicationDate","customerName","supplyPointNo","applicationType","capacityBefore","capacityAfter","status","assignee","siteAddress","desiredDate","scheduledWorkDate","receptionNo","remarks"]
+行追加の新しい値: DetailValues  分割の元が DetailText: true  14個の確認: true  申込番号の一致確認: true  textContent.trim(): true
+見出し14列: 14 申込番号／申込日／お客さま名／供給地点特定番号／申込種別／変更前容量／変更後容量／ステータス／担当者／需要場所住所／希望日／工事予定日／送配電受付番号／備考
+見出しが契約の順と一致: true
+mock/js/detail.js に14個のキーがある: 14/14
+JS の keys の順が見出し（docs/screens.md 1-2）の順と同じ: true
+  CSV L146: UTF8=true 列名=true 上書き=true コンマ=true %WorkFolder%\\%HistoryFileName%
+  CSV L147: UTF8=true 列名=true 上書き=true コンマ=true %WorkFolder%\\latest.csv
+ErrorEnd の流れ（ラベル→最後のエラー→置換→メッセージ→閉じる＋ON ERROR）の位置: [10861,11032,11063,11290,11366,11570]  昇順: true
+置換の直後に ON ERROR が無い: true
+個別の ON ERROR を付けたアクション: ["L49:UIAutomation.FocusWindow.FocusByInstanceOrHandle","L53:WebAutomation.PopulateTextField.PopulateTextField","L56:WebAutomation.PopulateTextField.PopulateTextField","L59:WebAutomation.ExecuteJavascript","L63:WebAutomation.Click.Click","L66:WAIT","L113:UIAutomation.FocusWindow.FocusByInstanceOrHandle","L134:UIAutomation.FocusWindow.FocusByInstanceOrHandle","L160:WebAutomation.CloseWebBrowser"]
+No.87 の正規表現（Main.txt）: (?m)[A-Za-z]:\\\\Users\\\\.*?(?=申込状況チェック_デモ|$)  → 画面での値: (?m)[A-Za-z]:\\Users\\.*?(?=申込状況チェック_デモ|$)
+   置換の試験（JS 正規表現 gim で代用）: "ファイル 'C:\\Users\\someone\\Documents\\申込状況チェック_デモ\\latest.csv' に書き込めません" → "ファイル '<ユーザー フォルダー>申込状況チェック_デモ\\latest.csv' に書き込めません"
+   置換の試験（JS 正規表現 gim で代用）: "D:\\Users\\x\\OneDrive - Org\\ドキュメント\\file.csv" → "<ユーザー フォルダー>"
+   置換の試験（JS 正規表現 gim で代用）: "サブフロー: main、アクション: 28\nエラー メッセージ: タイムアウトの期限が切れています。" → "サブフロー: main、アクション: 28\nエラー メッセージ: タイムアウトの期限が切れています。"
+ErrorEnd：ラベル true  メッセージ true  ブラウザーを閉じる＋ON ERROR true
+ON BLOCK ERROR → GOTO ErrorEnd が5ブロックすべて: 5
+
+== 4c-9 (b)・4c-1 (f)・4c-2 (d) README アクション表との対応 ==
+README アクション表の行数: 107  No が 1..n の連番: true  Main.txt アクション行: 107
+名前・要素名・生成変数の不一致: 0 []
+    1 L  6 | BLOCK Step0_Init  ⇔  ブロック エラー発生時（ブロックの開始） / —
+    2 L  7 | ON BLOCK ERROR  ⇔  （No.1 のエラー時の設定） / Step0_Init
+    3 L  8 | GOTO ErrorEnd  ⇔  （No.1 のエラー時の設定の続き） / Step0_Init
+    4 L 10 | SET StepMessage TO $'''手順0：初期化（実行日時の取得・作業フォルダの作成・データテーブルの準備）に失敗しました'''  ⇔  変数の設定 / Step0_Init
+    5 L 11 | SET BaseUrl TO $'''http://localhost:8080'''  ⇔  変数の設定 / Step0_Init
+    6 L 12 | SET LoginId TO $'''demo-user'''  ⇔  変数の設定 / Step0_Init
+    7 L 13 | SET LoginPassword TO $'''demo-pass'''  ⇔  変数の設定 / Step0_Init
+    8 L 14 | SET WorkFolderName TO $'''申込状況チェック_デモ'''  ⇔  変数の設定 / Step0_Init
+    9 L 15 | DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFor  ⇔  現在の日時を取得します / Step0_Init
+   10 L 16 | Text.ConvertDateTimeToText.FromCustomDateTime DateTime: RunDateTime Cu  ⇔  datetime をテキストに変換 / Step0_Init
+   11 L 17 | SET HistoryFileName TO $'''申込状況_%RunStamp%.csv'''  ⇔  変数の設定 / Step0_Init
+   12 L 18 | Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal S  ⇔  特別なフォルダーを取得 / Step0_Init
+   13 L 19 | SET WorkFolder TO $'''%DocumentsFolder%\\%WorkFolderName%'''  ⇔  変数の設定 / Step0_Init
+   14 L 20 | IF (Folder.IfFolderExists.DoesNotExist Path: WorkFolder) THEN  ⇔  フォルダーが存在する場合 / Step0_Init
+   15 L 21 | Folder.Create FolderPath: DocumentsFolder FolderName: WorkFolderName F  ⇔  フォルダーを作成 / Step0_Init（No.14 の中）
+   16 L 24 | Variables.CreateNewDatatable InputTable: { ^[$'''申込番号''', $'''申込日''',   ⇔  新しいデータ テーブルを作成する / Step0_Init
+   17 L 25 | Variables.DeleteRowFromDataTable DataTable: CurrentTable RowIndex: 0  ⇔  データ テーブルから行を削除する / Step0_Init
+   18 L 28 | BLOCK Step1_Login  ⇔  ブロック エラー発生時（ブロックの開始） / —
+   19 L 29 | ON BLOCK ERROR  ⇔  （No.18 のエラー時の設定） / Step1_Login
+   20 L 30 | GOTO ErrorEnd  ⇔  （No.18 のエラー時の設定の続き） / Step1_Login
+   21 L 32 | SET StepMessage TO $'''手順1-1〜1-2：モック画面に接続できません。server.js が起動しているか確認してく  ⇔  変数の設定 / Step1_Login
+   22 L 33 | WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' W  ⇔  新しい Microsoft Edge を起動する / Step1_Login
+   23 L 34 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / Step1_Login
+   24 L 35 | SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができ  ⇔  変数の設定 / Step1_Login
+   25 L 39 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / Step1_Login
+   26 L 40 | SET LoginCheck TO $'''NG'''  ⇔  変数の設定 / Step1_Login
+   27 L 41 | SET ListCheck TO $'''NG'''  ⇔  変数の設定 / Step1_Login
+   28 L 42 | LOOP LoginTry FROM 1 TO 3 STEP 1  ⇔  ループ（Loop） / Step1_Login
+   29 L 43 | IF ListCheck <> $'''OK''' THEN  ⇔  If / Step1_Login（No.28 の中）
+   30 L 44 | IF LoginTry > 1 THEN  ⇔  If / Step1_Login（No.29 の中）
+   31 L 45 | WAIT 2  ⇔  待機（Wait） / Step1_Login（No.30 の中）
+   32 L 48 | UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Brows  ⇔  ウィンドウにフォーカスする / Step1_Login（No.29 の中）
+   33 L 49 | ON ERROR  ⇔  （No.32 のエラー時の設定） / Step1_Login（No.29 の中）
+   34 L 51 | SET LoginCheck TO $'''NG'''  ⇔  変数の設定 / Step1_Login（No.29 の中）
+   35 L 52 | WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Bro  ⇔  Web ページ内のテキスト フィールドに入力する / Step1_Login（No.29 の中）
+   36 L 53 | ON ERROR  ⇔  （No.35 のエラー時の設定） / Step1_Login（No.29 の中）
+   37 L 55 | WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Bro  ⇔  Web ページ内のテキスト フィールドに入力する / Step1_Login（No.29 の中）
+   38 L 56 | ON ERROR  ⇔  （No.37 のエラー時の設定） / Step1_Login（No.29 の中）
+   39 L 58 | WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $  ⇔  Web ページで JavaScript 関数を実行します / Step1_Login（No.29 の中）
+   40 L 59 | ON ERROR  ⇔  （No.39 のエラー時の設定） / Step1_Login（No.29 の中）
+   41 L 61 | IF LoginCheck = $'''OK''' THEN  ⇔  If / Step1_Login（No.29 の中）
+   42 L 62 | WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['L  ⇔  Web ページのリンクをクリックします / Step1_Login（No.41 の中）
+   43 L 63 | ON ERROR  ⇔  （No.42 のエラー時の設定） / Step1_Login（No.41 の中）
+   44 L 65 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / Step1_Login（No.41 の中）
+   45 L 66 | ON ERROR  ⇔  （No.44 のエラー時の設定） / Step1_Login（No.41 の中）
+   46 L 70 | IF (WebAutomation.IfWebPageContains.WebPageContainsElement BrowserInst  ⇔  Web ページに次が含まれる場合 / Step1_Login（No.29 の中）
+   47 L 71 | SET ListCheck TO $'''OK'''  ⇔  変数の設定 / Step1_Login（No.46 の中）
+   48 L 75 | IF ListCheck <> $'''OK''' THEN  ⇔  If / Step1_Login
+   49 L 76 | IF LoginCheck <> $'''OK''' THEN  ⇔  If / Step1_Login（No.48 の中）
+   50 L 77 | SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても一覧  ⇔  変数の設定 / Step1_Login（No.49 の中）
+   51 L 78 | GOTO ErrorEnd  ⇔  移動先（Go to） / Step1_Login（No.49 の中）
+   52 L 80 | SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧画面が表示されませんでした（3 回試しま  ⇔  変数の設定 / Step1_Login（No.48 の中）
+   53 L 81 | GOTO ErrorEnd  ⇔  移動先（Go to） / Step1_Login（No.48 の中）
+   54 L 84 | SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません  ⇔  変数の設定 / Step1_Login
+   55 L 85 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / Step1_Login
+   56 L 88 | BLOCK Step2_GetList  ⇔  ブロック エラー発生時（ブロックの開始） / —
+   57 L 89 | ON BLOCK ERROR  ⇔  （No.56 のエラー時の設定） / Step2_GetList
+   58 L 90 | GOTO ErrorEnd  ⇔  （No.56 のエラー時の設定の続き） / Step2_GetList
+   59 L 92 | SET StepMessage TO $'''手順2-1：一覧から申込番号を取得できませんでした'''  ⇔  変数の設定 / Step2_GetList
+   60 L 93 | WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $  ⇔  Web ページで JavaScript 関数を実行します / Step2_GetList
+   61 L 94 | Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelim  ⇔  テキストの分割 / Step2_GetList
+   62 L 95 | SET StepMessage TO $'''手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした'''  ⇔  変数の設定 / Step2_GetList
+   63 L 97 | WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: ap  ⇔  Web ページ上の要素の詳細を取得します / Step2_GetList
+   64 L 98 | Text.ParseText.RegexParseForFirstOccurrence Text: DataCountText TextTo  ⇔  テキストの解析 / Step2_GetList
+   65 L 99 | Text.ToNumber Text: DataCountDigits Number=> DataCount  ⇔  テキストを数値に変換 / Step2_GetList
+   66 L100 | IF ApplicationNos.Count <> DataCount THEN  ⇔  If / Step2_GetList
+   67 L101 | SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取得 %Applica  ⇔  変数の設定 / Step2_GetList（No.66 の中）
+   68 L102 | GOTO ErrorEnd  ⇔  移動先（Go to） / Step2_GetList（No.66 の中）
+   69 L106 | BLOCK Step3_GetDetails  ⇔  ブロック エラー発生時（ブロックの開始） / —
+   70 L107 | ON BLOCK ERROR  ⇔  （No.69 のエラー時の設定） / Step3_GetDetails
+   71 L108 | GOTO ErrorEnd  ⇔  （No.69 のエラー時の設定の続き） / Step3_GetDetails
+   72 L110 | LOOP FOREACH CurrentNo IN ApplicationNos  ⇔  For each / Step3_GetDetails
+   73 L111 | SET StepMessage TO $'''手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした'''  ⇔  変数の設定 / Step3_GetDetails（ループ内）
+   74 L112 | UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Brows  ⇔  ウィンドウにフォーカスする / Step3_GetDetails（ループ内）
+   75 L113 | ON ERROR  ⇔  （No.74 のエラー時の設定） / Step3_GetDetails（ループ内）
+   76 L115 | WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['L  ⇔  Web ページのリンクをクリックします / Step3_GetDetails（ループ内）
+   77 L116 | SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当  ⇔  変数の設定 / Step3_GetDetails（ループ内）
+   78 L117 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / Step3_GetDetails（ループ内）
+   79 L118 | SET StepMessage TO $'''手順3-3〜3-4：申込番号 %CurrentNo% の詳細画面から項目を取得できませんでした  ⇔  変数の設定 / Step3_GetDetails（ループ内）
+   80 L120 | WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $  ⇔  Web ページで JavaScript 関数を実行します / Step3_GetDetails（ループ内）
+   81 L121 | Text.SplitText.SplitWithDelimiter Text: DetailText CustomDelimiter: $'  ⇔  テキストの分割 / Step3_GetDetails（ループ内）
+   82 L122 | IF DetailValues.Count <> 14 THEN  ⇔  If / Step3_GetDetails（ループ内）
+   83 L123 | SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の詳細画面から14項目を取得できませんでした（取  ⇔  変数の設定 / Step3_GetDetails（No.82 の中）
+   84 L124 | GOTO ErrorEnd  ⇔  移動先（Go to） / Step3_GetDetails（No.82 の中）
+   85 L126 | IF DetailValues[0] <> CurrentNo THEN  ⇔  If / Step3_GetDetails（ループ内）
+   86 L127 | SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %DetailVa  ⇔  変数の設定 / Step3_GetDetails（No.85 の中）
+   87 L128 | GOTO ErrorEnd  ⇔  移動先（Go to） / Step3_GetDetails（No.85 の中）
+   88 L131 | Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTab  ⇔  データ テーブルに行を挿入 / Step3_GetDetails（ループ内）
+   89 L132 | SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30   ⇔  変数の設定 / 同上
+   90 L133 | UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Brows  ⇔  ウィンドウにフォーカスする / 同上
+   91 L134 | ON ERROR  ⇔  （No.90 のエラー時の設定） / 同上
+   92 L136 | WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['D  ⇔  Web ページのリンクをクリックします / 同上
+   93 L137 | WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement Brow  ⇔  Web ページのコンテンツを待機 / 同上
+   94 L141 | BLOCK Step4_WriteCsv  ⇔  ブロック エラー発生時（ブロックの開始） / —
+   95 L142 | ON BLOCK ERROR  ⇔  （No.94 のエラー時の設定） / Step4_WriteCsv
+   96 L143 | GOTO ErrorEnd  ⇔  （No.94 のエラー時の設定の続き） / Step4_WriteCsv
+   97 L145 | SET StepMessage TO $'''手順4：CSV ファイルを書き出せませんでした。同じ名前のファイルを Excel 等で開いてい  ⇔  変数の設定 / Step4_WriteCsv
+   98 L146 | File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'  ⇔  CSV ファイルに書き込む / Step4_WriteCsv
+   99 L147 | File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'  ⇔  CSV ファイルに書き込む / Step4_WriteCsv
+  100 L151 | WebAutomation.CloseWebBrowser BrowserInstance: Browser  ⇔  Web ブラウザーを閉じる / —
+  101 L152 | EXIT Code: 0  ⇔  フローを停止する / —
+  102 L154 | LABEL ErrorEnd  ⇔  ラベル / —
+  103 L156 | ERROR => LastError Reset: True  ⇔  最後のエラーを取得 / —
+  104 L157 | Text.Replace.ReplaceTextWithRegex Text: $'''%LastError%''' TextToFind:  ⇔  テキストを置換する / —
+  105 L158 | Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しまし  ⇔  メッセージを表示 / —
+  106 L159 | WebAutomation.CloseWebBrowser BrowserInstance: Browser  ⇔  Web ブラウザーを閉じる / —
+  107 L160 | ON ERROR  ⇔  （No.106 のエラー時の設定） / —
+README 7 冒頭の「同じ数（N行）」: 107
+
+== 4c-1 (f) README の該当箇所 ==
+  README L148: | `DataCountText` | 一覧の `#application-count` の表示の文字（`Own Text`） | 要素の詳細を取得（No.63） | 例：`全 20 件` |
+  README L149: | `DataCountDigits` | `DataCountText` から取り出した数字の部分（テキスト） | テキストの解析（No.64、正規表現 `[0-9]+`） | 例：`20`（「全 100 件」なら `100`） |
+  README L150: | `DataCountPosition` | 数字が見つかった位置（以後は使わない） | テキストの解析（No.64） | 例：`2` |
+  README L151: | `DataCount` | `DataCountDigits` を数値にしたもの（画面の件数） | テキストを数値に変換（No.65） | 例：`20` |
+  README L222: | E5 | 手順2-2（件数表示の取得・数字の取り出し・数値への変換） | 手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした | U5 のセレクター、No.63 の属性名が `Own Text` か、No.64 の正規表現が `[0-9]+` か、一覧の件数表示に「全 20 件」のように数字が出ているかを確認して再実行 |
+  README L69: | U5 | ListPage | application-count | S2 一覧 | `#application-count` | `span[Id="application-count"]` | 件数表示の文字（「全 20 件」）を `Own Text` で取得し、数字だけ取り出す（属性 `data-count` は PAD では空の文字が返るので使わない。10-0c） |
+README で data-count を含む行:
+  README L69: | U5 | ListPage | application-count | S2 一覧 | `#application-count` | `span[Id="application-count"]` | 件数表示の文字（「全 20 件」）を `Own Text` で取得し、数字だけ取り出す（属性 `data-count` は PAD では空の文字が返るので使わない。10-0c） |
+  README L618: | 手順2-2（件数の取得、R-8） | 「Web ページ上の要素の詳細を取得します」で属性名を `data-count` にすると、**エラーにならず空の文字が返り**、続く「テキストを数値に変換」で「テキスト '' を有効な数値に変換できません」になって止まった | 方式 B'（人の決定）：属性名を `Own Text` にして表示の文字「全 20 件」を読み（No.50）、正規表現 `[0-9]+` で数字だけを取り出し（No.5
+  README L620: | 属性名の入力欄に手で入力したとき | 先頭が自動で大文字になる（`data-count` と打つと `Data-count` になる） | `Main.txt` を貼り付ければ影響しない。**手作業で作り直すときは、一覧から選べる `Own Text` を選ぶ**（手で打たない） |
+  README L624: - `docs/flow.md` 手順2-2 は「`data-count` と取得件数の一致を確認」と書いているが、PAD の「Web ページ上の要素の詳細を取得します」では `data-count` が読めない（空の文字が返る）。同じ要素 `#application-count` に表示されている「全 N 件」の文字は、モックが `data-count` と同じ件数から作っている（`mock/js/list.js`）ので、**表示の文
+  README L625: - JavaScript（No.47 と同じ「JavaScript 関数を実行」）で `data-count` を読む方法もあるが、人の決定で B'（表示の文字を読む）にした。
+  README L877: | R-8 | 要素の詳細を取得（No.63） | **実機で確認済** | 属性名の一覧は Own Text／Title／Source Link／HRef／Exists／Disabled の6つ。それ以外も自由に入力できるが、`data-count` を入力すると**空の文字が返る**（エラーにはならない）。`Own Text` で一覧の件数表示「全 20 件」「全 21 件」が取れた（10-0c・10-0d。`f8d3b85` でも
+
+== C1・C4 ==
+flows/ のファイル: ["flows/application-check/Main.txt","flows/application-check/README.md"]
+ flows/application-check/Main.txt: URL=["http://localhost:8080"] @=[] ユーザーパス=[] token等=[] ConnectionString=[""] ID/PW=["demo-user","demo-pass"] ScreenShot 種類=1(92文字)
+ flows/application-check/README.md: URL=["http://localhost:8080","http://localhost:8080/login.html"] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=["demo-user","demo-pass"]
+ (デコードした Repository): URL=[] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=[] ScreenShot 種類=1(92文字)
+ evidence/04d-login-stability/review-01_csv.txt: URL=[] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=[]
+ evidence/04d-login-stability/review-01_report.txt: URL=[] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=[]
+ evidence/04d-login-stability/review-02_csv.txt: URL=[] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=[]
+ evidence/04d-login-stability/review-02_report.txt: URL=[] @=[] ユーザーパス=[] token等=[] ConnectionString=[] ID/PW=[]
+ 社名・人名の手掛かり flows/application-check/Main.txt: 0件 []
+ 社名・人名の手掛かり flows/application-check/README.md: 0件 []
+ 社名・人名の手掛かり (デコードした Repository): 0件 []
+ 社名・人名の手掛かり evidence/04d-login-stability/review-01_csv.txt: 0件 []
+ 社名・人名の手掛かり evidence/04d-login-stability/review-01_report.txt: 0件 []
+ 社名・人名の手掛かり evidence/04d-login-stability/review-02_csv.txt: 0件 []
+ 社名・人名の手掛かり evidence/04d-login-stability/review-02_report.txt: 0件 []
+ 「申込管理システム（デモ）」の出現: ["flows/application-check/Main.txt:0","flows/application-check/README.md:1","(デコードした Repository):0","evidence/04d-login-stability/review-01_csv.txt:0","evidence/04d-login-stability/review-01_report.txt:0","evidence/04d-login-stability/review-02_csv.txt:0","evidence/04d-login-stability/review-02_report.txt:0"]
+ README 8 の例 DM-2026-0020: dummy.json と一致 true
+ README 8 の例 DM-2026-0019: dummy.json と一致 true
+ README 8 の例 DM-2026-0018: dummy.json と一致 true
+ README 8 の例 DM-2026-0001: dummy.json と一致 true
+
+== 4c-9 (d) git diff cb098e1 -- mock docs ==
+差分のバイト数: 0 （空）
+git diff --stat cb098e1 HEAD:
+ evidence/04d-login-stability/review-01_csv.txt    |  11 +
+ evidence/04d-login-stability/review-01_report.txt |  40 ++
+ evidence/04d-login-stability/review-01_static.txt | 366 ++++++++++++++
+ flows/application-check/Main.txt                  |  40 +-
+ flows/application-check/README.md                 | 569 +++++++++++++++-------
+ sprints/04d-login-stability/contract.md           | 135 +++++
+ sprints/04d-login-stability/review-01.md          |  61 +++
+ 7 files changed, 1030 insertions(+), 192 deletions(-)
+作業ツリー（git status --short）: "?? evidence/04d-login-stability/review-02_csv.txt\n?? evidence/04d-login-stability/review-02_report.txt"
+git log -3:
+495b937 sprint04d: README に 12be3e2 の実機結果を反映（最小化しない連続3回とも正常終了、128 アクション・エラー 0、CSV 不一致 0。Edge の前面化は未確認。デモ当日の注意は「操作しない」を必須、最小化を推奨に）
+12be3e2 sprint04d: 差し戻し1回目の修正（手順3 の「詳細」「一覧へ戻る」のクリック直前に Edge を前面に出す処理を追加）
+885f35e sprint04d: 契約に追補（人の判断、2026-10-19）：手順3 のクリック前に Edge を前面に出す (A)、4d-5 の読み替え、実機の確認条件の補足
+
+==================================================================
+# review-02 追加の机上確認（extra2.js。extra.js を 12be3e2 用に直したもの）
+作業ツリーの Main.txt と 12be3e2 の Main.txt がバイト単位で同一: true
+cb098e1: 推定のステートメント数 108
+HEAD(12be3e2): 推定のステートメント数 128
+手順2 以降の中の「FocusWindow＋空の ON ERROR（字下げ8）」の3行のかたまり: 2 か所
+それを取り除いた手順2 以降（UI 要素の JSON を含む）が cb098e1 と文字単位で同一: true
+  前面化の直前: SET StepMessage TO $'''手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした''' ／ 直後(ON ERROR/END の次): WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageTo
+  前面化の直前: SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30  ／ 直後(ON ERROR/END の次): WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitF
+手順0（先頭〜# 手順1. の前）が cb098e1 と同一: true
+手順1 が 5ebeec4 と同一: true
+LOOP FOREACH L110〜END L138、FocusWindow の行: ["L48(ループ外)","L112(ループ内)","L133(ループ内)"]
+==================================================================
+# git の確認（Evaluator が Bash で実行）
+git diff 12be3e2 495b937 -- flows/application-check/Main.txt の行数: 0（空）
+git diff 12be3e2 HEAD -- flows/application-check/Main.txt の行数: 0（空）
+git diff cb098e1 -- mock docs の行数: 0（空）
+git diff --stat 12be3e2 495b937:
+ flows/application-check/README.md | 108 ++++++++++++++++++++------------------
+ 1 file changed, 58 insertions(+), 50 deletions(-)
+git diff 5ebeec4 12be3e2 -- flows/application-check/Main.txt:
+diff --git a/flows/application-check/Main.txt b/flows/application-check/Main.txt
+index 689a323..011f042 100644
+--- a/flows/application-check/Main.txt
++++ b/flows/application-check/Main.txt
+@@ -109,6 +109,9 @@ ON BLOCK ERROR
+ END
+     LOOP FOREACH CurrentNo IN ApplicationNos
+         SET StepMessage TO $'''手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした'''
++        UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
++        ON ERROR
++        END
+         WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60
+         SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む）'''
+         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded']) FOR 30
+@@ -127,6 +130,9 @@ END
+         # 14項目を docs/screens.md 1-2 の順に並べたリストのまま1行追加（空の備考も空の値として位置で入るので列がずれない）
+         Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTable RowToAdd: DetailValues
+         SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30 秒）'''
++        UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
++        ON ERROR
++        END
+         WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60
+         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+     END
