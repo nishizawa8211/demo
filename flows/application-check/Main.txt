@@ -33,14 +33,22 @@ END
     WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-id']) FOR 30
     SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
-    # Edge 起動直後の入力失敗の対策：ボタンまで表示されるのを待ち、入力 → 入力欄の値を確認、を最大3回くり返す（3回とも値が入らなければ E2 で止まる）
+    # Edge 起動直後のログインの失敗の対策（04c・04d）：ボタンまで表示されるのを待ってから、次を最大3回くり返す（一覧画面が表示されたら抜ける）
+    # Edge のウィンドウを前面に出す → ID・パスワードの入力 → 入力欄の値を確認 → 確認できたらログインボタンをクリック → 一覧画面の読み込み完了を待つ（30 秒）→ 一覧画面が表示されたかを確認
+    # 前面に出す・入力・確認・クリック・一覧の待機の1回ごとのエラーは、その場では止めずに次の回でやり直す。3回とも一覧画面が表示されなければ E2（入力できない）または E3（一覧が出ない）で止まる
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-button']) FOR 30
     SET LoginCheck TO $'''NG'''
+    SET ListCheck TO $'''NG'''
     LOOP LoginTry FROM 1 TO 3 STEP 1
-        IF LoginCheck <> $'''OK''' THEN
+        IF ListCheck <> $'''OK''' THEN
             IF LoginTry > 1 THEN
                 WAIT 2
             END
+            # フローが起動した Edge のウィンドウ（ブラウザー インスタンス Browser の Handle プロパティ＝ウィンドウ ハンドル）を前面に出す。失敗しても止めない
+            UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+            ON ERROR
+            END
+            SET LoginCheck TO $'''NG'''
             WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
             ON ERROR
             END
@@ -50,13 +58,29 @@ END
             WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var id = document.getElementById(\"login-id\"); var pw = document.getElementById(\"login-password\"); if (id && pw && id.value === \"%LoginId%\" && pw.value === \"%LoginPassword%\") { return \"OK\"; } return \"NG\"; }''' Result=> LoginCheck
             ON ERROR
             END
+            IF LoginCheck = $'''OK''' THEN
+                WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+                ON ERROR
+                END
+                WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+                ON ERROR
+                END
+            END
+            # 一覧画面の読み込みが完了していれば（前の回のクリックで遅れて表示された場合も含む）やり直しを抜ける
+            IF (WebAutomation.IfWebPageContains.WebPageContainsElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) THEN
+                SET ListCheck TO $'''OK'''
+            END
         END
     END
-    IF LoginCheck <> $'''OK''' THEN
-        SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても入力欄に値が入りません）'''
+    IF ListCheck <> $'''OK''' THEN
+        IF LoginCheck <> $'''OK''' THEN
+            SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても一覧画面に進めず、最後の回は入力欄に値が入りませんでした）'''
+            GOTO ErrorEnd
+        END
+        SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧画面が表示されませんでした（3 回試しました。クリックに失敗したか、30 秒待っても一覧の読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
         GOTO ErrorEnd
     END
-    WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+    # ここに来るのは一覧画面が表示された場合だけ。念のため一覧の読み込み完了をもう一度確かめてから手順2 へ進む（表示済みなのですぐに終わる）
     SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
 END
