@@ -7,6 +7,8 @@
 | 03 | 詳細画面 | 完了 | 合格 100/100 | 0回 | 2026-10-14 | [contract](03-detail-screen/contract.md) / [review-01](03-detail-screen/review-01.md) |
 | 04 | フロー前半（ログイン〜CSV 出力） | 完了（PAD 実機は未確認） | 合格 100/100 | 0回 | 2026-10-14 | [contract](04-flow-scrape/contract.md) / [review-01](04-flow-scrape/review-01.md) |
 | 04b | フロー前半の作り直し（UI 要素の定義を Main.txt に同梱） | 完了（PAD 実機は未確認） | 合格 100/100 | 0回 | 2026-10-15 | [contract](04b-flow-ui-elements/contract.md) / [review-01](04b-flow-ui-elements/review-01.md) / [review-02](04b-flow-ui-elements/review-02.md) |
+| 04c | フロー前半の PAD 実機確認と修正 | 完了（ログインボタンの停止対策は 04d へ） | 合格 100/100（review-02。4c-4 の扱い・Excel 確認の代替は人が了承 2026-10-19） | 1回 | 2026-10-19 | [contract](04c-flow-pad-check/contract.md) / [review-01](04c-flow-pad-check/review-01.md) / [review-02](04c-flow-pad-check/review-02.md) |
+| 04d | ログインの停止対策（クリックのやり直し・Edge を前面に） | 未着手 | — | — | — | — |
 | 05 | フロー後半（SharePoint 保存・比較・Teams 投稿） | 未着手 | — | — | — | — |
 
 状態：未着手 / 契約中 / 実装中 / 採点中 / 差し戻し中 / 完了 / 停止
