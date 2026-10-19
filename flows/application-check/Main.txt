@@ -122,12 +122,9 @@ WebAutomation.CloseWebBrowser BrowserInstance: Browser
 EXIT Code: 0
 # ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない）=====
 LABEL ErrorEnd
-# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる
+# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる。「テキストを置換する」には個別のエラー時の設定（ON ERROR）を付けられないので付けない（README 10-0f）
 ERROR => LastError Reset: True
-SET ErrorDetail TO $'''（取得できませんでした）'''
 Text.Replace.ReplaceTextWithRegex Text: $'''%LastError%''' TextToFind: $'''(?m)[A-Za-z]:\\\\Users\\\\.*?(?=申込状況チェック_デモ|$)''' IgnoreCase: True ReplaceWith: $'''<ユーザー フォルダー>''' ActivateEscapeSequences: False Result=> ErrorDetail
-ON ERROR
-END
 Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: $'''%StepMessage%（PAD のエラー情報：%ErrorDetail%）''' Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
 WebAutomation.CloseWebBrowser BrowserInstance: Browser
 ON ERROR
