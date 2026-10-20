@@ -9,7 +9,7 @@
 | 3 | 変数 |
 | 4 | エラー表（止まった手順と Teams の通知の手順名） |
 | 5 | Teams の投稿文 |
-| 6 | コネクタのアクションの設定値（手で配置する場合・設定の確認用） |
+| 6 | コネクタのアクションの書式（実機の PAD の出力に合わせた）・貼り付け後の再設定・実機で確認すること（C1〜C4） |
 | 7 | アクション表（`Main.txt` と1対1） |
 
 ---
@@ -30,8 +30,9 @@
 | D8 | 手順7（ブラウザーを閉じる・EXIT。No.172〜173） | 内容は同じ（資産4の No.100〜101）。位置は手順6 の後 | 資産4のコメント行「手順5〜6 はここ」の位置に D4〜D7 を入れた |
 | D9 | `ErrorEnd` | 追加：失敗通知（`NotifyOnError` が YES のとき、Teams に投稿）。**追加の位置は、エラー情報の取得・置換の後、画面のメッセージの前**。取得・置換・メッセージ・ブラウザーを閉じる処理は資産4と同じ行 | 失敗時の Teams 通知。通知が失敗しても止まらないよう、投稿の直後に個別のエラー時の設定を付けた |
 | D10 | 手順書 | 資産5の `README.md`・`reference.md`・`verification-log.md` を新規作成 | 資産4の分割に合わせる |
+| D11 | コネクタ 5 行の書式・`ConvertFromBinary` の列挙値・末尾の `ConnectionReferences`（2026-10-20、実機の貼り付けの結果を受けて修正） | 6-1 のとおり。`File.ConvertFromBinary` の `IfFileExists` を `File.IfFileExists.Overwrite` から `File.IfExists.Overwrite` に変更（このアクションの列挙型は `IfExists`。`WriteCSV` の `File.IfFileExists.Overwrite` は別の列挙型で正しい） | 実機の PAD が出力した書式に合わせる |
 
-- UI 要素（末尾の JSON）は資産4とバイト単位で同じ（3画面・8要素・`InstanceId` 重複なし）。資産5で UI 要素は足していない。
+- UI 要素（末尾の JSON の `Repository` 部分）は資産4とバイト単位で同じ（3画面・8要素・`InstanceId` 重複なし）。資産5で UI 要素は足していない。違うのは末尾の `ConnectionReferences`（資産4は空、資産5はプレースホルダー 2 件。6-1）だけ。
 - 手順5〜6 の失敗も `ErrorEnd`（画面のメッセージ・Teams の失敗通知・ブラウザーを閉じる）に集まる。
 
 ---
@@ -64,7 +65,7 @@
 | `ChatRecipient` | 投稿先（作成者本人。**プレースホルダー**） | 3 |
 | `NotifyOnError` | 失敗通知を出すか（YES／NO）。手順6 に入るとき NO | 4・152 |
 | `PreviousExists` | 前回の `latest.csv` の有無（True／False）。無ければ初回扱い | 108・117・127 |
-| `PreviousBinary` | 取得した前回の `latest.csv`（バイナリ）。取得に失敗した場合は `NONE` のまま | 110・111 |
+| `PreviousBinary` | 取得した前回の `latest.csv`。実機の出力名は `GetFileContentByPathResponse`（応答型の可能性があり、バイナリそのものかは未確認。6-3 の C1）。取得に失敗した場合は `NONE` のまま | 110・111 |
 | `PrevError`／`PrevErrorText` | 前回の取得が失敗したときのエラー情報（「無い」か別の理由かの判定に使う） | 113・115 |
 | `PreviousTable`／`PreviousNos` | 前回の CSV の内容／申込番号のリスト | 123・124 |
 | `PreviousNosKey` | `,申込番号,申込番号,…,` の形の文字（新規判定の比較用） | 109・126 |
@@ -125,30 +126,58 @@
 | 新規0件 | 【申込状況チェック】新規案件はありません（全 N 件を確認しました）（取得日時：…）<br><br>CSV：`<履歴ファイルへのリンク>` |
 | 失敗 | 【申込状況チェック】取得に失敗しました。手順◯◯ で停止（取得日時：…）<br>`StepMessage`<br>（PAD のエラー情報：ユーザー名を含むパスを伏せた版）。**リンクは付けない** |
 
-- リンクは履歴ファイルを指す（`latest.csv` ではない）。リンクは `SharePointSiteUrl`／`SharePointFolder`／ファイル名から組み立てる（空白は `%20`）。SharePoint の「ファイルの作成」の出力に使えるリンクの項目があればそれに置き換えてよい（実機で確認）。
+- リンクは履歴ファイルを指す（`latest.csv` ではない）。リンクは `SharePointSiteUrl`／`SharePointFolder`／ファイル名から組み立てる（空白は `%20`）。SharePoint の「ファイルの作成」の出力（`CreateFileResponse2`）に使えるリンクの項目があればそれに置き換えてよい（実機で確認）。
 - 新規あり の各案件は、`NewRows` の列 0（申込番号）・2（お客さま名）・4（申込種別）・5（変更前容量）・6（変更後容量）・7（ステータス）を使う。
 - 取得日時は、正常時は `RunDateTime`、失敗時は失敗した時刻。
 
 ---
 
-## 6. コネクタのアクションの設定値（手で配置する場合・設定の確認用）
+## 6. コネクタのアクションの設定値と、貼り付け後の再設定
 
-`Main.txt` の `External.InvokeCloudConnector` の行（アクション表 No.111・143・148・171・182）は、`Connection`（接続参照）・`ConnectorId`・`OperationId` と、操作ごとの入力で書いてある。**入力の名前・出力の項目は、この PC に定義が無く照合できていない**ため、貼り付けでエラーになる・PAD の画面の項目名と違う場合は、次の表の内容で PAD の画面から設定し直す。`<…>` の実値は書かない。
+### 6-1. 書式（実機の PAD が出力した形に合わせた。2026-10-20）
+
+最初の版（コミット `1c93b3f`）の書式（`ConnectorId: $'''shared_sharepointonline'''` と、`dataset:`・`body_recipient:` などの `@` 無しの入力）は**実機の PAD に受け付けられず**、SharePoint・Teams の 5 行が「不明なアクション」になって保存できなかった（「コネクタ定義の準備に失敗しました」）。デスクトップ版のセッションが手で配置し直して保存に成功し、PAD が出力した書式を報告してきたため、それに合わせて直した。実値は伏せてある（プレースホルダー）。
+
+- `Connection: '<接続参照ID>'`（実機では GUID。ここでは `<SharePoint 接続参照ID>`／`<Teams 接続参照ID>`）
+- `ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline'`（Teams は `.../shared_teams`）
+- `OperationId: 'GetFileContentByPath'`／`'CreateFile'`／`'PostMessageToConversation'`
+- 入力と出力は **`@` を付ける**：`@dataset:`・`@path:`・`@folderPath:`・`@name:`・`@body:`・`@'body/recipient':`・`@'body/messageBody':`・`@<出力名>=> <変数>`
+- コネクタの行の直前に、PAD が付ける注釈の行（`@@dataset:`／`@@path:`／`@@folderPath:`／`@@connectionDisplayName:`）を置いた。構文解析器は、この注釈の行を直後のステートメントに付くものとして受け付ける
+- 末尾の JSON の `ConnectionReferences` に、`ConnectorId`・`DisplayName`・`LogicalName`・`ConnectionName` のキーでプレースホルダーを 2 件（SharePoint・Teams）入れた。**この形で貼り付けて保存できるかは未確認**
+
+実値（サイトの URL・サイト名・フォルダー・投稿先・接続参照の GUID／表示名／接続名）は `Main.txt` に書かない。
+
+### 6-2. 貼り付け後の再設定（実機で試すこと）
+
+プレースホルダーのまま貼り付けても、保存できる保証はない（未確認）。次のどちらかで、実値に直してから保存する。
+
+1. **PAD 上でアクションを開いて選び直す（推奨）**：5 つのコネクタのアクションを開き、「接続」で作成済みの接続参照を選び、SharePoint はサイトを一覧から選ぶ。保存できたら、`ConnectionReferences` のプレースホルダー（`<…接続参照名>` など）は PAD が実値に置き換えている。
+2. **貼り付ける前にテキストで置換する**：`Main.txt` をコピーしたものの中の `<SharePoint 接続参照ID>`・`<SharePoint 接続参照名>`・`<SharePoint 接続名>`・`<Teams …>`・`<サイト名> - <保存先サイト>`・`<保存先サイト>` を、実値に置き換えてから貼り付ける（置換後のファイルは**コミットしない**）。
+
+貼り付けただけで保存できなかった場合は、5 つのアクションを消し、次の表のとおりに手で配置する。
 
 | No | コネクタ／操作 | 設定する内容 |
 |----|----------------|--------------|
-| 111 | SharePoint ／ パスによるファイルの内容の取得（`GetFileContentByPath`） | サイト：一覧から選ぶ。ファイル パス：`%SharePointFolder%/latest.csv`（直接入力）。出力（ファイルの内容）→ 変数 `PreviousBinary`。直後に「個別のエラー時の設定」で**フロー実行を続行する／次のアクション**（ファイルが無くても止めないため） |
-| 143 | SharePoint ／ ファイルの作成（`CreateFile`） | サイト：一覧から選ぶ。フォルダーのパス：`%SharePointFolder%`（直接入力）。ファイル名：`%HistoryFileName%`。**ファイル コンテンツ：`%HistoryBinary%`（バイナリ必須）** |
-| 148 | SharePoint ／ ファイルの作成（`CreateFile`） | 同上。ファイル名：`latest.csv`。ファイル コンテンツ：`%LatestBinary%`。**既存の `latest.csv` が上書きされるかは実機で確認**（上書きされずにエラーになる場合は、ファイルの更新に変える） |
-| 171 | Teams ／ チャットまたはチャネルにメッセージを投稿する（`PostMessageToConversation`） | 投稿者：Flow ボット。投稿先：Flow ボットとのチャット。宛先：`%ChatRecipient%`。メッセージ：`%PostMessage%` |
-| 182 | Teams ／ 同上 | 同じ投稿先。メッセージ：失敗通知の文（`Main.txt` の行のとおり）。直後に「個別のエラー時の設定」で**フロー実行を続行する／次のアクション** |
+| 111 | SharePoint ／ パスによるファイル コンテンツの取得（`GetFileContentByPath`） | サイト：一覧から選ぶ。ファイル パス：`%SharePointFolder%/latest.csv`（直接入力）。「コンテンツの種類を推測する」（`inferContentType`）：実機の既定は True（最初の版は False にしていた。6-3 の C3）。出力 `GetFileContentByPathResponse` → 変数 `PreviousBinary`。直後に「個別のエラー時の設定」で**フロー実行を続行する／次のアクション**（ファイルが無くても止めないため） |
+| 143 | SharePoint ／ ファイルの作成（`CreateFile`） | サイト：一覧から選ぶ。フォルダーのパス：`%SharePointFolder%`（直接入力）。ファイル名：`%HistoryFileName%`。**ファイル コンテンツ：`%HistoryBinary%`（バイナリ必須）**。出力 `CreateFileResponse2` |
+| 148 | SharePoint ／ ファイルの作成（`CreateFile`） | 同上。ファイル名：`latest.csv`。ファイル コンテンツ：`%LatestBinary%`。出力 `CreateFileResponse`。**既存の `latest.csv` の上書きはできない可能性が高い（6-3 の C2）** |
+| 171 | Teams ／ チャットまたはチャネルにメッセージを投稿する（`PostMessageToConversation`） | 投稿者（`poster`）：Flow bot。投稿先（`location`）：Chat with Flow bot。宛先（`body/recipient`）：`%ChatRecipient%`。メッセージ（`body/messageBody`）：`%PostMessage%`。出力 `PostMessageToConversationResponse` |
+| 182 | Teams ／ 同上 | 同じ投稿先。メッセージ：失敗通知の文（`Main.txt` の行のとおり）。出力 `PostMessageToConversationResponse2`。直後に「個別のエラー時の設定」で**フロー実行を続行する／次のアクション** |
+
+### 6-3. 実機で確認すること（未確認。推測を含む）
+
+| # | 内容 | 今の `Main.txt` | 確認と、だめだったときの直し方 |
+|---|------|-----------------|--------------------------------|
+| C1 | **`PreviousBinary` の型**。実機の PAD の出力名は `GetFileContentByPathResponse` で、「応答」型の変数であり、ファイルの内容そのもの（バイナリ）ではない可能性がある。`File.ConvertFromBinary`（No.122）には `PreviousBinary` をそのまま渡している | 応答がそのままバイナリとして使える場合の形 | 実行後、変数ペインで `PreviousBinary` の型と中身を見る。オブジェクトで、内容を指すプロパティがあれば、No.122 の「バイナリ データ」をそのプロパティ（例：`%PreviousBinary.<プロパティ名>%`）にする。プロパティ名はこの資料では**不明**（実機で見て書く）。また、取得が失敗したとき `PreviousBinary` が `NONE` のまま残る前提（No.110・114）が、型の違いで成り立つかも確認する |
+| C2 | **`latest.csv` の上書き**。SharePoint の「ファイルの作成」には「ファイルが存在する場合」の設定が無い。`latest.csv` が既にあるときの上書きができない可能性が高い（推測） | `CreateFile` のまま（2 回目の実行で手順5-3 が失敗する恐れ） | 2 回目の実行（新規あり）で試す。上書きされない場合の候補（いずれも**未試行・推測**）：(1) 作成の前に既存の `latest.csv` を「ファイルの削除」で消す（ファイルの識別子が要るため、先に「パスによるファイル メタデータの取得」で取得する必要がある見込み）、(2) 既存があるときは「ファイルの更新」（`UpdateFile`。同じくファイルの識別子が要る見込み）に切り替える。どれにするかは実機の画面の項目を見て決め、`Main.txt` と手順5-3 を直す |
+| C3 | `@inferContentType` は実機の既定が True（最初の版の `Main.txt` は False だった）。True にしたまま、CSV の内容が文字化けしないか | True（既定に合わせた） | `previous.csv` の文字（日本語）が壊れていないか、手順5-1 の `ReadCSV` の結果で確認。壊れる場合は False を試す |
+| C4 | 貼り付けただけで保存できるか（プレースホルダーのままの `Connection`／`ConnectionReferences`） | 上の 6-1 のとおり | 保存できなければ 6-2 の 1 または 2 |
 
 ---
-
 ## 7. アクション表
 
 - `Main.txt` のアクション行（`#` コメント・空行・`END` を除く）を上から順に並べた。**表の No と `Main.txt` の行は1対1で同じ順・同じ数（186行）**。資産4は 107 行で、資産5の No.5〜103（手順0〜4）、No.172〜176・184〜186（手順7 と `ErrorEnd` の資産4の行）は「資産4 の No.n と同じ」と書いてある（計 107 行）。新規は 79 行。
-- PAD のステータス バーのアクション数は、構文解析器で数えた 229 の見込み（コメントも1つ、ブロックのエラー時の設定は開始と1つ、If・Loop の終わりも1つと数える。実機は未確認）。
+- PAD のステータス バーのアクション数は、構文解析器で数えた 229 の見込み（コメントも1つ、ブロックのエラー時の設定は開始と1つ、If・Loop の終わりも1つと数える。）。最初の版の貼り付けでは実機でも 229 アクションと表示された（コネクタの 5 行が「不明なアクション」になった状態）。今の版の表示は未確認。コネクタの行の直前の `@@` の注釈の行は、アクションとして数えない（表にも入れていない）。
 - 「主な設定値」は `Main.txt` の行の要約（文字列は長いものを省略。`\\` は `Main.txt` での書き方のまま）。アクション名は PAD の日本語表示に近い名前で、表示と少し違う場合がある。
 - 手順5〜6 のブロックと `ErrorEnd` の中の `IF`／`ELSE`／`ON ERROR` も1行として数える。
 
@@ -264,7 +293,7 @@
 | 108 | 5-1 | Step5a_GetPrevious | 変数の設定 | `PreviousExists` ＝ False | `PreviousExists` | 新規 |
 | 109 | 5-1 | Step5a_GetPrevious | 変数の設定 | `PreviousNosKey` ＝ `,` | `PreviousNosKey` | 新規 |
 | 110 | 5-1 | Step5a_GetPrevious | 変数の設定 | `PreviousBinary` ＝ `NONE` | `PreviousBinary` | 新規 |
-| 111 | 5-1 | Step5a_GetPrevious | SharePoint コネクタのアクション（`GetFileContentByPath`） | 接続参照・サイト／投稿先はプレースホルダー。dataset: `<保存先サイト>` path: `%SharePointFolder%/latest.csv` inferContentType: False Result=> PreviousBinary | `PreviousBinary` | 新規 |
+| 111 | 5-1 | Step5a_GetPrevious | SharePoint コネクタのアクション（`GetFileContentByPath`） | 接続参照・サイト／投稿先はプレースホルダー。@dataset: `<保存先サイト>` @path: `%SharePointFolder%/latest.csv` @inferContentType: True @GetFileContentByPathResponse=> PreviousBinary（接続は `<SharePoint 接続参照ID>`、ConnectorId は `/providers/Microsoft.PowerApps/apis/shared_sharepointonline`） | `PreviousBinary` | 新規 |
 | 112 | 5-1 | Step5a_GetPrevious | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 新規 |
 | 113 | 5-1 | Step5a_GetPrevious | 最後のエラーを取得 | `PrevError Reset: False` | `PrevError` | 新規 |
 | 114 | 5-1 | Step5a_GetPrevious | If | PreviousBinary = `NONE` | — | 新規 |
@@ -275,7 +304,7 @@
 | 119 | 5-1 | Step5a_GetPrevious | ラベルに移動 | `ErrorEnd` | — | 新規 |
 | 120 | 5-1 | Step5a_GetPrevious | Else | — | — | 新規 |
 | 121 | 5-1 | Step5a_GetPrevious | 変数の設定 | `StepMessage` ＝ `手順5-1：前回の latest.csv は取得できましたが、内容を読み込めませんでした` | `StepMessage` | 新規 |
-| 122 | 5-1 | Step5a_GetPrevious | バイナリ データをファイルに変換 | BinaryData: PreviousBinary File: `%WorkFolder%\\previous.csv` IfFileExists: File.IfFileExists.Overwrite | — | 新規 |
+| 122 | 5-1 | Step5a_GetPrevious | バイナリ データをファイルに変換 | BinaryData: PreviousBinary File: `%WorkFolder%\\previous.csv` IfFileExists: File.IfExists.Overwrite | — | 新規 |
 | 123 | 5-1 | Step5a_GetPrevious | CSV ファイルから読み取ります | CSVFile: `%WorkFolder%\\previous.csv` Encoding: File.CSVEncoding.UTF8 TrimFields: False FirstLineContainsColumnNames: True ColumnsSeparator: File.CSVColumnsSeparator.Comma CSVTable=> PreviousTable | `PreviousTable` | 新規 |
 | 124 | 5-1 | Step5a_GetPrevious | データ テーブルの列をリストに取得 | DataTable: PreviousTable ColumnNameOrIndex: `申込番号` ColumnAsList=> PreviousNos | `PreviousNos` | 新規 |
 | 125 | 5-1 | Step5a_GetPrevious | For each | `PreviousNos` の各要素を `PreviousNo` に | `PreviousNo` | 新規 |
@@ -296,12 +325,12 @@
 | 140 | 5-3 | Step5c_Save | ラベルに移動 | `ErrorEnd` | — | 新規 |
 | 141 | 5-3 | Step5c_Save | 変数の設定 | `StepMessage` ＝ `手順5-3：SharePoint への履歴ファイルの保存に失敗しました（latest.csv…` | `StepMessage` | 新規 |
 | 142 | 5-3 | Step5c_Save | ファイルをバイナリ データに変換 | File: `%WorkFolder%\\%HistoryFileName%` BinaryData=> HistoryBinary | `HistoryBinary` | 新規 |
-| 143 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。dataset: `<保存先サイト>` folderPath: SharePointFolder name: HistoryFileName body: HistoryBinary | — | 新規 |
+| 143 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。@dataset: `<保存先サイト>` @folderPath: SharePointFolder @name: HistoryFileName @body: HistoryBinary @CreateFileResponse=> CreateFileResponse2 | — | 新規 |
 | 144 | 5-3 | Step5c_Save | 変数の設定 | `HistoryFileLink` ＝ `%SharePointSiteUrl%/%SharePointFolder%/%Histor…` | `HistoryFileLink` | 新規 |
 | 145 | 5-3 | Step5c_Save | テキストを置換する | Text: HistoryFileLink TextToFind: `\\x20` IgnoreCase: False ReplaceWith: `%%20` ActivateEscapeSequences: False Result=> HistoryFileLink | `HistoryFileLink` | 新規 |
 | 146 | 5-3 | Step5c_Save | 変数の設定 | `StepMessage` ＝ `手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の…` | `StepMessage` | 新規 |
 | 147 | 5-3 | Step5c_Save | ファイルをバイナリ データに変換 | File: `%WorkFolder%\\latest.csv` BinaryData=> LatestBinary | `LatestBinary` | 新規 |
-| 148 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。dataset: `<保存先サイト>` folderPath: SharePointFolder name: `latest.csv` body: LatestBinary | — | 新規 |
+| 148 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。@dataset: `<保存先サイト>` @folderPath: SharePointFolder @name: `latest.csv` @body: LatestBinary @CreateFileResponse=> CreateFileResponse | — | 新規 |
 | 149 | 6 | Step6_Notify | ブロック エラー発生時（ブロックの開始） | 名前：`Step6_Notify` | — | 新規 |
 | 150 | 6 | Step6_Notify | （直前のブロックのエラー時の設定） | 例外処理モード：フロー実行を続行する | — | 新規 |
 | 151 | 6 | Step6_Notify | ラベルに移動 | `ErrorEnd` | — | 新規 |
@@ -324,7 +353,7 @@
 | 168 | 6 | Step6_Notify | Else | — | — | 新規 |
 | 169 | 6 | Step6_Notify | 変数の設定 | `PostPattern` ＝ `新規0件` | `PostPattern` | 新規 |
 | 170 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount…` | `PostMessage` | 新規 |
-| 171 | 6 | Step6_Notify | Teams コネクタのアクション（`PostMessageToConversation`） | 接続参照・サイト／投稿先はプレースホルダー。poster: `Flow bot` location: `Chat with Flow bot` body_recipient: ChatRecipient body_messageBody: PostMessage | — | 新規 |
+| 171 | 6 | Step6_Notify | Teams コネクタのアクション（`PostMessageToConversation`） | 接続参照・サイト／投稿先はプレースホルダー。@poster: `Flow bot` @location: `Chat with Flow bot` @'body/recipient': ChatRecipient @'body/messageBody': PostMessage @PostMessageToConversationResponse=> PostMessageToConversationResponse | — | 新規 |
 | 172 | 7 | — | Web ブラウザーを閉じる | BrowserInstance: Browser | — | 資産4 の No.100 と同じ |
 | 173 | 7 | — | フローを停止する（正常終了） | 終了コード：0 | — | 資産4 の No.101 と同じ |
 | 174 | エラー時 | — | ラベル | `ErrorEnd` | — | 資産4 の No.102 と同じ |
@@ -335,7 +364,7 @@
 | 179 | エラー時 | — | datetime をテキストに変換 | DateTime: ErrorDateTime CustomFormat: `yyyy/MM/dd HH:mm` Result=> ErrorDateTimeText | `ErrorDateTimeText` | 新規 |
 | 180 | エラー時 | — | テキストを置換する | Text: `%StepMessage%` TextToFind: `(?s)^(手順[0-9〜-]+).*$` IgnoreCase: False ReplaceWith: `$1` ActivateEscapeSequences: False Result=> StopStep | `StopStep` | 新規 |
 | 181 | エラー時 | — | テキストを置換する | Text: `%ErrorDetail%` TextToFind: `\\r?\\n` IgnoreCase: False ReplaceWith: `<br>` ActivateEscapeSequences: False Result=> ErrorDetailHtml | `ErrorDetailHtml` | 新規 |
-| 182 | エラー時 | — | Teams コネクタのアクション（`PostMessageToConversation`） | 接続参照・サイト／投稿先はプレースホルダー。poster: `Flow bot` location: `Chat with Flow bot` body_recipient: ChatRecipient body_messageBody: `【申込状況チェック】取得に失敗しました。%StopStep% で停止（取得日時：%Error…` | — | 新規 |
+| 182 | エラー時 | — | Teams コネクタのアクション（`PostMessageToConversation`） | 接続参照・サイト／投稿先はプレースホルダー。@poster: `Flow bot` @location: `Chat with Flow bot` @'body/recipient': ChatRecipient @'body/messageBody': `【申込状況チェック】取得に失敗しました。%StopStep% で停止（取得日時：%Error…` | — | 新規 |
 | 183 | エラー時 | — | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 新規 |
 | 184 | エラー時 | — | メッセージを表示 | Title: `申込状況チェック_デモ（エラーで停止しました）` Message: `%StepMessage%（PAD のエラー情報：%ErrorDetail%）` Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed | `ButtonPressed` | 資産4 の No.105 と同じ |
 | 185 | エラー時 | — | Web ブラウザーを閉じる | BrowserInstance: Browser | — | 資産4 の No.106 と同じ |

@@ -163,7 +163,10 @@ END
     SET PreviousNosKey TO $''','''
     # 取得に成功すると PreviousBinary に latest.csv の内容（バイナリ）が入る。失敗した場合は NONE のまま
     SET PreviousBinary TO $'''NONE'''
-    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''GetFileContentByPath''' dataset: $'''<保存先サイト>''' path: $'''%SharePointFolder%/latest.csv''' inferContentType: False Result=> PreviousBinary
+    @@dataset: '<サイト名> - <保存先サイト>'
+    @@path: '%SharePointFolder%/latest.csv'
+    @@connectionDisplayName: '<SharePoint 接続参照名>'
+    External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline' OperationId: 'GetFileContentByPath' @dataset: $'''<保存先サイト>''' @path: $'''%SharePointFolder%/latest.csv''' @inferContentType: True @GetFileContentByPathResponse=> PreviousBinary
     ON ERROR
     END
     # 失敗の内容を残す（Reset: False。「ファイルが無い」以外の失敗なら、ErrorEnd でも同じエラー情報を表示する）
@@ -180,7 +183,7 @@ END
         END
     ELSE
         SET StepMessage TO $'''手順5-1：前回の latest.csv は取得できましたが、内容を読み込めませんでした'''
-        File.ConvertFromBinary BinaryData: PreviousBinary File: $'''%WorkFolder%\\previous.csv''' IfFileExists: File.IfFileExists.Overwrite
+        File.ConvertFromBinary BinaryData: PreviousBinary File: $'''%WorkFolder%\\previous.csv''' IfFileExists: File.IfExists.Overwrite
         File.ReadFromCSVFile.ReadCSV CSVFile: $'''%WorkFolder%\\previous.csv''' Encoding: File.CSVEncoding.UTF8 TrimFields: False FirstLineContainsColumnNames: True ColumnsSeparator: File.CSVColumnsSeparator.Comma CSVTable=> PreviousTable
         Variables.RetrieveDataTableColumnIntoList DataTable: PreviousTable ColumnNameOrIndex: $'''申込番号''' ColumnAsList=> PreviousNos
         # 比べやすいように ,申込番号,申込番号,…, の形の文字にする（前後と間をカンマで囲む）
@@ -214,13 +217,19 @@ ON BLOCK ERROR
 END
     SET StepMessage TO $'''手順5-3：SharePoint への履歴ファイルの保存に失敗しました（latest.csv は保存していません）'''
     File.ConvertToBinary File: $'''%WorkFolder%\\%HistoryFileName%''' BinaryData=> HistoryBinary
-    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''CreateFile''' dataset: $'''<保存先サイト>''' folderPath: SharePointFolder name: HistoryFileName body: HistoryBinary
+    @@dataset: '<サイト名> - <保存先サイト>'
+    @@folderPath: '%SharePointFolder%'
+    @@connectionDisplayName: '<SharePoint 接続参照名>'
+    External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline' OperationId: 'CreateFile' @dataset: $'''<保存先サイト>''' @folderPath: SharePointFolder @name: HistoryFileName @body: HistoryBinary @CreateFileResponse=> CreateFileResponse2
     # 履歴ファイルへのリンク（サイトの URL ＋ フォルダー ＋ ファイル名。空白は %20 にする）
     SET HistoryFileLink TO $'''%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%'''
     Text.Replace.ReplaceTextWithRegex Text: HistoryFileLink TextToFind: $'''\\x20''' IgnoreCase: False ReplaceWith: $'''%%20''' ActivateEscapeSequences: False Result=> HistoryFileLink
     SET StepMessage TO $'''手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の保存に失敗しました（latest.csv は前回のまま、または無い状態です）'''
     File.ConvertToBinary File: $'''%WorkFolder%\\latest.csv''' BinaryData=> LatestBinary
-    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''CreateFile''' dataset: $'''<保存先サイト>''' folderPath: SharePointFolder name: $'''latest.csv''' body: LatestBinary
+    @@dataset: '<サイト名> - <保存先サイト>'
+    @@folderPath: '%SharePointFolder%'
+    @@connectionDisplayName: '<SharePoint 接続参照名>'
+    External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline' OperationId: 'CreateFile' @dataset: $'''<保存先サイト>''' @folderPath: SharePointFolder @name: $'''latest.csv''' @body: LatestBinary @CreateFileResponse=> CreateFileResponse
 END
 # 手順6. Teams 投稿（毎回必ず1回投稿する。初回／新規あり／新規0件で文言を変える。投稿先は作成者本人の個人チャット）
 BLOCK Step6_Notify
@@ -251,7 +260,8 @@ END
             SET PostMessage TO $'''【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount% 件を確認しました）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileLink%'''
         END
     END
-    External.InvokeCloudConnector Connection: $'''<Teams 接続参照（作成時に設定）>''' ConnectorId: $'''shared_teams''' OperationId: $'''PostMessageToConversation''' poster: $'''Flow bot''' location: $'''Chat with Flow bot''' body_recipient: ChatRecipient body_messageBody: PostMessage
+    @@connectionDisplayName: '<Teams 接続参照名>'
+    External.InvokeCloudConnector Connection: '<Teams 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_teams' OperationId: 'PostMessageToConversation' @poster: $'''Flow bot''' @location: $'''Chat with Flow bot''' @'body/recipient': ChatRecipient @'body/messageBody': PostMessage @PostMessageToConversationResponse=> PostMessageToConversationResponse
 END
 # 手順7. 終了（正常時）
 WebAutomation.CloseWebBrowser BrowserInstance: Browser
@@ -268,7 +278,8 @@ IF NotifyOnError = $'''YES''' THEN
     # 止まった手順の名前（StepMessage の先頭の「手順◯◯」の部分。例：手順2-1）
     Text.Replace.ReplaceTextWithRegex Text: $'''%StepMessage%''' TextToFind: $'''(?s)^(手順[0-9〜-]+).*$''' IgnoreCase: False ReplaceWith: $'''$1''' ActivateEscapeSequences: False Result=> StopStep
     Text.Replace.ReplaceTextWithRegex Text: $'''%ErrorDetail%''' TextToFind: $'''\\r?\\n''' IgnoreCase: False ReplaceWith: $'''<br>''' ActivateEscapeSequences: False Result=> ErrorDetailHtml
-    External.InvokeCloudConnector Connection: $'''<Teams 接続参照（作成時に設定）>''' ConnectorId: $'''shared_teams''' OperationId: $'''PostMessageToConversation''' poster: $'''Flow bot''' location: $'''Chat with Flow bot''' body_recipient: ChatRecipient body_messageBody: $'''【申込状況チェック】取得に失敗しました。%StopStep% で停止（取得日時：%ErrorDateTimeText%）<br>%StepMessage%<br>（PAD のエラー情報：%ErrorDetailHtml%）'''
+    @@connectionDisplayName: '<Teams 接続参照名>'
+    External.InvokeCloudConnector Connection: '<Teams 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_teams' OperationId: 'PostMessageToConversation' @poster: $'''Flow bot''' @location: $'''Chat with Flow bot''' @'body/recipient': ChatRecipient @'body/messageBody': $'''【申込状況チェック】取得に失敗しました。%StopStep% で停止（取得日時：%ErrorDateTimeText%）<br>%StepMessage%<br>（PAD のエラー情報：%ErrorDetailHtml%）''' @PostMessageToConversationResponse=> PostMessageToConversationResponse2
     ON ERROR
     END
 END
@@ -298,5 +309,18 @@ END
     "ImportMetadata": {},
     "Name": "imgrepo"
   },
-  "ConnectionReferences": []
+  "ConnectionReferences": [
+    {
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+      "DisplayName": "<SharePoint 接続参照名>",
+      "LogicalName": "<SharePoint 接続参照ID>",
+      "ConnectionName": "<SharePoint 接続名>"
+    },
+    {
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+      "DisplayName": "<Teams 接続参照名>",
+      "LogicalName": "<Teams 接続参照ID>",
+      "ConnectionName": "<Teams 接続名>"
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-# 申込状況チェック_通知付き — 検証ログ（照合の結果・照合できなかったもの・実機の結果）
+# 申込状況チェック_通知付き — 検証ログ（照合の結果・実機の書式との照合と未確認・実機の結果）
 
 当日の手順は [README.md](./README.md)、設定値・エラー表・アクション表は [reference.md](./reference.md)。資産5（付加価値・保留）の記録で、デモ本編の資産4（`flows/application-check/`）の検証ログとは別。
 
@@ -6,8 +6,8 @@
 |----|------|
 | 1 | 経緯と今の版 |
 | 2 | PAD の定義との照合（今の版） |
-| 3 | **照合できなかったもの**（SharePoint・Teams のアクションなど） |
-| 4 | 実機の結果（**未実施**。結果が出てから追記する） |
+| 3 | 実機の PAD が出した書式との照合と、確認済み／未確認 |
+| 4 | 実機の結果（貼り付けの事実と、実行は未実施の欄） |
 | 5 | 実機で確認してほしいこと（レビュー②・進行役向け） |
 
 ---
@@ -16,31 +16,32 @@
 
 - 2026-10-20：人の決定でスプリント05 を付加価値（保留）として別資産 `flows/application-check-notify/` に作った。資産4の `Main.txt`（コミット `12be3e2` の版）を出発点にコピーし、手順5〜6 と失敗時の Teams 通知を足した（差分は reference.md の 1）。
 - 実機（デスクトップ版）で分かっていたこと：SharePoint「ファイルの作成」の「ファイル コンテンツ」はバイナリ必須（「ファイルをバイナリ データに変換」を経由）。フォルダーのパスは直接入力、サイトは一覧から選択。接続参照は作成済み。→ `Main.txt` に反映した。
-- 今の版の `Main.txt`：**コミット ID は未記入**（コミット後に進行役が追記する。`<コミット ID>`）。実機で試す前に、この版のコミット ID を記録する。
+- 2026-10-20（実機の貼り付け）：最初の版（コミット `1c93b3f`）を実機（PAD 11.2609.183.0）に貼り付けたところ、229 アクションで貼り付けはできたが、SharePoint・Teams のコネクタ 5 行が「不明なアクション」になり、保存できなかった（「コネクタ定義の準備に失敗しました」）。デスクトップ版のセッションが手で配置し直して保存に成功し、PAD が出力した実際の書式を報告してきた。→ `Main.txt` のコネクタ 5 行と `File.ConvertFromBinary` の列挙値、末尾の `ConnectionReferences` を、その書式に直した（reference.md の 6-1、D11）。
+- 今の版の `Main.txt`：**コミット ID は未記入**（コミット後に進行役が追記する。`<コミット ID>`）。直した版を実機に貼り付けて保存できるかは**未確認**。
 
 ## 2. PAD の定義との照合（今の版。2026-10-20）
 
-照合に使ったのは、この PC の PAD 11.2609.183.0 の構文解析器（`Microsoft.Flow.RPA.Desktop.Robin.Language.dll` の `LangParser.GetStatements`）と、各アクション モジュール（`Microsoft.Flow.RPA.Desktop.Modules.*.Actions.dll`）の定義（PowerShell で読み込み、`ActionAttribute` の `Name` → `Id` → クラス名、`ThrowsAttribute`、セレクターの `ActionName` と引数、列挙値を確認）。04b〜04d と同じ方法で、SharePoint・Teams の定義だけはローカルに無い（3）。
+照合に使ったのは、この PC の PAD 11.2609.183.0 の構文解析器（`Microsoft.Flow.RPA.Desktop.Robin.Language.dll` の `LangParser.GetStatements`）と、各アクション モジュール（`Microsoft.Flow.RPA.Desktop.Modules.*.Actions.dll`）の定義（PowerShell で読み込み、`ActionAttribute`・`ThrowsAttribute`・セレクターの引数・列挙値を確認）。04b〜04d と同じ方法。SharePoint・Teams のコネクタのアクションの定義はローカルに無いが、**今の版のコネクタ 5 行の書式は、実機の PAD が出力したもの（デスクトップ版のセッションの報告）に合わせてある**（3 で、実機で確認済みのものと未確認のものを分けた）。
 
 | 確認したこと | 結果 |
 |--------------|------|
-| 構文解析器（`LangParser.GetStatements`） | **エラー 0**、**229 ステートメント**（内訳：アクション 44、コネクタ 5、代入 56、コメント 41、If 17、Else 4、End 31、ブロック 9、For each 4、Loop 1、Wait 7、Goto 6、エラー取得 2、Label 1、Exit 1）。PAD のステータス バーの表示は実機で確認していない（資産4は構文解析器の数と実機の表示が一致していた） |
-| 書き戻し（解析結果を PAD の書式で文字列に戻す） | 空でない行 278 行のうち **277 行が一致**。残る 1 行は、前回取得のコネクタの行の末尾 `Result=> PreviousBinary`（構文解析器はコネクタのアクションの出力を書き戻さない）。**貼り付けでこの出力が引き継がれない可能性があるため、README の 3 の 4b に人が設定する手順を書いた** |
+| 構文解析器（`LangParser.GetStatements`） | **エラー 0**、**229 ステートメント**（内訳：アクション 44、コネクタ 5、代入 56、コメント 41、If 17、Else 4、End 31、ブロック 9、For each 4、Loop 1、Wait 7、Goto 6、エラー取得 2、Label 1、Exit 1）。最初の版を実機に貼り付けたときの PAD の表示も 229 アクションで、構文解析器の数と一致した。今の版の実機の表示は未確認 |
+| 書き戻し（解析結果を PAD の書式で文字列に戻す） | 空でない行 289 行のうち **289 行が一致**（`@@` の注釈の行・コネクタの出力の `@…=> 変数` を含む。最初の版で一致しなかった出力の行も、実機の書式にしたことで一致した）。コネクタの行の直前の `@@` の注釈の行は、構文解析器が直後のステートメントに付くものとして受け付ける（ステートメント数は増えない） |
 | 手順0〜4 の回帰 | `Main.txt` の手順0〜4（`# 手順0. 初期化` から `Step4_WriteCsv` の `END` まで 144 行）は、資産4（`12be3e2`）と**文字単位で同じ**。アクション行は資産4の 107 行がすべて順に含まれる（reference.md の 7 で No. の対応を確認できる） |
-| UI 要素の定義（末尾の JSON） | マーカー行から最後まで資産4と**バイト単位で同じ**（3画面・8要素・`CustomSelector` 同じ・`InstanceId` 重複なし）。マーカー行は 1 回。`appmask` の参照は延べ 13 か所（資産4と同じ。資産5で UI 要素は足していない） |
-| 未定義の変数・括弧・ブロック | 未定義の変数 0（ラベル `ErrorEnd` と UI 要素 `appmask` を除く）。`BLOCK`／`IF`／`LOOP` と `END` の入れ子は閉じている。`'''` の対はパーサーが受け付けた |
+| UI 要素の定義（末尾の JSON） | `Repository` 部分（3画面・8要素・`CustomSelector` 同じ・`InstanceId` 重複なし）は資産4と**同じ**。違うのは末尾の `ConnectionReferences`（資産4は空、今の版はプレースホルダー 2 件。JSON として読めることを確認）。マーカー行は 1 回。`appmask` の参照は延べ 13 か所（資産4と同じ） |
+| 未定義の変数・括弧・ブロック | 未定義の変数 0（ラベル `ErrorEnd` と UI 要素 `appmask` を除く）。`BLOCK`／`IF`／`LOOP`（31）と `ON ERROR`／`ON BLOCK ERROR`（20）の合計 51 に対し `END` が 51 で、入れ子は閉じている。`'''` の対はパーサーが受け付けた |
 | **新しく使ったアクションの名前・パラメーター名・列挙値**（ローカルの定義と照合） | **不一致 0**（下の表の 10 種類・14 か所。資産4から引き継いだ行は資産4の照合〔04d：38 か所不一致 0〕の対象と同じ行） |
-| `ON ERROR` の付け先 | 11 か所（下の表）。ローカルの定義でエラーの種類を宣言しているのは 9 か所、残る 2 か所はコネクタ（3 の A6）。**宣言していないアクションへの `ON ERROR` は 0**（照合できたものについて） |
+| `ON ERROR` の付け先 | 11 か所（下の表）。ローカルの定義でエラーの種類を宣言しているのは 9 か所、残る 2 か所はコネクタ（3 の A9）。**宣言していないアクションへの `ON ERROR` は 0**（照合できたものについて） |
 | `NEXT ACTION`（構文解析器は通すがデザイナーが受け付けない書き方） | **0 件**。`ON ERROR` の中身はすべて空 |
 | 固定秒数の待機 | `WAIT 2` の 1 か所だけ（資産4と同じ） |
-| 実値 | SharePoint のサイト名・URL・フォルダー名・Teams の投稿先・接続の名前・ID・メールアドレス・テナント名は `Main.txt` に無い（`<保存先サイトの URL>`・`<保存先フォルダー>`・`<投稿先>`・`<保存先サイト>`・`<SharePoint 接続参照（作成時に設定）>`・`<Teams 接続参照（作成時に設定）>` のプレースホルダー）。URL は `http://localhost:8080` のみ。ID/PW は demo-user／demo-pass のみ |
+| 実値 | SharePoint のサイト名・URL・フォルダー名・Teams の投稿先・接続の名前・ID（GUID）・メールアドレス・テナント名は `Main.txt` に無い（`<保存先サイトの URL>`・`<保存先フォルダー>`・`<投稿先>`・`<保存先サイト>`・`<サイト名> - <保存先サイト>`・`<SharePoint 接続参照ID／名／接続名>`・`<Teams 接続参照ID／名／接続名>` のプレースホルダー）。URL は `http://localhost:8080` のみ。ID/PW は demo-user／demo-pass のみ |
 
 **新しく使ったアクション（資産5で追加。ローカルの定義と照合できたもの）**
 
 | アクション（`Main.txt`） | アクション クラス | 確認したこと |
 |--------------------------|-------------------|--------------|
 | `File.ConvertToBinary`（No.142・147） | `ConvertFileToBinaryAction`（`Name`・`Id` なし → クラス名から `ConvertToBinary`）。セレクターなし | 引数 `File`（入力）・`BinaryData`（出力）。`ThrowsAttribute`：`FileNotFoundError`・`ConvertFileToBinaryError`。「ファイルをバイナリ データに変換」に当たる |
-| `File.ConvertFromBinary`（No.122） | `ConvertBinaryToFileAction`。セレクターなし | 引数 `BinaryData`・`File`・`IfFileExists`（列挙：`DoNothing`／`Overwrite`。`Overwrite` を使用）。`ThrowsAttribute`：`InvalidDirectoryError`・`ConvertBinaryToFileError` |
+| `File.ConvertFromBinary`（No.122） | `ConvertBinaryToFileAction`。セレクターなし | 引数 `BinaryData`・`File`・`IfFileExists`。**このアクションの `IfFileExists` の列挙型は `IfExists`（`DoNothing`／`Overwrite`）なので、`File.IfExists.Overwrite` と書く**（最初の版は `File.IfFileExists.Overwrite` と書いていて誤り。実機の出力で気づき、定義を確認して直した。`File.WriteToCSVFile.WriteCSV` の `IfFileExists` は別の列挙型 `IfFileExists`〔`Overwrite`／`Append`〕で、`File.IfFileExists.Overwrite` のままで正しい）。`ThrowsAttribute`：`InvalidDirectoryError`・`ConvertBinaryToFileError` |
 | `File.ReadFromCSVFile.ReadCSV`（No.123） | `ReadFromCSVFileAction`、セレクター `ReadFromCSVFileSelector`（`ActionName` ＝ `ReadCSV`） | 引数 `CSVFile`・`Encoding`（列挙 `UTF8`）・`TrimFields`・`FirstLineContainsColumnNames`・`ColumnsSeparator`（列挙 `Comma`）・`CSVTable` はすべてセレクターの引数に含まれる。`ThrowsAttribute`：`ReadFromCsvError` |
 | `Variables.RetrieveDataTableColumnIntoList`（No.124） | 同名クラス。セレクターなし | 引数 `DataTable`・`ColumnNameOrIndex`（文字列）・`ColumnAsList`（出力・リスト）。`ThrowsAttribute`：`ColumnNameNotFoundError`・`ColumnIndexOutOfRangeError` |
 | `Variables.AddRowToDataTable.AppendRowToDataTable`（No.137。資産4 No.88 と同じセレクター） | `AddRowToDataTable` | `RowToAdd` の型は `List<object>` なので、14個の要素のリストで渡している（行オブジェクトそのものは渡していない） |
@@ -55,39 +56,49 @@
 | アクション表 No. | アクション | エラーの種類の宣言（`ThrowsAttribute`） | 付けられるか |
 |------------------|------------|------------------------------------------|--------------|
 | 資産4から引き継いだ 8 か所 | ウィンドウにフォーカス（3）・テキスト入力（2）・JavaScript・クリック・待機 | 資産4の照合表（04d）のとおり | 付けられる（資産4で実機確認済み） |
-| 111（→112） | `External.InvokeCloudConnector`（前回の `latest.csv` の取得） | ローカルに無い（3 の A6）。構文解析器は受け付けた | 構文解析器は受け付けた。デザイナーの検証は**未確認** |
+| 111（→112） | `External.InvokeCloudConnector`（前回の `latest.csv` の取得） | ローカルに無い。実機の PAD が出力した形（`ON ERROR`／`END`、内容は「フロー実行を続行する・次のアクションに移動」）に合わせた | 実機の PAD が出力した形。今の版の貼り付け・保存は未確認 |
 | 182（→183） | `External.InvokeCloudConnector`（失敗通知の Teams 投稿） | 同上 | 同上 |
 | 185（→186） | `WebAutomation.CloseWebBrowser` | `CloseWebBrowserError` | 付けられる（資産4と同じ） |
 
-## 3. 照合できなかったもの（正直な記録）
+## 3. 実機の PAD が出した書式との照合と、確認済み／未確認
 
-SharePoint と Teams のアクションは、PAD の「クラウド コネクタ」として実行時に Microsoft のサービスから定義（Swagger）が取得される。この PC のインストール先・ローカルの保存先（`%LOCALAPPDATA%` 配下）を調べたが、SharePoint・Teams の定義ファイルは**見つからなかった**。そのため次は**照合できていない**。`Main.txt` に書いた値は、コネクタの一般的な操作名と入力名に基づく**推測**で、実機の貼り付け・設定で補う。
+SharePoint・Teams のアクションは、PAD の「クラウド コネクタ」として実行時に Microsoft のサービスから定義が取得されるため、この PC のローカルには定義が無く、ローカルの照合はできない。代わりに、**実機（PAD 11.2609.183.0）の事実**を根拠にする。
 
-| # | 照合できなかったこと | `Main.txt` に書いたこと（推測） | 補う方法 |
-|---|----------------------|----------------------------------|----------|
-| A1 | コネクタのアクションの書式 | PAD の構文解析器が持つ `InvokeCloudConnectorStatement`（アクション名 `External.InvokeCloudConnector`、静的な入力 `Connection`・`ConnectorId`・`OperationId`、省略できる `timeout`、動的な入力・出力）に合わせた。構文解析器はこの書式を受け付けた（エラー 0） | 実機の貼り付け（5-13）。受け付けられない場合は reference.md の 6 で手で配置する |
-| A2 | `Connection`（接続参照）の書き方 | プレースホルダーの文字列。実際の接続参照の指定の書式は不明 | 貼り付け後、各アクションで作成済みの接続参照を選ぶ（README の 3 の 1） |
-| A3 | SharePoint の操作名と入力名 | `GetFileContentByPath`（`dataset`・`path`・`inferContentType`）、`CreateFile`（`dataset`・`folderPath`・`name`・`body`） | 貼り付け後、PAD の画面の項目に合わせて選び直す（reference.md の 6）。動的な入力名の書き方（`/` を含む名前は構文解析器が受け付けない）は不明 |
-| A4 | Teams の操作名と入力名 | `PostMessageToConversation`（`poster`・`location`・`body_recipient`・`body_messageBody`）。**作成者の個人チャット（Flow ボットとのチャット）に投稿できるか、デスクトップ版のコネクタで使えるかも未確認** | 実機（5-14〜5-16・5-18）。できない場合は人が代替の投稿先を決める |
-| A5 | SharePoint の `CreateFile` の出力と、既存の `latest.csv` の上書き | 出力は使っていない（リンクはサイトの URL ＋フォルダー＋ファイル名から組み立てる）。**上書きされるか不明** | 実機（5-15）。上書きされずにエラーになる場合は、ファイルの更新に変える |
-| A6 | コネクタのアクションに付ける `ON ERROR` のエラーの種類 | 構文解析器は受け付けた。`Language.dll` に `ConnectorTimeoutError`・`ConnectorExecutionError` の文字列があることは確認したが、`ThrowsAttribute` による宣言はローカルに無く、デザイナーの検証は未確認 | 実機の貼り付け（エラー ペインの件数） |
-| A7 | 前回の `latest.csv` が「無い」ときのエラー情報の文面 | `404`／`NotFound`／`not found`／`見つかりません`／`存在しません` のどれかを含めば「無い」と判定（reference.md の 4） | 実機（5-14）。初回で別の失敗として止まったら、文面を報告して判定の文字を直す |
-| A8 | コネクタのアクションの出力（ファイルの内容）を変数 `PreviousBinary` に入れる設定 | `Result=> PreviousBinary`（構文解析器は書き戻さない） | 貼り付け後に人が設定（README の 3 の 4b） |
-| A9 | `<br>` で改行した本文が Teams に正しく表示されるか。`%%20`（`%20` に置換）が期待どおりか | `<br>`・`%%20` | 実機（5-14・5-15） |
+### 3-1. 実機で起きた事実（デスクトップ版のセッションの報告。2026-10-20）
 
-- 構文解析器は、アクションの名前や設定の正しさの根拠にならない（資産4の 10-0 と同じ）。上の A1〜A9 は、実機で貼り付け・設定・実行してはじめて分かる。**「照合できた」とは書いていない。**
+- 最初の版（コミット `1c93b3f`）の `Main.txt` を貼り付けた：229 アクションで貼り付けはできた。
+- SharePoint・Teams のコネクタ 5 行が「不明なアクション」になり、保存できなかった（「コネクタ定義の準備に失敗しました」）。
+- デスクトップ版のセッションが手で配置し直して保存に成功し、PAD が出力した書式を報告してきた：`@@dataset`／`@@path`／`@@folderPath`／`@@connectionDisplayName` の注釈の行、`Connection: '<GUID>'`、`ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_…'`、`OperationId: '…'`、`@` 付きの入力・出力、`File.IfExists.Overwrite`、末尾の `ConnectionReferences`（`ConnectorId`／`DisplayName`／`LogicalName`／`ConnectionName`）。
+- 最初の版の誤り：コネクタの書式のほか、`File.ConvertFromBinary` の列挙値（`File.IfFileExists.Overwrite` → 正しくは `File.IfExists.Overwrite`。ローカルの定義でも確認）、`inferContentType` の値（False → 実機の既定は True）。
 
-## 4. 実機の結果（未実施。デスクトップ版の実行結果が出てから追記する）
+### 3-2. 今の版の確認状況
+
+| # | 項目 | 状況 |
+|---|------|------|
+| A1 | コネクタのアクションの書式 | **実機の PAD が出した書式に合わせて直した**。構文解析器はエラー 0・書き戻しが全行一致。**直した版の貼り付け・保存は未確認** |
+| A2 | `Connection`（接続参照 ID）・接続参照名・サイト・フォルダー・投稿先 | **プレースホルダーのまま**（実値は書かない）。貼り付けただけで保存できるかは**未確認**。再設定の手順は README の 3、reference.md の 6-2 |
+| A3 | `ConnectionReferences`（末尾の JSON）のプレースホルダー 2 件 | キー名は実機の報告どおり。値はプレースホルダー。この形での貼り付けは**未確認** |
+| A4 | Teams の操作名と入力名（`PostMessageToConversation`、`poster`・`location`・`body/recipient`・`body/messageBody`） | 実機の PAD が出した形。**作成者の個人チャット（Flow ボット）への投稿が実際にできるかは未確認** |
+| A5 | **C1：`PreviousBinary` の型**（`GetFileContentByPathResponse`） | **未確認**。応答型で、ファイルの内容そのものではない可能性がある。`File.ConvertFromBinary` に直接渡しているので、実行時に変数ペインで確認する。違った場合の直し方は reference.md の 6-3 |
+| A6 | **C2：`latest.csv` の上書き** | **未確認（推測）**。SharePoint「ファイルの作成」に「ファイルが存在する場合」の設定が無く、上書きできない可能性が高い。`Main.txt` は現時点の最善の形（`CreateFile` のまま）。候補（削除してから作成／ファイルの更新）は reference.md の 6-3 |
+| A7 | **C3：`inferContentType`** | 実機の既定の True にした。True で日本語が文字化けしないかは**未確認** |
+| A8 | 前回の `latest.csv` が「無い」ときのエラー情報の文面 | `404`／`NotFound` など 5 種の文字で判定する**推測**。応答型の変数に変わったことで、取得失敗時に `PreviousBinary` が `NONE` のまま残る前提が成り立つかも**未確認** |
+| A9 | コネクタのアクションに付ける `ON ERROR`（No.111・182） | 実機の PAD の出力にも `ON ERROR`／`END` があった（続行・次のアクションへ）。形は一致。実際に失敗を続行できるかは**未実行** |
+| A10 | `<br>` で改行した本文が Teams に正しく表示されるか。`%%20`（`%20` に置換）が期待どおりか | **未確認** |
+
+- 構文解析器は、アクションの名前や設定の正しさの根拠にならない（資産4の 10-0 と同じ）。**「実機で動いた」とは書いていない。**
+
+## 4. 実機の結果（実行は未実施。デスクトップ版の実行結果が出てから追記する）
 
 | 項目 | 内容 |
 |------|------|
-| 日付・PAD の版・試した `Main.txt` のコミット ID | **未実施**（`<コミット ID>`） |
-| 5-13 貼り付け・保存・設定 | **未確認**（貼り付け直後と設定後のエラー ペインの件数、ステータス バーのアクション数〔見込み 229〕、UI 要素の画面数・要素数〔3・8〕、README の設定手順のとおりだったか） |
+| 最初の版（`1c93b3f`）の貼り付け | 2026-10-20、PAD 11.2609.183.0。229 アクションで貼り付けできたが、コネクタ 5 行が「不明なアクション」で保存できなかった（3-1）。手で配置し直して保存に成功 |
+| 今の版の貼り付け・保存・設定（5-13） | **未確認**（`<コミット ID>`。貼り付け直後と設定後のエラー ペインの件数、ステータス バーのアクション数〔見込み 229〕、UI 要素の画面数・要素数〔3・8〕、README の設定手順のとおりだったか） |
 
 | 場面（順序は 初回 → 新規あり → 新規0件 → Excel で確認 → 失敗） | 条件 | 開始／終了時刻 | 結果 | Teams の投稿（届いたか・文言） | SharePoint の状態 | CSV の確認 |
 |---------------------------------------------------------------|------|----------------|------|-------------------------------|-------------------|------------|
 | 5-14 初回 | モック20件・`latest.csv` 無し | 未実施 | 未確認 | 未確認（「初回実行のため、全 20 件を保存しました（比較する前回データがありません）」＋リンク） | 未確認（履歴ファイルと `latest.csv`） | 未確認（4,135 バイト・BOM あり・14列・20行） |
-| 5-15 新規あり | モック22件（2件追加）・`latest.csv` は20件 | 未実施 | 未確認 | 未確認（「新規案件が 2 件あります」＋2件の内容＋リンク） | 未確認（`latest.csv` が上書きされ22件） | 未確認（22行） |
+| 5-15 新規あり | モック22件（2件追加）・`latest.csv` は20件 | 未実施 | 未確認 | 未確認（「新規案件が 2 件あります」＋2件の内容＋リンク） | 未確認（`latest.csv` が上書きされ22件。C2） | 未確認（22行） |
 | 5-16 新規0件 | モック22件のまま再実行 | 未実施 | 未確認 | 未確認（「新規案件はありません（全 22 件を確認しました）」＋リンク） | 未確認 | 未確認 |
 | 5-17 SharePoint 上の CSV を Excel で開く | — | 未実施 | 未確認 | — | — | 未確認 |
 | 5-18 失敗（モックを止める） | モックのサーバーを停止 | 未実施 | 未確認 | 未確認（「取得に失敗しました。手順◯◯で停止」・リンクなし） | 未確認（実行前から変わらない） | 未確認（ローカルに今回分が出力されない） |
@@ -99,9 +110,12 @@ SharePoint と Teams のアクションは、PAD の「クラウド コネクタ
 
 | # | 内容 |
 |---|------|
+| R0 | 直した版の `Main.txt` を貼り付けて保存できるか（プレースホルダーのまま／接続参照・サイトを選び直したあと）。保存できない場合は、エラーの文言と、どの行かを報告（reference.md の 6-2） |
 | R1 | `IF Contains(…)`、`%NewRow[0]%`（データ テーブルの行の列を番号で指定）、`%CurrentTable.RowsCount%`、`SET x TO x + y`（文字・数値の連結）が PAD で意図どおり動くか（エラー ペイン、投稿文の内容） |
 | R2 | Teams の作成者の個人チャット（Flow ボット）への投稿がデスクトップ版のコネクタでできるか（できない場合の扱いは人が決める） |
-| R3 | SharePoint の「ファイルの作成」で、既存の `latest.csv` が上書きされるか。履歴ファイルのリンク（サイトの URL ＋フォルダー＋ファイル名）が開けるか |
-| R4 | 前回の `latest.csv` が無いときのエラー情報の文面（reference.md の 4 の判定の文字で「無い」と判定できるか） |
+| R3 | **C2**：SharePoint の「ファイルの作成」で、既存の `latest.csv` が上書きされるか（されなければ、削除してから作成／ファイルの更新に変える。reference.md の 6-3）。履歴ファイルのリンク（サイトの URL ＋フォルダー＋ファイル名）が開けるか |
+| R4 | 前回の `latest.csv` が無いときのエラー情報の文面（reference.md の 4 の判定の文字で「無い」と判定できるか）。取得失敗時に `PreviousBinary` が `NONE` のままか |
 | R5 | 失敗通知の `手順◯◯` が、画面のメッセージの先頭と同じ文言で投稿されるか（`StopStep` の正規表現）。PAD のエラー情報にユーザー名を含むパスが残っていないか |
 | R6 | 失敗通知の投稿自体を失敗させた場合に、画面のメッセージとブラウザーを閉じる処理が飛ばされないか（任意。実機で再現しにくい） |
+| R7 | **C1**：`PreviousBinary` の型と中身（変数ペイン）。`File.ConvertFromBinary` がそのまま使えたか、プロパティを指定する必要があったか |
+| R8 | **C3**：`inferContentType` が True で、`previous.csv` の日本語が壊れないか |
