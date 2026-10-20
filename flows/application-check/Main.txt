@@ -1,7 +1,7 @@
 # ===== 申込状況チェック_デモ（Main サブフロー）=====
 # スプリント04：docs/flow.md 手順0〜4 と 手順7（ブラウザを閉じる）
 # 末尾の ControlRepository の行と JSON は UI 要素（U1〜U7・U22 の8要素）の定義。末尾まで全文をコピーして貼り付けると UI 要素も登録される
-# 貼り付け方法・UI 要素表・アクション表は README.md を参照
+# 貼り付け方法は README.md、UI 要素表・アクション表は reference.md を参照
 # 手順0. 初期化
 BLOCK Step0_Init
 ON BLOCK ERROR
@@ -152,7 +152,7 @@ WebAutomation.CloseWebBrowser BrowserInstance: Browser
 EXIT Code: 0
 # ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない）=====
 LABEL ErrorEnd
-# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる。「テキストを置換する」には個別のエラー時の設定（ON ERROR）を付けられないので付けない（README 10-0f）
+# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる。「テキストを置換する」には個別のエラー時の設定（ON ERROR）を付けられないので付けない（verification-log.md 10-0f）
 ERROR => LastError Reset: True
 Text.Replace.ReplaceTextWithRegex Text: $'''%LastError%''' TextToFind: $'''(?m)[A-Za-z]:\\\\Users\\\\.*?(?=申込状況チェック_デモ|$)''' IgnoreCase: True ReplaceWith: $'''<ユーザー フォルダー>''' ActivateEscapeSequences: False Result=> ErrorDetail
 Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: $'''%StepMessage%（PAD のエラー情報：%ErrorDetail%）''' Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
