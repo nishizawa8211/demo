@@ -1,7 +1,7 @@
-# スプリント契約 — 04c フロー前半の PAD 実機確認と修正（`04c-flow-pad-check`）
+# スプリント合格基準書 — 04c フロー前半の PAD 実機確認と修正（`04c-flow-pad-check`）
 
-> Evaluator が `docs/criteria.md`（スプリント04・共通条件・人のレビュー② R1・R5〜R7）、`docs/flow.md`（手順1〜4・4 エラー時）、`docs/screens.md`（1-1・S2 の件数表示）、`docs/demo-script.md` 1-2、`CLAUDE.md`、`.claude/agents/evaluator.md` 3、`sprints/04b-flow-ui-elements/contract.md`、ブランチ `sprint/04c-flow-pad-check`（`ba8d543`）の `flows/application-check/Main.txt`・`README.md`（とくに 10-0b・10-1）、および 04c の中で PAD 11.2609 の実機で分かったこと（下の 0-1）をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント04・共通条件・人のレビュー② R1・R5〜R7）、`docs/flow.md`（手順1〜4・4 エラー時）、`docs/screens.md`（1-1・S2 の件数表示）、`docs/demo-script.md` 1-2、`CLAUDE.md`、`.claude/agents/evaluator.md` 3、`sprints/04b-flow-ui-elements/pass-criteria.md`、ブランチ `sprint/04c-flow-pad-check`（`ba8d543`）の `flows/application-check/Main.txt`・`README.md`（とくに 10-0b・10-1）、および 04c の中で PAD 11.2609 の実機で分かったこと（下の 0-1）をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -19,9 +19,9 @@
 | 実機の報告に含めてもらうもの | 各条件の「報告で判定する内容」列のとおり。報告の日時・PAD の版（11.2609.183.0 など）・試した `Main.txt` のコミット ID を必ず含める |
 | 証跡 | `evidence/04c-flow-pad-check/review-XX_<条件番号>.txt`（スクリプト出力・Grep 結果・報告の要約）。デスクトップ版から渡されたスクリーンショットは `evidence/04c-flow-pad-check/review-XX_<条件番号>.png` 等に置く（または渡されたパスを根拠の欄に書く）。**証跡にユーザー名を含むパス（`C:\Users\<名前>\…`）・コンピューター名・アカウント名を書かない**（CSV の場所は `<ドキュメント>\申込状況チェック_デモ\…` と書く） |
 
-### 0-1. 04c の中で実機（PAD 11.2609.183.0）で分かっていること（契約の前提）
+### 0-1. 04c の中で実機（PAD 11.2609.183.0）で分かっていること（合格基準書の前提）
 
-| # | 分かったこと | 本契約での扱い |
+| # | 分かったこと | 本合格基準書での扱い |
 |---|--------------|----------------|
 | P1 | 貼り付けは成功。UI 要素は 3画面・22要素が登録された（R-19・R-20 確認済み）。`NEXT ACTION` の削除は `47401c7` で済んでいる | 修正後の `Main.txt` でも再確認する（4c-3） |
 | P2 | R-2：エラー時に `ErrorEnd` へ移動し、メッセージを表示し、ブラウザーを閉じて終わることを確認した（サーバーを止めて試した） | README への反映を確認する（4c-8） |
@@ -35,9 +35,9 @@
 
 | 項目 | 内容 |
 |------|------|
-| ブランチ | `sprint/04c-flow-pad-check`（契約時点 `ba8d543`） |
+| ブランチ | `sprint/04c-flow-pad-check`（合格基準書の作成時点 `ba8d543`） |
 | 採点対象 | `flows/application-check/` 配下（`Main.txt`・`README.md`。ファイルを追加した場合はそれも） |
-| 比較の基準 | `git show ba8d543:flows/application-check/Main.txt`・`README.md`（契約時点） |
+| 比較の基準 | `git show ba8d543:flows/application-check/Main.txt`・`README.md`（合格基準書の作成時点） |
 | `mock/`・`docs/` | 本スプリントで変更しない。`git diff ba8d543 -- mock docs` が空であることを確認する |
 | 「アクション行」の定義 | `Main.txt` のうち `# [ControlRepository][PowerAutomateDesktop]` の行より前で、`#` コメント・空行・`END` を除いた行（04・04b と同じ数え方） |
 | 実機の実行環境 | PAD 11.2609 系・Microsoft Edge・PAD の Edge 拡張機能が有効。モックは `node mock/server.js`（ポート 8080）。実行前に一覧のデモ操作で［初期データに戻す］→［実行する］で 20 件にしておく（4c-6 を除く） |
@@ -78,7 +78,7 @@
 
 ### criteria.md・README 10-1 との対応
 
-| 元の条件 | 本契約 |
+| 元の条件 | 本合格基準書 |
 |----------|--------|
 | criteria 4-2（手順0〜4 をすべて含む） | 4c-9 (c)、実機では 4c-5 |
 | criteria 4-3（セレクター方針） | 4c-9 (a) |

@@ -1,7 +1,7 @@
-# スプリント契約 — 03 申込詳細画面（`03-detail-screen`）
+# スプリント合格基準書 — 03 申込詳細画面（`03-detail-screen`）
 
-> Evaluator が `docs/criteria.md`（スプリント03・共通条件）、`docs/screens.md`（1・1-1・1-2・2・S2・S3・4）、`docs/flow.md`（手順3）、`CLAUDE.md`、前スプリントの `sprints/01-list-screen/contract.md`・`review-01.md`、`sprints/02-login-screen/contract.md`・`review-01.md`（申し送り）をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント03・共通条件）、`docs/screens.md`（1・1-1・1-2・2・S2・S3・4）、`docs/flow.md`（手順3）、`CLAUDE.md`、前スプリントの `sprints/01-list-screen/pass-criteria.md`・`review-01.md`、`sprints/02-login-screen/pass-criteria.md`・`review-01.md`（申し送り）をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -93,5 +93,5 @@
 
 - 詳細画面での「新規案件を追加」「初期データに戻す」（詳細画面にはデモ操作エリアを置かない。C1 で「無いこと」だけ確認）
 - データ取得失敗時（サーバー停止中など）の詳細画面の表示（criteria の対象外。採点しない）
-- スプリント01・02 の条件のうち、本契約の R1〜R3 に含めないもの（列順・並び順の再読み込み比較・サーバー再起動後の保持・追加候補の再現性・`/` の表示・ログイン済みでのログイン画面表示など）は再採点しない
+- スプリント01・02 の条件のうち、本合格基準書の R1〜R3 に含めないもの（列順・並び順の再読み込み比較・サーバー再起動後の保持・追加候補の再現性・`/` の表示・ログイン済みでのログイン画面表示など）は再採点しない
 - PAD フローの実行確認（Evaluator の範囲外。人のレビュー②）

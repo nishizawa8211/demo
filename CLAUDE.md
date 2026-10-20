@@ -18,13 +18,13 @@
 | Evaluator | `.claude/agents/evaluator.md` | `sprints/*/review-*.md`, `evidence/` |
 
 - 自分の担当外のフォルダは **読むだけ** にする。
-- `sprints/*/contract.md` は Evaluator と Generator の合意として作成し、以後スプリント中は変更しない。
+- `sprints/*/pass-criteria.md` は Evaluator と Generator の合意として作成し、以後スプリント中は変更しない。
 - `sprints/README.md`（スプリント実施状況の一覧）は、全体の進行役（`/sprint` を回すメインのセッション）が更新する。
 
 ## 進め方
 1. 人が `input/brief.md` を書く
 2. Planner が `docs/` 一式を作成 → **人のレビュー①**
-3. `/sprint <画面名 or フロー名>` でスプリントを回す（契約 → 実装 → 採点 → 差し戻し、上限3回）
+3. `/sprint <画面名 or フロー名>` でスプリントを回す（合格基準書 → 実装 → 採点 → 差し戻し、上限3回）
 4. 全スプリント完了後 → **人のレビュー②**（画面とデモ通し）
 
 ## ブランチ運用

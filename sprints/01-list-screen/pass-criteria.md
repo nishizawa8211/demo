@@ -1,7 +1,7 @@
-# スプリント契約 — 01 申込一覧画面＋デモ操作エリア（`01-list-screen`）
+# スプリント合格基準書 — 01 申込一覧画面＋デモ操作エリア（`01-list-screen`）
 
 > Evaluator が `docs/criteria.md`（スプリント01・共通条件）、`docs/screens.md`（0・1・2・S2）、`CLAUDE.md` をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 

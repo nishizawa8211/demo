@@ -1,7 +1,7 @@
-# スプリント契約 — 02 ログイン画面（`02-login-screen`）
+# スプリント合格基準書 — 02 ログイン画面（`02-login-screen`）
 
-> Evaluator が `docs/criteria.md`（スプリント02・共通条件）、`docs/screens.md`（1・1-1・2・S1・S2）、`CLAUDE.md`、前スプリントの `sprints/01-list-screen/contract.md`・`review-01.md`（申し送り）をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント02・共通条件）、`docs/screens.md`（1・1-1・2・S1・S2）、`CLAUDE.md`、前スプリントの `sprints/01-list-screen/pass-criteria.md`・`review-01.md`（申し送り）をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -87,6 +87,6 @@
 
 - 「詳細」ボタンの遷移先、詳細画面、詳細画面の未ログインガード・ログアウト（スプリント03）
 - Enter キーでのログイン（任意。採点しない）
-- スプリント01 の条件のうち、本契約の R1・R2 に含めないもの（列順・並び順の再読み込み比較・サーバー再起動後の保持・追加候補の再現性・デモ操作エリアの配置など）は再採点しない
+- スプリント01 の条件のうち、本合格基準書の R1・R2 に含めないもの（列順・並び順の再読み込み比較・サーバー再起動後の保持・追加候補の再現性・デモ操作エリアの配置など）は再採点しない
 - データ取得失敗時の `#list-error` 表示（criteria の対象外。採点しない）
 - PAD フローの実行確認（Evaluator の範囲外。人のレビュー②）

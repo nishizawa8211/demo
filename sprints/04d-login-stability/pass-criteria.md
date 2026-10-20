@@ -1,7 +1,7 @@
-# スプリント契約 — 04d ログインの停止対策（`04d-login-stability`）
+# スプリント合格基準書 — 04d ログインの停止対策（`04d-login-stability`）
 
-> Evaluator が `docs/criteria.md`（スプリント04 の 4-2〜4-4・4-7・共通条件・人のレビュー② R1・R7）、`docs/flow.md`（手順1・4 エラー時の扱い）、`CLAUDE.md`、`.claude/agents/evaluator.md` 3、`sprints/04c-flow-pad-check/contract.md`（追補を含む）・`review-01.md`・`review-02.md`、ブランチ `sprint/04d-login-stability`（`main` の `cb098e1` から作成）の `flows/application-check/Main.txt`・`README.md`（とくに 5 のデモ当日の注意、6 の E2、7 の「ログインの入力のやり直し」、10-0、10-0g、10-1 R-6）、および人の決定（2026-10-19、下の 0-1）をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント04 の 4-2〜4-4・4-7・共通条件・人のレビュー② R1・R7）、`docs/flow.md`（手順1・4 エラー時の扱い）、`CLAUDE.md`、`.claude/agents/evaluator.md` 3、`sprints/04c-flow-pad-check/pass-criteria.md`（追補を含む）・`review-01.md`・`review-02.md`、ブランチ `sprint/04d-login-stability`（`main` の `cb098e1` から作成）の `flows/application-check/Main.txt`・`README.md`（とくに 5 のデモ当日の注意、6 の E2、7 の「ログインの入力のやり直し」、10-0、10-0g、10-1 R-6）、および人の決定（2026-10-19、下の 0-1）をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -19,9 +19,9 @@
 | 実機の報告に含めてもらうもの | 各条件の「報告で判定する内容」列のとおり。報告の日時・PAD の版（11.2609.183.0 など）・試した `Main.txt` のコミット ID を必ず含める |
 | 証跡 | `evidence/04d-login-stability/review-XX_<条件番号 または static/report/csv>.txt`（スクリプト出力・Grep 結果・報告の要約）。デスクトップ版から渡されたスクリーンショットは `evidence/04d-login-stability/review-XX_<条件番号>.png` 等に置く（または渡されたパスを根拠の欄に書く）。**証跡にユーザー名を含むパス（`C:\Users\<名前>\…`）・コンピューター名・アカウント名を書かない**（CSV の場所は `<ドキュメント>\申込状況チェック_デモ\…` と書く） |
 
-### 0-1. 人の決定と、04c で分かっていること（契約の前提）
+### 0-1. 人の決定と、04c で分かっていること（合格基準書の前提）
 
-| # | 内容 | 本契約での扱い |
+| # | 内容 | 本合格基準書での扱い |
 |---|------|----------------|
 | P1 | 04c の `f8d3b85` の実機（2026-10-19）で、その日の最初の実行（Edge が閉じた状態から）が No.40 のログインボタンのクリックで「セレクター #login-button を含む要素が見つかりません。」で止まった。直前の JavaScript による入力の確認（No.35）は通っていた。ほかのウィンドウを最小化して操作しなかった次の2回は止まらなかった（README 10-0g）。`1f6091f` の版で5回中1回止まった件も同じ型とみられる（推測） | (a)(b) を入れる → 4d-1・4d-2 |
 | P2 | 人（R.N.）の見立て：原因は「Edge が前面に出ていなかった」こと（推測。断定はしていない） | (b) を入れ、**最小化しない状態** で実機確認する → 4d-7・4d-8 |
@@ -39,7 +39,7 @@
 |------|------|
 | ブランチ | `sprint/04d-login-stability`（`main` の `cb098e1` から作成） |
 | 採点対象 | `flows/application-check/` 配下（`Main.txt`・`README.md`。ファイルを追加した場合はそれも） |
-| 比較の基準 | `git show cb098e1:flows/application-check/Main.txt`・`README.md`（契約時点） |
+| 比較の基準 | `git show cb098e1:flows/application-check/Main.txt`・`README.md`（合格基準書の作成時点） |
 | `mock/`・`docs/` | 本スプリントで変更しない。`git diff cb098e1 -- mock docs` が空であることを確認する |
 | 「アクション行」の定義 | `Main.txt` のうち `# [ControlRepository][PowerAutomateDesktop]` の行より前で、`#` コメント・空行・`END` を除いた行（04・04b・04c と同じ数え方） |
 | 実機の実行環境 | PAD 11.2609 系・Microsoft Edge・PAD の Edge 拡張機能が有効。モックは `node mock/server.js`（ポート 8080）。実行前に一覧のデモ操作で［初期データに戻す］→［実行する］で 20 件にしておき、その Edge のウィンドウは閉じておく |
@@ -83,7 +83,7 @@
 
 ### criteria.md・docs/flow.md・README 10-1 との対応
 
-| 元の条件 | 本契約 |
+| 元の条件 | 本合格基準書 |
 |----------|--------|
 | criteria 4-2（手順0〜4 をすべて含む） | 4d-5 (a)〜(c)、実機では 4d-7・4d-9 |
 | criteria 4-3（セレクター方針） | 4d-5 (d)（足したウィンドウの要素は 4d-2 (c)） |
