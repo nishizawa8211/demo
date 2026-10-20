@@ -1,0 +1,302 @@
+# ===== 申込状況チェック_通知付き（Main サブフロー）：資産5（付加価値・保留）=====
+# スプリント05：資産4（flows/application-check/）の手順0〜4 をそのまま引き継ぎ、docs/flow.md 手順5〜6（前回比較・SharePoint 保存・Teams 投稿）と、失敗時の Teams 通知（ErrorEnd）を足した別資産。資産4のファイルは参照しない（この Main.txt だけで貼り付けられる）
+# 末尾の ControlRepository の行と JSON は UI 要素（U1〜U7・U22 の8要素）の定義（資産4と同じ）。末尾まで全文をコピーして貼り付けると UI 要素も登録される
+# SharePoint・Teams の接続参照・サイト・フォルダー・投稿先は <…> のプレースホルダー（実値は書かない）。貼り付け後に人が PAD 上で設定する。手順は README.md の「3. 貼り付けたあとの設定」、アクション表・UI 要素表は reference.md
+# ===== 設定（資産5で追加。実値は書かない。貼り付け後に人が PAD 上で設定する）=====
+SET SharePointSiteUrl TO $'''<保存先サイトの URL>'''
+SET SharePointFolder TO $'''<保存先フォルダー>'''
+SET ChatRecipient TO $'''<投稿先>'''
+# 失敗したときに Teams へ失敗通知を投稿するか（YES／NO）。手順6（正常時の Teams 投稿）に入る前に NO にして、正常時の投稿の失敗では通知を重ねない
+SET NotifyOnError TO $'''YES'''
+# 手順0. 初期化
+BLOCK Step0_Init
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順0：初期化（実行日時の取得・作業フォルダの作成・データテーブルの準備）に失敗しました'''
+    SET BaseUrl TO $'''http://localhost:8080'''
+    SET LoginId TO $'''demo-user'''
+    SET LoginPassword TO $'''demo-pass'''
+    SET WorkFolderName TO $'''申込状況チェック_デモ'''
+    DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTime=> RunDateTime
+    Text.ConvertDateTimeToText.FromCustomDateTime DateTime: RunDateTime CustomFormat: $'''yyyyMMdd_HHmm''' Result=> RunStamp
+    SET HistoryFileName TO $'''申込状況_%RunStamp%.csv'''
+    Folder.GetSpecialFolder SpecialFolder: Folder.SpecialFolder.Personal SpecialFolderPath=> DocumentsFolder
+    SET WorkFolder TO $'''%DocumentsFolder%\\%WorkFolderName%'''
+    IF (Folder.IfFolderExists.DoesNotExist Path: WorkFolder) THEN
+        Folder.Create FolderPath: DocumentsFolder FolderName: WorkFolderName Folder=> CreatedFolder
+    END
+    # 見出し14列（docs/screens.md 1-2 の順）。作成時の空行は直後に削除する
+    Variables.CreateNewDatatable InputTable: { ^[$'''申込番号''', $'''申込日''', $'''お客さま名''', $'''供給地点特定番号''', $'''申込種別''', $'''変更前容量''', $'''変更後容量''', $'''ステータス''', $'''担当者''', $'''需要場所住所''', $'''希望日''', $'''工事予定日''', $'''送配電受付番号''', $'''備考'''], [$'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $''''''] } DataTable=> CurrentTable
+    Variables.DeleteRowFromDataTable DataTable: CurrentTable RowIndex: 0
+END
+# 手順1. Edge 起動・ログイン
+BLOCK Step1_Login
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順1-1〜1-2：モック画面に接続できません。server.js が起動しているか確認してください'''
+    WebAutomation.LaunchEdge.LaunchEdge Url: $'''%BaseUrl%/login.html''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
+    WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-id']) FOR 30
+    SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
+    # Edge 起動直後のログインの失敗の対策（04c・04d）：ボタンまで表示されるのを待ってから、次を最大3回くり返す（一覧画面が表示されたら抜ける）
+    # Edge のウィンドウを前面に出す → ID・パスワードの入力 → 入力欄の値を確認 → 確認できたらログインボタンをクリック → 一覧画面の読み込み完了を待つ（30 秒）→ 一覧画面が表示されたかを確認
+    # 前面に出す・入力・確認・クリック・一覧の待機の1回ごとのエラーは、その場では止めずに次の回でやり直す。3回とも一覧画面が表示されなければ E2（入力できない）または E3（一覧が出ない）で止まる
+    WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-button']) FOR 30
+    SET LoginCheck TO $'''NG'''
+    SET ListCheck TO $'''NG'''
+    LOOP LoginTry FROM 1 TO 3 STEP 1
+        IF ListCheck <> $'''OK''' THEN
+            IF LoginTry > 1 THEN
+                WAIT 2
+            END
+            # フローが起動した Edge のウィンドウ（ブラウザー インスタンス Browser の Handle プロパティ＝ウィンドウ ハンドル）を前面に出す。失敗しても止めない
+            UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+            ON ERROR
+            END
+            SET LoginCheck TO $'''NG'''
+            WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-id'] Text: LoginId EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+            ON ERROR
+            END
+            WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Control: appmask['LoginPage']['login-password'] Text: LoginPassword EmulateTyping: True UnfocusAfterPopulate: False Mode: WebAutomation.PopulateTextMode.Replace WaitForPageToLoadTimeout: 60
+            ON ERROR
+            END
+            WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var id = document.getElementById(\"login-id\"); var pw = document.getElementById(\"login-password\"); if (id && pw && id.value === \"%LoginId%\" && pw.value === \"%LoginPassword%\") { return \"OK\"; } return \"NG\"; }''' Result=> LoginCheck
+            ON ERROR
+            END
+            IF LoginCheck = $'''OK''' THEN
+                WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+                ON ERROR
+                END
+                WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+                ON ERROR
+                END
+            END
+            # 一覧画面の読み込みが完了していれば（前の回のクリックで遅れて表示された場合も含む）やり直しを抜ける
+            IF (WebAutomation.IfWebPageContains.WebPageContainsElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) THEN
+                SET ListCheck TO $'''OK'''
+            END
+        END
+    END
+    IF ListCheck <> $'''OK''' THEN
+        IF LoginCheck <> $'''OK''' THEN
+            SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードを入力できませんでした（3 回試しても一覧画面に進めず、最後の回は入力欄に値が入りませんでした）'''
+            GOTO ErrorEnd
+        END
+        SET StepMessage TO $'''手順1-4〜1-5：ログインボタンをクリックしても一覧画面が表示されませんでした（3 回試しました。クリックに失敗したか、30 秒待っても一覧の読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
+        GOTO ErrorEnd
+    END
+    # ここに来るのは一覧画面が表示された場合だけ。念のため一覧の読み込み完了をもう一度確かめてから手順2 へ進む（表示済みなのですぐに終わる）
+    SET StepMessage TO $'''手順1-5：ログイン後に一覧画面が表示されませんでした（30 秒待っても読み込みが完了しません）。ID・パスワードと一覧画面の表示を確認してください'''
+    WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+END
+# 手順2. 一覧から申込番号を全件取得
+BLOCK Step2_GetList
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順2-1：一覧から申込番号を取得できませんでした'''
+    WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var rows = document.querySelectorAll(\"#application-tbody tr[data-application-no]\"); var nos = []; for (var i = 0; i < rows.length; i++) { nos.push(rows[i].getAttribute(\"data-application-no\")); } return nos.join(\",\"); }''' Result=> ApplicationNosText
+    Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelimiter: $''',''' IsRegEx: False Result=> ApplicationNos
+    SET StepMessage TO $'''手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした'''
+    # 件数表示の文字（例「全 20 件」）を Own Text で読み、数字の部分だけ取り出して数値にする（data-count 属性は PAD では空の文字が返るため）
+    WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''Own Text''' AttributeValue=> DataCountText
+    Text.ParseText.RegexParseForFirstOccurrence Text: DataCountText TextToFind: $'''[0-9]+''' StartingPosition: 0 IgnoreCase: False OccurrencePosition=> DataCountPosition Match=> DataCountDigits
+    Text.ToNumber Text: DataCountDigits Number=> DataCount
+    IF ApplicationNos.Count <> DataCount THEN
+        SET StepMessage TO $'''手順2-2：件数が一致しません（画面の件数 %DataCount% 件／取得 %ApplicationNos.Count% 件）。取得した申込番号：%ApplicationNosText%'''
+        GOTO ErrorEnd
+    END
+END
+# 手順3. 各案件の詳細を取得（手順2 で取得した申込番号リストの全件を繰り返す）
+BLOCK Step3_GetDetails
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    LOOP FOREACH CurrentNo IN ApplicationNos
+        SET StepMessage TO $'''手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした'''
+        UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+        ON ERROR
+        END
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60
+        SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む）'''
+        WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded']) FOR 30
+        SET StepMessage TO $'''手順3-3〜3-4：申込番号 %CurrentNo% の詳細画面から項目を取得できませんでした'''
+        # 14項目（#field-<キー>）の表示テキストを JavaScript 1回でまとめて取得する（要素ごとに14回取得すると1件あたり約26〜30秒かかったため）。値はカンマでつなぐ（値にカンマは含まれない：docs/screens.md 1 のデータの制約）
+        WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var keys = [\"applicationNo\", \"applicationDate\", \"customerName\", \"supplyPointNo\", \"applicationType\", \"capacityBefore\", \"capacityAfter\", \"status\", \"assignee\", \"siteAddress\", \"desiredDate\", \"scheduledWorkDate\", \"receptionNo\", \"remarks\"]; var vals = []; for (var i = 0; i < keys.length; i++) { var el = document.getElementById(\"field-\" + keys[i]); if (!el) { return \"NG:field-\" + keys[i]; } vals.push(el.textContent.trim()); } return vals.join(\",\"); }''' Result=> DetailText
+        Text.SplitText.SplitWithDelimiter Text: DetailText CustomDelimiter: $''',''' IsRegEx: False Result=> DetailValues
+        IF DetailValues.Count <> 14 THEN
+            SET StepMessage TO $'''手順3-4：申込番号 %CurrentNo% の詳細画面から14項目を取得できませんでした（取得できた値は %DetailValues.Count% 個）'''
+            GOTO ErrorEnd
+        END
+        IF DetailValues[0] <> CurrentNo THEN
+            SET StepMessage TO $'''手順3-3：申込番号が一致しません（対象 %CurrentNo%／詳細画面 %DetailValues[0]%）'''
+            GOTO ErrorEnd
+        END
+        # 14項目を docs/screens.md 1-2 の順に並べたリストのまま1行追加（空の備考も空の値として位置で入るので列がずれない）
+        Variables.AddRowToDataTable.AppendRowToDataTable DataTable: CurrentTable RowToAdd: DetailValues
+        SET StepMessage TO $'''手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30 秒）'''
+        UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+        ON ERROR
+        END
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60
+        WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
+    END
+END
+# 手順4. ローカルに CSV 出力（全件の取得が終わった後だけ実行される）
+BLOCK Step4_WriteCsv
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順4：CSV ファイルを書き出せませんでした。同じ名前のファイルを Excel 等で開いていないか確認してください'''
+    File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\\%HistoryFileName%''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+    File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\\latest.csv''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+END
+# 手順5. 前回との比較と SharePoint への保存（資産5で追加）
+# 手順5-1. SharePoint から前回の latest.csv を取得する（今回の latest.csv を保存する 5-3 より前に行う）
+BLOCK Step5a_GetPrevious
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順5-1：SharePoint から前回の latest.csv を取得できませんでした（ファイルが無いのとは別の理由です。初回扱いにはしません）。SharePoint の接続・保存先・ネットワークを確認してください'''
+    SET PreviousExists TO False
+    SET PreviousNosKey TO $''','''
+    # 取得に成功すると PreviousBinary に latest.csv の内容（バイナリ）が入る。失敗した場合は NONE のまま
+    SET PreviousBinary TO $'''NONE'''
+    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''GetFileContentByPath''' dataset: $'''<保存先サイト>''' path: $'''%SharePointFolder%/latest.csv''' inferContentType: False Result=> PreviousBinary
+    ON ERROR
+    END
+    # 失敗の内容を残す（Reset: False。「ファイルが無い」以外の失敗なら、ErrorEnd でも同じエラー情報を表示する）
+    ERROR => PrevError Reset: False
+    IF PreviousBinary = $'''NONE''' THEN
+        # 取得できなかった。ファイルが無い（初回）のか、別の理由（接続エラー等）かを、エラー情報の文面で見分ける
+        SET PrevErrorText TO $'''%PrevError%'''
+        IF Contains(PrevErrorText, $'''404''', True) OR Contains(PrevErrorText, $'''NotFound''', True) OR Contains(PrevErrorText, $'''not found''', True) OR Contains(PrevErrorText, $'''見つかりません''', True) OR Contains(PrevErrorText, $'''存在しません''', True) THEN
+            # ファイルが無い＝初回。エラーにせず、比較しない（PreviousExists は False のまま）
+            SET PreviousExists TO False
+        ELSE
+            # 「無い」以外の失敗は初回扱いにしない（latest.csv を誤って上書きしないため）。手順5-1 で停止する
+            GOTO ErrorEnd
+        END
+    ELSE
+        SET StepMessage TO $'''手順5-1：前回の latest.csv は取得できましたが、内容を読み込めませんでした'''
+        File.ConvertFromBinary BinaryData: PreviousBinary File: $'''%WorkFolder%\\previous.csv''' IfFileExists: File.IfFileExists.Overwrite
+        File.ReadFromCSVFile.ReadCSV CSVFile: $'''%WorkFolder%\\previous.csv''' Encoding: File.CSVEncoding.UTF8 TrimFields: False FirstLineContainsColumnNames: True ColumnsSeparator: File.CSVColumnsSeparator.Comma CSVTable=> PreviousTable
+        Variables.RetrieveDataTableColumnIntoList DataTable: PreviousTable ColumnNameOrIndex: $'''申込番号''' ColumnAsList=> PreviousNos
+        # 比べやすいように ,申込番号,申込番号,…, の形の文字にする（前後と間をカンマで囲む）
+        LOOP FOREACH PreviousNo IN PreviousNos
+            SET PreviousNosKey TO PreviousNosKey + PreviousNo + $''','''
+        END
+        SET PreviousExists TO True
+    END
+END
+# 手順5-2. 新規案件の抽出（今回の行のうち、申込番号が前回の latest.csv に無いもの。申込番号以外の変化は見ない）
+BLOCK Step5b_FindNew
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順5-2：新規案件の判定に失敗しました'''
+    # 見出し14列は手順0 と同じ。初回（PreviousExists = False）は新規の抽出をしないので、0行のまま
+    Variables.CreateNewDatatable InputTable: { ^[$'''申込番号''', $'''申込日''', $'''お客さま名''', $'''供給地点特定番号''', $'''申込種別''', $'''変更前容量''', $'''変更後容量''', $'''ステータス''', $'''担当者''', $'''需要場所住所''', $'''希望日''', $'''工事予定日''', $'''送配電受付番号''', $'''備考'''], [$'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $'''''', $''''''] } DataTable=> NewRows
+    Variables.DeleteRowFromDataTable DataTable: NewRows RowIndex: 0
+    IF PreviousExists = True THEN
+        LOOP FOREACH CurrentRow IN CurrentTable
+            IF NOT Contains(PreviousNosKey, $''',%CurrentRow[0]%,''', False) THEN
+                Variables.AddRowToDataTable.AppendRowToDataTable DataTable: NewRows RowToAdd: [CurrentRow[0], CurrentRow[1], CurrentRow[2], CurrentRow[3], CurrentRow[4], CurrentRow[5], CurrentRow[6], CurrentRow[7], CurrentRow[8], CurrentRow[9], CurrentRow[10], CurrentRow[11], CurrentRow[12], CurrentRow[13]]
+            END
+        END
+    END
+END
+# 手順5-3. SharePoint への保存（履歴ファイル → latest.csv の順。ファイルの内容はバイナリで渡す）
+BLOCK Step5c_Save
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    SET StepMessage TO $'''手順5-3：SharePoint への履歴ファイルの保存に失敗しました（latest.csv は保存していません）'''
+    File.ConvertToBinary File: $'''%WorkFolder%\\%HistoryFileName%''' BinaryData=> HistoryBinary
+    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''CreateFile''' dataset: $'''<保存先サイト>''' folderPath: SharePointFolder name: HistoryFileName body: HistoryBinary
+    # 履歴ファイルへのリンク（サイトの URL ＋ フォルダー ＋ ファイル名。空白は %20 にする）
+    SET HistoryFileLink TO $'''%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%'''
+    Text.Replace.ReplaceTextWithRegex Text: HistoryFileLink TextToFind: $'''\\x20''' IgnoreCase: False ReplaceWith: $'''%%20''' ActivateEscapeSequences: False Result=> HistoryFileLink
+    SET StepMessage TO $'''手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の保存に失敗しました（latest.csv は前回のまま、または無い状態です）'''
+    File.ConvertToBinary File: $'''%WorkFolder%\\latest.csv''' BinaryData=> LatestBinary
+    External.InvokeCloudConnector Connection: $'''<SharePoint 接続参照（作成時に設定）>''' ConnectorId: $'''shared_sharepointonline''' OperationId: $'''CreateFile''' dataset: $'''<保存先サイト>''' folderPath: SharePointFolder name: $'''latest.csv''' body: LatestBinary
+END
+# 手順6. Teams 投稿（毎回必ず1回投稿する。初回／新規あり／新規0件で文言を変える。投稿先は作成者本人の個人チャット）
+BLOCK Step6_Notify
+ON BLOCK ERROR
+    GOTO ErrorEnd
+END
+    # ここから先で失敗しても、失敗通知は投稿しない（画面のメッセージだけ出して終了。CSV は SharePoint に保存済み）
+    SET NotifyOnError TO $'''NO'''
+    SET StepMessage TO $'''手順6：Teams への投稿に失敗しました。CSV は SharePoint に保存済みです（このまま再実行すると、新規案件は 0 件になります）'''
+    Text.ConvertDateTimeToText.FromCustomDateTime DateTime: RunDateTime CustomFormat: $'''yyyy/MM/dd HH:mm''' Result=> RunDateTimeText
+    IF PreviousExists = False THEN
+        SET PostPattern TO $'''初回'''
+        SET PostMessage TO $'''【申込状況チェック】初回実行のため、全 %CurrentTable.RowsCount% 件を保存しました（比較する前回データがありません）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileLink%'''
+    ELSE
+        IF NewRows.RowsCount > 0 THEN
+            SET PostPattern TO $'''新規あり'''
+            # 列の番号：0＝申込番号、2＝お客さま名、4＝申込種別、5＝変更前容量、6＝変更後容量、7＝ステータス（docs/screens.md 1-2 の順）
+            SET NewLines TO $''''''
+            SET NewIndex TO 0
+            LOOP FOREACH NewRow IN NewRows
+                SET NewIndex TO NewIndex + 1
+                SET NewLine TO $'''%NewIndex%. %NewRow[0]%／%NewRow[2]%／%NewRow[4]%／%NewRow[5]% → %NewRow[6]%／%NewRow[7]%<br>'''
+                SET NewLines TO NewLines + NewLine
+            END
+            SET PostMessage TO $'''【申込状況チェック】新規案件が %NewRows.RowsCount% 件あります（取得日時：%RunDateTimeText%／全 %CurrentTable.RowsCount% 件）<br><br>%NewLines%<br>CSV：%HistoryFileLink%'''
+        ELSE
+            SET PostPattern TO $'''新規0件'''
+            SET PostMessage TO $'''【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount% 件を確認しました）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileLink%'''
+        END
+    END
+    External.InvokeCloudConnector Connection: $'''<Teams 接続参照（作成時に設定）>''' ConnectorId: $'''shared_teams''' OperationId: $'''PostMessageToConversation''' poster: $'''Flow bot''' location: $'''Chat with Flow bot''' body_recipient: ChatRecipient body_messageBody: PostMessage
+END
+# 手順7. 終了（正常時）
+WebAutomation.CloseWebBrowser BrowserInstance: Browser
+EXIT Code: 0
+# ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない・SharePoint にも保存しない）=====
+LABEL ErrorEnd
+# 止まった原因が分かるように、PAD の最後のエラー（どのアクションで・どんなエラーか）を取得してメッセージに足す。ユーザー名を含むパス（ドライブの Users フォルダー以下）は伏せる。「テキストを置換する」には個別のエラー時の設定（ON ERROR）を付けられないので付けない（verification-log.md 10-0f）
+ERROR => LastError Reset: True
+Text.Replace.ReplaceTextWithRegex Text: $'''%LastError%''' TextToFind: $'''(?m)[A-Za-z]:\\\\Users\\\\.*?(?=申込状況チェック_デモ|$)''' IgnoreCase: True ReplaceWith: $'''<ユーザー フォルダー>''' ActivateEscapeSequences: False Result=> ErrorDetail
+# 失敗の通知（資産5で追加）：手順0〜5 の失敗では Teams にも投稿する。手順6（正常時の投稿）の失敗では投稿しない（NotifyOnError が NO）。通知の投稿が失敗しても再投稿はせず、次の画面のメッセージへ進む
+IF NotifyOnError = $'''YES''' THEN
+    DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTime=> ErrorDateTime
+    Text.ConvertDateTimeToText.FromCustomDateTime DateTime: ErrorDateTime CustomFormat: $'''yyyy/MM/dd HH:mm''' Result=> ErrorDateTimeText
+    # 止まった手順の名前（StepMessage の先頭の「手順◯◯」の部分。例：手順2-1）
+    Text.Replace.ReplaceTextWithRegex Text: $'''%StepMessage%''' TextToFind: $'''(?s)^(手順[0-9〜-]+).*$''' IgnoreCase: False ReplaceWith: $'''$1''' ActivateEscapeSequences: False Result=> StopStep
+    Text.Replace.ReplaceTextWithRegex Text: $'''%ErrorDetail%''' TextToFind: $'''\\r?\\n''' IgnoreCase: False ReplaceWith: $'''<br>''' ActivateEscapeSequences: False Result=> ErrorDetailHtml
+    External.InvokeCloudConnector Connection: $'''<Teams 接続参照（作成時に設定）>''' ConnectorId: $'''shared_teams''' OperationId: $'''PostMessageToConversation''' poster: $'''Flow bot''' location: $'''Chat with Flow bot''' body_recipient: ChatRecipient body_messageBody: $'''【申込状況チェック】取得に失敗しました。%StopStep% で停止（取得日時：%ErrorDateTimeText%）<br>%StepMessage%<br>（PAD のエラー情報：%ErrorDetailHtml%）'''
+    ON ERROR
+    END
+END
+Display.ShowMessageDialog.ShowMessage Title: $'''申込状況チェック_デモ（エラーで停止しました）''' Message: $'''%StepMessage%（PAD のエラー情報：%ErrorDetail%）''' Icon: Display.Icon.ErrorIcon Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: True ButtonPressed=> ButtonPressed
+WebAutomation.CloseWebBrowser BrowserInstance: Browser
+ON ERROR
+END
+
+# [ControlRepository][PowerAutomateDesktop]
+
+{
+  "ControlRepositorySymbols": [
+    {
+      "IgnoreImagesOnSerialization": false,
+      "Repository": "{\r\n  \"Screens\": [\r\n    {\r\n      \"Controls\": [\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Input text\",\r\n          \"InstanceId\": \"3f28a143-3da4-5f62-abdf-dc86bee4133c\",\r\n          \"Name\": \"login-id\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#login-id\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"login-id\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"login-id\",\r\n                  \"Tag\": \"input\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"input\"\r\n        },\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Input password\",\r\n          \"InstanceId\": \"b16a934f-052e-539f-930e-6d41a0825894\",\r\n          \"Name\": \"login-password\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#login-password\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"login-password\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"login-password\",\r\n                  \"Tag\": \"input\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"input\"\r\n        },\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Button\",\r\n          \"InstanceId\": \"1c515cc9-3763-52ac-ab21-952029ce8e37\",\r\n          \"Name\": \"login-button\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#login-button\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"login-button\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"login-button\",\r\n                  \"Tag\": \"button\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"button\"\r\n        }\r\n      ],\r\n      \"Handle\": {\r\n        \"value\": 0\r\n      },\r\n      \"ProcessName\": \"msedge\",\r\n      \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n      \"ElementTypeName\": \"Web Page\",\r\n      \"InstanceId\": \"e3796213-cbc7-5696-b709-3ead2f27c26c\",\r\n      \"Name\": \"LoginPage\",\r\n      \"SelectorCount\": 1,\r\n      \"Selectors\": [\r\n        {\r\n          \"CustomSelector\": null,\r\n          \"Elements\": [\r\n            {\r\n              \"Attributes\": [],\r\n              \"CustomValue\": \"domcontainer\",\r\n              \"Ignore\": false,\r\n              \"Name\": \"LoginPage\",\r\n              \"Tag\": \"domcontainer\"\r\n            }\r\n          ],\r\n          \"Ignore\": false,\r\n          \"ImageSelector\": null,\r\n          \"IsCustom\": false,\r\n          \"IsImageBased\": false,\r\n          \"IsPlaceholderSelector\": false,\r\n          \"IsWindowsInstance\": false,\r\n          \"Name\": \"Default Selector\",\r\n          \"Properties\": []\r\n        }\r\n      ],\r\n      \"Tag\": \"domcontainer\"\r\n    },\r\n    {\r\n      \"Controls\": [\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Table\",\r\n          \"InstanceId\": \"2188e066-bacd-52c9-bee9-436a0175caae\",\r\n          \"Name\": \"application-table-loaded\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#application-table[data-loaded=\\\"true\\\"]\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"application-table\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"application-table-loaded\",\r\n                  \"Tag\": \"table\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"table\"\r\n        },\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Span\",\r\n          \"InstanceId\": \"f1fcefb4-1866-531a-ba34-6fed2c0ab2e6\",\r\n          \"Name\": \"application-count\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#application-count\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"application-count\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"application-count\",\r\n                  \"Tag\": \"span\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"span\"\r\n        },\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Button\",\r\n          \"InstanceId\": \"f9242e63-b176-5240-bc64-c68d5e92d0cc\",\r\n          \"Name\": \"detail-button\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"button[data-action=\\\"detail\\\"][data-application-no=\\\"%CurrentNo%\\\"]\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"detail-button\",\r\n                  \"Tag\": \"button\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"button\"\r\n        }\r\n      ],\r\n      \"Handle\": {\r\n        \"value\": 0\r\n      },\r\n      \"ProcessName\": \"msedge\",\r\n      \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n      \"ElementTypeName\": \"Web Page\",\r\n      \"InstanceId\": \"89e29882-9116-5cbb-aac1-42ba9f8a70b8\",\r\n      \"Name\": \"ListPage\",\r\n      \"SelectorCount\": 1,\r\n      \"Selectors\": [\r\n        {\r\n          \"CustomSelector\": null,\r\n          \"Elements\": [\r\n            {\r\n              \"Attributes\": [],\r\n              \"CustomValue\": \"domcontainer\",\r\n              \"Ignore\": false,\r\n              \"Name\": \"ListPage\",\r\n              \"Tag\": \"domcontainer\"\r\n            }\r\n          ],\r\n          \"Ignore\": false,\r\n          \"ImageSelector\": null,\r\n          \"IsCustom\": false,\r\n          \"IsImageBased\": false,\r\n          \"IsPlaceholderSelector\": false,\r\n          \"IsWindowsInstance\": false,\r\n          \"Name\": \"Default Selector\",\r\n          \"Properties\": []\r\n        }\r\n      ],\r\n      \"Tag\": \"domcontainer\"\r\n    },\r\n    {\r\n      \"Controls\": [\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Description list\",\r\n          \"InstanceId\": \"c2b04a03-157f-568f-a6c8-d179f1a8ee7c\",\r\n          \"Name\": \"application-detail-loaded\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#application-detail[data-loaded=\\\"true\\\"]\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"application-detail\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"application-detail-loaded\",\r\n                  \"Tag\": \"dl\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"dl\"\r\n        },\r\n        {\r\n          \"AutomationProtocol\": \"uia3\",\r\n          \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n          \"ElementTypeName\": \"Button\",\r\n          \"InstanceId\": \"25e384c1-48b7-5156-a08a-09db5209020f\",\r\n          \"Name\": \"back-to-list-button\",\r\n          \"SelectorCount\": 1,\r\n          \"Selectors\": [\r\n            {\r\n              \"CustomSelector\": \"#back-to-list-button\",\r\n              \"Elements\": [\r\n                {\r\n                  \"Attributes\": [\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Class\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    },\r\n                    {\r\n                      \"Ignore\": false,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Id\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": \"back-to-list-button\"\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": true,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Ordinal\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": 0\r\n                    },\r\n                    {\r\n                      \"Ignore\": true,\r\n                      \"IsOrdinal\": false,\r\n                      \"IsDisabledAttribute\": false,\r\n                      \"Name\": \"Title\",\r\n                      \"Operation\": \"EqualTo\",\r\n                      \"Value\": null\r\n                    }\r\n                  ],\r\n                  \"CustomValue\": null,\r\n                  \"Ignore\": false,\r\n                  \"Name\": \"back-to-list-button\",\r\n                  \"Tag\": \"button\"\r\n                }\r\n              ],\r\n              \"Ignore\": false,\r\n              \"ImageSelector\": null,\r\n              \"IsCustom\": true,\r\n              \"IsImageBased\": false,\r\n              \"IsPlaceholderSelector\": false,\r\n              \"IsWindowsInstance\": false,\r\n              \"Name\": \"Default Selector\",\r\n              \"Properties\": []\r\n            }\r\n          ],\r\n          \"Tag\": \"button\"\r\n        }\r\n      ],\r\n      \"Handle\": {\r\n        \"value\": 0\r\n      },\r\n      \"ProcessName\": \"msedge\",\r\n      \"ScreenShot\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mO4e/cuAAUyApj98CkjAAAAAElFTkSuQmCC\",\r\n      \"ElementTypeName\": \"Web Page\",\r\n      \"InstanceId\": \"438e9a40-4ab4-5cc9-b9cb-180f0c7217ef\",\r\n      \"Name\": \"DetailPage\",\r\n      \"SelectorCount\": 1,\r\n      \"Selectors\": [\r\n        {\r\n          \"CustomSelector\": null,\r\n          \"Elements\": [\r\n            {\r\n              \"Attributes\": [],\r\n              \"CustomValue\": \"domcontainer\",\r\n              \"Ignore\": false,\r\n              \"Name\": \"DetailPage\",\r\n              \"Tag\": \"domcontainer\"\r\n            }\r\n          ],\r\n          \"Ignore\": false,\r\n          \"ImageSelector\": null,\r\n          \"IsCustom\": false,\r\n          \"IsImageBased\": false,\r\n          \"IsPlaceholderSelector\": false,\r\n          \"IsWindowsInstance\": false,\r\n          \"Name\": \"Default Selector\",\r\n          \"Properties\": []\r\n        }\r\n      ],\r\n      \"Tag\": \"domcontainer\"\r\n    }\r\n  ],\r\n  \"Version\": 1\r\n}",
+      "ImportMetadata": {
+        "DisplayName": "ローカル コンピューター",
+        "ConnectionString": "",
+        "Type": "Local",
+        "DesktopType": "local"
+      },
+      "Name": "appmask"
+    }
+  ],
+  "ImageRepositorySymbol": {
+    "Repository": "{\r\n  \"Folders\": [],\r\n  \"Images\": [],\r\n  \"Version\": 1\r\n}",
+    "ImportMetadata": {},
+    "Name": "imgrepo"
+  },
+  "ConnectionReferences": []
+}
