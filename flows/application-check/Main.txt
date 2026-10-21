@@ -35,7 +35,7 @@ END
     SET StepMessage TO $'''手順1-3〜1-4：ログイン画面で ID・パスワードの入力またはログインボタンのクリックができませんでした'''
     # Edge 起動直後のログインの失敗の対策（04c・04d）：ボタンまで表示されるのを待ってから、次を最大3回くり返す（一覧画面が表示されたら抜ける）
     # Edge のウィンドウを前面に出す → ID・パスワードの入力 → 入力欄の値を確認 → 確認できたらログインボタンをクリック → 一覧画面の読み込み完了を待つ（30 秒）→ 一覧画面が表示されたかを確認
-    # 前面に出す・入力・確認・クリック・一覧の待機の1回ごとのエラーは、その場では止めずに次の回でやり直す。3回とも一覧画面が表示されなければ E2（入力できない）または E3（一覧が出ない）で止まる
+    # 前面に出す・入力・確認・クリック・一覧の待機の1回ごとのエラーは、その場では止めずに次の回でやり直す。3回とも一覧画面が表示されなければ E2（入力できない）または E3（一覧が出ない）で止まる。ログインボタン・「詳細」・「一覧へ戻る」のクリックは「物理クリックを送信」をオフ（MouseClick: False。マウス カーソルを動かさない）にしている（04e。verification-log.md 10-0j）
     WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['LoginPage']['login-button']) FOR 30
     SET LoginCheck TO $'''NG'''
     SET ListCheck TO $'''NG'''
@@ -59,7 +59,7 @@ END
             ON ERROR
             END
             IF LoginCheck = $'''OK''' THEN
-                WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60
+                WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] ClickType: WebAutomation.ClickType.LeftClick MouseClick: False WaitForPageToLoadTimeout: 60 MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter OffsetX: 0 OffsetY: 0
                 ON ERROR
                 END
                 WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
@@ -112,7 +112,7 @@ END
         UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
         ON ERROR
         END
-        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] ClickType: WebAutomation.ClickType.LeftClick MouseClick: False WaitForPageToLoadTimeout: 60 MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter OffsetX: 0 OffsetY: 0
         SET StepMessage TO $'''手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該当する申込が見つからない場合を含む）'''
         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded']) FOR 30
         SET StepMessage TO $'''手順3-3〜3-4：申込番号 %CurrentNo% の詳細画面から項目を取得できませんでした'''
@@ -133,7 +133,7 @@ END
         UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
         ON ERROR
         END
-        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60
+        WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] ClickType: WebAutomation.ClickType.LeftClick MouseClick: False WaitForPageToLoadTimeout: 60 MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter OffsetX: 0 OffsetY: 0
         WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded']) FOR 30
     END
 END
