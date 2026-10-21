@@ -16,7 +16,9 @@
 
 ## 1. 資産4との差分（意図して変えた箇所）
 
-資産4の `Main.txt`（コミット `12be3e2` の版）との比較（`Main.txt` の手順0〜4 の本文・末尾の UI 要素の定義は**1文字も変えていない**）。
+資産4の `Main.txt`（**`752291d` の版**。スプリント04e のマージ後の `main`。04d の `12be3e2` の版から、No.42・76・92 の3か所のクリックに「物理的なクリックを送信：オフ」〔`MouseClick: False`〕を明示しただけの版）との比較（`Main.txt` の手順0〜4 の本文・末尾の UI 要素の定義は**1文字も変えていない**）。
+
+- 2026-10-20 に作ったときの出発点は `12be3e2` の版。2026-10-21 に 04e の修正を反映し、資産5の3か所のクリック（No.46・80・96）の行と、手順1 の説明のコメント行1行を、資産4（`752291d`）の対応する行（62・115・136 行目と 38 行目）と同じにした（verification-log.md の 1-1）。**この3か所のクリックは資産4と同じ行なので、下の「意図して変えた箇所」には載せていない**。
 
 | # | 場所 | 変更 | 理由 |
 |---|------|------|------|
@@ -90,7 +92,7 @@
 | E0 | 手順0（初期化） | 手順0 | 手順0：初期化…に失敗しました |
 | E1 | 手順1-1〜1-2（モックに接続できない） | 手順1-1〜1-2 | 手順1-1〜1-2：モック画面に接続できません… |
 | E2 | 手順1-3〜1-4（ID・パスワードの入力／ログインボタン） | 手順1-3〜1-4 | 手順1-3〜1-4：ログイン画面で… |
-| E3 | 手順1-4〜1-5／手順1-5（ログイン後に一覧が出ない） | 手順1-4〜1-5／手順1-5 | 手順1-4〜1-5：ログインボタンをクリックしても…／手順1-5：ログイン後に一覧画面が… |
+| E3 | 手順1-4〜1-5／手順1-5（ログイン後に一覧が出ない。ログインボタンのクリックが成功扱いでも一覧に移らなかった場合を含む。下の「E3 の説明と対処」） | 手順1-4〜1-5／手順1-5 | 手順1-4〜1-5：ログインボタンをクリックしても…／手順1-5：ログイン後に一覧画面が… |
 | E4 | 手順2-1（申込番号の取得） | 手順2-1 | 手順2-1：一覧から申込番号を取得できませんでした |
 | E5 | 手順2-2（件数表示の取得） | 手順2-2 | 手順2-2：一覧の件数表示…を取得できませんでした |
 | E6 | 手順2-2（件数の不一致） | 手順2-2 | 手順2-2：件数が一致しません… |
@@ -109,6 +111,10 @@
 | **E17** | 手順6（正常時の Teams 投稿の失敗） | **通知しない**（`NotifyOnError` が NO） | 手順6：Teams への投稿に失敗しました。CSV は SharePoint に保存済みです… |
 
 - 手順0〜4 のメッセージ全文・人がすること・実機で出た例は資産4の reference.md の 6。
+- **E3 の説明と対処（04e の反映）**：
+  - 2026-10-20 の止まり方（**資産4の 04d の版での実例**。資産5でも同じ日にログインで E3 で止まった）：PAD のエラー情報は「Web ページのコンテンツを待機」のタイムアウト（一覧の待機。資産5の No.48）。Edge は前面にあり、ログイン画面に ID・パスワードが入ったまま。PAD の実行ログでは、ログインボタンのクリックは3回とも **成功扱い**（`"mouseClick":"True"`）なのに一覧に移っていなかった。マウス カーソルが動いたときに Edge の上部に「…デバッグを開始しました」の帯が出てボタンの位置が下にずれ、**マウス カーソルを動かす物理的なクリックがずれた位置を押した** とみられる（**推測**。資産4の verification-log.md 10-0j）。
+  - 今の版の対策：3か所の「Web ページのリンクをクリック」（No.46 ログインボタン・No.80「詳細」・No.96「一覧へ戻る」）の「物理的なクリックを送信」を **オフ**（`MouseClick: False`）にして、マウス カーソルを動かさないクリックにした（資産4の 04e と同じ行。7 の「クリックの方法」）。**資産5の今の版の実機の確認はまだ**（verification-log.md の 4）。参考：資産4の同じ行の版は、2026-10-21 に資産4で、2026-10-20 と同じ2枚のディスプレイ構成（と報告された状態）・ほかのウィンドウを最小化しない・実行中は操作しない条件で、連続3回ともログインボタンのクリック1回で一覧に移り最後まで終わった（**資産4での結果**。資産4の verification-log.md 10-0j）。
+  - 対処：［OK］を押してから（文言は先に書き写す）、ほかのウィンドウ（PAD のデザイナー・コンソールを含む）を最小化して再実行し、実行中はマウス・キーボードを操作しない。それでも出る場合は、デザイナーで No.46 の「物理的なクリックを送信」がオフになっているか（`Main.txt` の `MouseClick: False` が貼り付けで残っているか。No.80・96 も同じ）、変数 `LoginId`・`LoginPassword` の値（demo-user / demo-pass）、一覧に「データを読み込めませんでした」が出ていないか、モックが止まっていないか、U3・U4 のセレクターを確認する。PAD のエラー情報が「Web ページのリンクをクリック」の「セレクター #login-button を含む要素が見つかりません。」の場合は、Edge が前面に出ていなかった・ログイン画面が表示されていなかった等で、ボタンが見つからなかった（資産4の reference.md の 6 の E3 と同じ）。
 - E14〜E17 は資産5で増えたエラー。手順5〜6 のエラーも手順ごとのブロックから `ErrorEnd` に集まり、メッセージ・失敗通知（E17 を除く）・ブラウザーを閉じる処理は手順0〜4 と同じ。
 - **前回の取得が「無い」のか別の失敗かの見分け方**：取得の前に `PreviousBinary` を `NONE` にしておき、取得が失敗すると `NONE` のまま残る。そのときエラー情報の文面に `404`／`NotFound`／`not found`／`見つかりません`／`存在しません` のどれかがあれば「ファイルが無い」（初回扱い）、無ければ別の失敗として手順5-1 で停止する。**実機で「ファイルが無い」ときに実際に出る文面は未確認**（初回の場面で別の失敗として止まったら、出た文面を報告して判定の文字を直す）。
 - **手順6 で止まったときの CSV**：CSV は SharePoint に保存済み。再実行すると今回の分が「前回」になるため新規0件になる。
@@ -180,6 +186,8 @@
 - PAD のステータス バーのアクション数は、構文解析器で数えた 229 の見込み（コメントも1つ、ブロックのエラー時の設定は開始と1つ、If・Loop の終わりも1つと数える。）。最初の版の貼り付けでは実機でも 229 アクションと表示された（コネクタの 5 行が「不明なアクション」になった状態）。今の版の表示は未確認。コネクタの行の直前の `@@` の注釈の行は、アクションとして数えない（表にも入れていない）。
 - 「主な設定値」は `Main.txt` の行の要約（文字列は長いものを省略。`\\` は `Main.txt` での書き方のまま）。アクション名は PAD の日本語表示に近い名前で、表示と少し違う場合がある。
 - 手順5〜6 のブロックと `ErrorEnd` の中の `IF`／`ELSE`／`ON ERROR` も1行として数える。
+- 「資産4 の No.n と同じ」は、資産4の `752291d` の版（04e）のアクション表（資産4の reference.md の 7）の番号。
+- **クリックの方法（No.46・80・96。04e の反映、2026-10-21）**：3か所の「Web ページのリンクをクリック」（ログインボタン・「詳細」・「一覧へ戻る」）は、［詳細］の「**物理的なクリックを送信**」を **オフ**（`MouseClick: False`）にしてある（資産4の手順書では「物理クリックを送信」と書いている。同じ設定）。マウス カーソルを動かさずに、要素にクリックを送る。`Main.txt` の3行は、資産4（`752291d`）の No.42・76・92 の行と行頭の空白を除いて文字単位で同じで、書き方は資産4で実機の PAD 11.2609 のデザイナーでオフにして保存し、コピーした文と同じ（資産4の verification-log.md 10-0j）。`MouseClick` 以外に書いてある `ClickType`（左クリック）・`MousePositionRelativeToElement`（中央）・`OffsetX`・`OffsetY`（0）は既定値と同じ。ほかのアクション（直後の空のエラー時の設定 No.47、ログインのやり直し、前面に出す処理 No.36・78・94 など）は変えていない。経緯は 4 の「E3 の説明と対処」。**資産5の今の版の貼り付け・実行での確認はまだ**（verification-log.md の 4）。
 
 | No | 手順 | ブロック | アクション名（PAD デザイナー） | 主な設定値（`Main.txt` の行の要約） | 生成される変数 | 資産4との関係 |
 |----|------|----------|-------------------------------|--------------------------------------|----------------|---------------|
@@ -228,7 +236,7 @@
 | 43 | 1 | Step1_Login | Web ページで JavaScript 関数を実行します | BrowserInstance: Browser Javascript: `function ExecuteScript() { var id = document.g…` Result=> LoginCheck | `LoginCheck` | 資産4 の No.39 と同じ |
 | 44 | 1 | Step1_Login | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 資産4 の No.40 と同じ |
 | 45 | 1 | Step1_Login | If | LoginCheck = `OK` | — | 資産4 の No.41 と同じ |
-| 46 | 1 | Step1_Login | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] WaitForPageToLoadTimeout: 60 | — | 資産4 の No.42 と同じ |
+| 46 | 1 | Step1_Login | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['LoginPage']['login-button']、**物理的なクリックを送信：オフ（`MouseClick: False`。04e の反映）**、クリックの種類：左クリック（`ClickType: WebAutomation.ClickType.LeftClick`）、要素に対するマウスの位置：中央（`MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter`）、オフセット X・Y：0（`OffsetX: 0 OffsetY: 0`）、ページ読み込みのタイムアウト：60 秒 | — | 資産4 の No.42 と同じ |
 | 47 | 1 | Step1_Login | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 資産4 の No.43 と同じ |
 | 48 | 1 | Step1_Login | Web ページのコンテンツを待機 | 要素が表示されるまで最大 30 秒待つ：BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded'] | — | 資産4 の No.44 と同じ |
 | 49 | 1 | Step1_Login | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 資産4 の No.45 と同じ |
@@ -262,7 +270,7 @@
 | 77 | 3 | Step3_GetDetails | 変数の設定 | `StepMessage` ＝ `手順3-1：申込番号 %CurrentNo% の「詳細」ボタンをクリックできませんでした` | `StepMessage` | 資産4 の No.73 と同じ |
 | 78 | 3 | Step3_GetDetails | ウィンドウにフォーカスする | WindowInstance: Browser.Handle | — | 資産4 の No.74 と同じ |
 | 79 | 3 | Step3_GetDetails | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 資産4 の No.75 と同じ |
-| 80 | 3 | Step3_GetDetails | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['ListPage']['detail-button'] WaitForPageToLoadTimeout: 60 | — | 資産4 の No.76 と同じ |
+| 80 | 3 | Step3_GetDetails | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['ListPage']['detail-button']、**物理的なクリックを送信：オフ（`MouseClick: False`。04e の反映）**、クリックの種類：左クリック（`ClickType: WebAutomation.ClickType.LeftClick`）、要素に対するマウスの位置：中央（`MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter`）、オフセット X・Y：0（`OffsetX: 0 OffsetY: 0`）、ページ読み込みのタイムアウト：60 秒 | — | 資産4 の No.76 と同じ |
 | 81 | 3 | Step3_GetDetails | 変数の設定 | `StepMessage` ＝ `手順3-2：申込番号 %CurrentNo% の詳細画面が表示されませんでした（30 秒。該…` | `StepMessage` | 資産4 の No.77 と同じ |
 | 82 | 3 | Step3_GetDetails | Web ページのコンテンツを待機 | 要素が表示されるまで最大 30 秒待つ：BrowserInstance: Browser Control: appmask['DetailPage']['application-detail-loaded'] | — | 資産4 の No.78 と同じ |
 | 83 | 3 | Step3_GetDetails | 変数の設定 | `StepMessage` ＝ `手順3-3〜3-4：申込番号 %CurrentNo% の詳細画面から項目を取得できませんでし…` | `StepMessage` | 資産4 の No.79 と同じ |
@@ -278,7 +286,7 @@
 | 93 | 3 | Step3_GetDetails | 変数の設定 | `StepMessage` ＝ `手順3-5：申込番号 %CurrentNo% の詳細画面から一覧画面に戻れませんでした（30…` | `StepMessage` | 資産4 の No.89 と同じ |
 | 94 | 3 | Step3_GetDetails | ウィンドウにフォーカスする | WindowInstance: Browser.Handle | — | 資産4 の No.90 と同じ |
 | 95 | 3 | Step3_GetDetails | （直前のアクションの個別のエラー時の設定） | フロー実行を続行する／次のアクションに移動 | — | 資産4 の No.91 と同じ |
-| 96 | 3 | Step3_GetDetails | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button'] WaitForPageToLoadTimeout: 60 | — | 資産4 の No.92 と同じ |
+| 96 | 3 | Step3_GetDetails | Web ページのリンクをクリックします | BrowserInstance: Browser Control: appmask['DetailPage']['back-to-list-button']、**物理的なクリックを送信：オフ（`MouseClick: False`。04e の反映）**、クリックの種類：左クリック（`ClickType: WebAutomation.ClickType.LeftClick`）、要素に対するマウスの位置：中央（`MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter`）、オフセット X・Y：0（`OffsetX: 0 OffsetY: 0`）、ページ読み込みのタイムアウト：60 秒 | — | 資産4 の No.92 と同じ |
 | 97 | 3 | Step3_GetDetails | Web ページのコンテンツを待機 | 要素が表示されるまで最大 30 秒待つ：BrowserInstance: Browser Control: appmask['ListPage']['application-table-loaded'] | — | 資産4 の No.93 と同じ |
 | 98 | 4 | Step4_WriteCsv | ブロック エラー発生時（ブロックの開始） | 名前：`Step4_WriteCsv` | — | 資産4 の No.94 と同じ |
 | 99 | 4 | Step4_WriteCsv | （直前のブロックのエラー時の設定） | 例外処理モード：フロー実行を続行する | — | 資産4 の No.95 と同じ |
