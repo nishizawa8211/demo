@@ -1,0 +1,21 @@
+# 04e review-01 実機の確認（4e-8）PAD の実行ログの照合
+# 対象：%LOCALAPPDATA%\Microsoft\Power Automate Desktop\DataCollection\ の 2026-10-21-05-05／05-07／05-09-RobinRobot.log
+
+## デスクトップ版の報告（2026-10-21 14:00〜14:12）の要約
+各回とも operationName WebAutomationActionBase.ClickBase の execute 41 件・execute.success 41 件（失敗 0）
+mouseClick：3回とも False 41 件・True 0 件（clickType LeftClick）
+要素ごと（順序と件数からの推定）：ログイン 1 件（最初）・詳細 20 件・一覧へ戻る 20 件（交互）
+ログインボタンの Click は各回 1 回（やり直しなし）
+時刻の範囲（UTC）：1回目 05:05:25〜05:06:42、2回目 05:07:13〜05:08:35、3回目 05:09:12〜05:10:30
+
+## Evaluator が読んで照合した結果（log2.js。読むだけ。一時コピーは照合後に削除）
+採点時（2026-10-21 午後）にフォルダーにあった 05-0x の RobinRobot.log は 05-09 の1つだけ（05-05・05-07 は最初の一覧では 05-07 が見えたが、直後の一覧では無くなっていた。PAD 側で送信・削除されたとみられる）。3回目のみ照合した
+--- 2026-10-21-05-09-RobinRobot.log（3回目）---
+operationName=ClickBase の記録: 82
+message と mouseClick ごとの件数: {"webautomationruntime.execute mouseClick=False":41,"webautomationruntime.execute.success mouseClick=False":41}
+success の時刻の範囲(UTC): 05:09:13 〜 05:10:30
+success の expressionInfo.count の並び: 01010101010101010101010101010101010101010
+runId の種類の数: 1
+（expressionInfo.count が 1 の Click は UI 要素に変数 %CurrentNo% を含む「詳細」ボタン。並び 0,1,0,1,…,0 は ログイン1・詳細20・一覧へ戻る20 の交互と一致し、報告の推定を裏づける）
+→ 3回目：Click 41 件（ログイン 1・詳細 20・一覧へ戻る 20）、mouseClick False 41／True 0、success 41（runId は1つ）。報告と一致
+→ 1回目・2回目：ログイン後のファイルが残っていなかったため、報告で判定

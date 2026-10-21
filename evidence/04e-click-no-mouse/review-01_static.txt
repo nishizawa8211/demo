@@ -1,0 +1,100 @@
+# 04e review-01 机上の確認（4e-1〜4e-5, C1, C3, C4）
+# 採点日 2026-10-21 / ブランチ sprint/04e-click-no-mouse @ 3e6d086 / 比較の基準 ad55c6c
+# スクリプト：Evaluator の scratchpad の static.js・repo.js（Node v22）。git の結果は下のとおり
+
+## git
+git diff f0c3322 HEAD -- flows/application-check/Main.txt : 空（実機で試した f0c3322 と採点時の Main.txt は同一）
+git diff ad55c6c -- mock docs flows/application-check-notify : 空
+git diff ad55c6c --stat -- flows/application-check :
+   flows/application-check/Main.txt            |   8 +-
+   flows/application-check/README.md           |   6 +-
+   flows/application-check/reference.md        |  19 ++--
+   flows/application-check/verification-log.md | 137 +++++++++++++++++++++++++---
+   4 files changed, 143 insertions(+), 27 deletions(-)
+
+## Main.txt の差分（ad55c6c → HEAD）で変わった行
+  @@ -38 +38 @@ END
+  @@ -62 +62 @@ END
+  @@ -115 +115 @@ END
+  @@ -136 +136 @@ END
+  （L38 は # コメント行の文末への追記。L62・L115・L136 は Click の行）
+
+## static.js の出力
+== アクション行 ==
+マーカー行の数 cur/base: 1 1
+アクション行の数 cur/base: 107 107
+異なるアクション行の数: 3
+  No.42 cur L62 / base L62
+  No.76 cur L115 / base L115
+  No.92 cur L136 / base L136
+
+== 4e-1 Click の行 ==
+Click の行の数: 3
+  L62 Control=appmask['LoginPage']['login-button'] MouseClick=False base引数が同値で残る=true 書き出しと名前・並び一致=true 値一致(Control除く)=true
+  L115 Control=appmask['ListPage']['detail-button'] MouseClick=False base引数が同値で残る=true 書き出しと名前・並び一致=true 値一致(Control除く)=true
+  L136 Control=appmask['DetailPage']['back-to-list-button'] MouseClick=False base引数が同値で残る=true 書き出しと名前・並び一致=true 値一致(Control除く)=true
+MouseClick: True の行: 0
+MouseClick の無い Click の行: 0
+
+== 4e-2 (b) マーカー行以降 ==
+cur と base が文字単位で同一: true
+JSON.parse: OK, keys: ControlRepositorySymbols,ImageRepositorySymbol,ConnectionReferences
+
+== 4e-2 (c) 残っているもの ==
+LOOP LoginTry FROM 1 TO 3: true
+FocusWindow の行数: 3
+WAIT 2: 1
+E2/E3 の文言（手順1-3〜1-4／1-4〜1-5）: true true
+
+== 4e-4 ON ERROR の直前のアクション ==
+  No.32→33 UIAutomation.FocusWindow.FocusByInstanceOrHandle 中が空=true
+  No.35→36 WebAutomation.PopulateTextField.PopulateTextField 中が空=true
+  No.37→38 WebAutomation.PopulateTextField.PopulateTextField 中が空=true
+  No.39→40 WebAutomation.ExecuteJavascript 中が空=true
+  No.42→43 WebAutomation.Click.Click 中が空=true
+  No.44→45 WAIT (WAIT) 中が空=true
+  No.74→75 UIAutomation.FocusWindow.FocusByInstanceOrHandle 中が空=true
+  No.90→91 UIAutomation.FocusWindow.FocusByInstanceOrHandle 中が空=true
+  No.106→107 WebAutomation.CloseWebBrowser 中が空=true
+ON ERROR の数 cur/base: 9 9 一覧が同じ: true
+NEXT ACTION: 0
+
+== 4e-5 (a) アクション表 ==
+アクション表の行数: 107  Main.txt のアクション行: 107
+  No.42: Web ページのリンクをクリックします / 物理クリックを送信：オフ を含む=true / MouseClick: False を含む=true / Main.txt の No.42 は Click=true
+  No.76: Web ページのリンクをクリックします / 物理クリックを送信：オフ を含む=true / MouseClick: False を含む=true / Main.txt の No.76 は Click=true
+  No.92: Web ページのリンクをクリックします / 物理クリックを送信：オフ を含む=true / MouseClick: False を含む=true / Main.txt の No.92 は Click=true
+表の「クリック」の行 No: 42,76,92  Main.txt の Click の No: 42,76,92
+ON ERROR の No（Main.txt）: 33,36,38,40,43,45,75,91,107
+## repo.js の出力（マーカー行以降の JSON・Repository）
+LoginPage 3 login-id,login-password,login-button
+ListPage 3 application-table-loaded,application-count,detail-button
+DetailPage 2 application-detail-loaded,back-to-list-button
+ConnectionString: undefined
+Repository 内の URL: 
+Repository 内の Users パス: false  メール形式: 0
+要素の合計 8
+  ※ ConnectionString は ConnectionReferences 側にあり、値は ""（Grep で確認）
+
+## 4e-1 (c) 比較に使った実機の書き出し（verification-log.md 10-0j に記録された「物理クリックを送信」オフの文）
+WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']['login-button'] ClickType: WebAutomation.ClickType.LeftClick MouseClick: False WaitForPageToLoadTimeout: 60 MousePositionRelativeToElement: WebAutomation.RectangleEdgePoint.MiddleCenter OffsetX: 0 OffsetY: 0
+→ 3行とも引数の名前・並び・値（Control を除く）がこの文と一致（static.js）
+
+## 4e-3・4e-4・4e-5 Read の結果（verification-log.md・README.md・reference.md）
+- 4e-3：10-0j に書き出しの文（オフ・オン）がコードとして載っている。日時 2026-10-20 16:51〜16:58、PAD 11.2609.183.0、行った人「Claude デスクトップ版のセッション」。増えた引数5つ（ClickType・MouseClick・MousePositionRelativeToElement・OffsetX・OffsetY）と Main.txt への反映の表あり。README（位置づけ・E3）・reference.md（7 の注記・クリックの方法）から 10-0j を参照
+- 4e-4：10-0「今の版の照合」：128 ステートメント・エラー 0・書き戻し一致・不一致 0（38 か所）。MouseClick＝System.Boolean ほか型・列挙値の不一致 0。ON ERROR 9か所（No.33・36・38・40・43・45・75・91・107）が ad55c6c と同じ、ThrowsAttribute の宣言あり。NEXT ACTION 不使用。→ Evaluator の数え：アクション行 107（ad55c6c と同じ）、ON ERROR の位置 9か所が一致、NEXT ACTION 0 件、実機のステータス バー 128 と一致
+- 4e-5 (a)：アクション表 107 行、No.42・76・92 に「物理クリックを送信：オフ（MouseClick: False）」。表の「クリック」の行と Main.txt の Click の No. がともに 42・76・92
+- 4e-5 (b)：reference.md 6 の E3 に 2026-10-20 の実例と今の版の対策あり。「Edge が前面に出ていなかった可能性」だけを原因とする記述は無い。README 4 の E3 も矛盾なし
+- 4e-5 (c)：README 冒頭の位置づけは「今の版を実機で実行した確認はまだ」、3 の注意 4 を追加、【必須】の注意 1 は残っている。強すぎる記述なし
+- 4e-5 (d)：**10-0j の「今の版の実機の確認結果」の表（日付・PAD・試した Main.txt・試した条件・4e-6・4e-7・各回の行）がすべて「（未実施）」のまま**。2026-10-21 の実機の結果が書かれていない → 不合格
+- 4e-5 (e)：10-1 に R-27 があるが、状態は「今の版の貼り付け・実行は実機で未確認」のまま（実機の結果が出たので更新が要る）
+- 4e-5 (f)：「確認済」と書いている未実施の項目は無い
+
+## C1・C3・C4 Grep の結果（flows/application-check/ の4ファイル）
+URL：http://localhost:8080 と http://localhost:8080/login.html のみ
+ID/PW：demo-user / demo-pass のみ（Main.txt L12・L13、README、reference.md）
+メール形式・token・tenant・sharepoint.com：0 件（README・reference・Main）。verification-log.md の token/tenant：0 件
+ユーザー名を含むパス：0 件（reference.md の 'Users\<名前>' 等は置き換えの説明・正規表現）
+Repository：URL なし・Users パスなし・メール形式 0
+社名・人名：追加・変更した行は PAD・Edge の製品名と dummy.json の架空データの参照のみ。「申込管理システム（デモ）」の表記は README 冒頭にあり
+C3：追加した文言・コメントは日本語（引数名・書き出しの文・ログの値は英語）
