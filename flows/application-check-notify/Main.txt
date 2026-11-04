@@ -1,9 +1,9 @@
 # ===== 申込状況チェック_通知付き（Main サブフロー）：資産5（付加価値・保留）=====
-# スプリント05：資産4（flows/application-check/）の手順0〜4 をそのまま引き継ぎ、docs/flow.md 手順5〜6（前回比較・SharePoint 保存・Teams 投稿）と、失敗時の Teams 通知（ErrorEnd）を足した別資産。資産4のファイルは参照しない（この Main.txt だけで貼り付けられる）
-# 末尾の ControlRepository の行と JSON は UI 要素（U1〜U7・U22 の8要素）の定義（資産4と同じ）。末尾まで全文をコピーして貼り付けると UI 要素も登録される
-# SharePoint・Teams の接続参照・サイト・フォルダー・投稿先は <…> のプレースホルダー（実値は書かない）。貼り付け後に人が PAD 上で設定する。手順は README.md の「3. 貼り付けたあとの設定」、アクション表・UI 要素表は reference.md
-# ===== 設定（資産5で追加。実値は書かない。貼り付け後に人が PAD 上で設定する）=====
+# スプリント05：資産4（flows/application-check/）の手順0〜4 をそのまま引き継ぎ、docs/flow.md 手順5〜6（前回比較・SharePoint 保存・Teams 投稿）と、失敗時の Teams 通知（ErrorEnd）を足した別資産。資産4のファイルは参照しない（この Main.txt だけで貼り付けられる）。末尾の ControlRepository の行と JSON は UI 要素（U1〜U7・U22 の8要素）の定義（資産4と同じ）。末尾まで全文をコピーして貼り付けると UI 要素も登録される
+# ===== 設定（資産5で追加。実値は書かない。貼り付け後に人が PAD 上で設定する）===== SharePoint・Teams の接続参照・サイト・フォルダー・投稿先は <…> のプレースホルダー。手順は README.md の「3. 貼り付けたあとの設定」、アクション表・UI 要素表は reference.md
+# SharePointSiteUrl：サイトの URL。末尾に「/」を付けない（例 https://<テナント>.sharepoint.com/sites/<サイト>）
 SET SharePointSiteUrl TO $'''<保存先サイトの URL>'''
+# SharePointFolder：ライブラリを含むフォルダーのパス。「/」で始め、末尾に「/」を付けない（例 /Shared Documents/<フォルダー>）
 SET SharePointFolder TO $'''<保存先フォルダー>'''
 SET ChatRecipient TO $'''<投稿先>'''
 # 失敗したときに Teams へ失敗通知を投稿するか（YES／NO）。手順6（正常時の Teams 投稿）に入る前に NO にして、正常時の投稿の失敗では通知を重ねない
@@ -221,8 +221,8 @@ END
     @@folderPath: '%SharePointFolder%'
     @@connectionDisplayName: '<SharePoint 接続参照名>'
     External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline' OperationId: 'CreateFile' @dataset: $'''<保存先サイト>''' @folderPath: SharePointFolder @name: HistoryFileName @body: HistoryBinary @CreateFileResponse=> CreateFileResponse2
-    # 履歴ファイルへのリンク（サイトの URL ＋ フォルダー ＋ ファイル名。空白は %20 にする）
-    SET HistoryFileLink TO $'''%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%'''
+    # 履歴ファイルへのリンク（サイトの URL ＋ フォルダー ＋「/」＋ ファイル名。SharePointFolder は「/」で始まるので、サイトの URL との間に「/」を足さない。空白は %20 にする）
+    SET HistoryFileLink TO $'''%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%'''
     Text.Replace.ReplaceTextWithRegex Text: HistoryFileLink TextToFind: $'''\\x20''' IgnoreCase: False ReplaceWith: $'''%%20''' ActivateEscapeSequences: False Result=> HistoryFileLink
     SET StepMessage TO $'''手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の保存に失敗しました（latest.csv は前回のまま、または無い状態です）'''
     File.ConvertToBinary File: $'''%WorkFolder%\\latest.csv''' BinaryData=> LatestBinary
