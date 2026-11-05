@@ -1,0 +1,163 @@
+# 05 review-01 机上の確認（5-1〜5-12、追補 5-2 (f)・5-9 (f)・5-11 (f)）
+# 対象：sprint/05-flow-notify @ 488ab8a（作業ツリー。mock/data/dummy.json の未コミットの変更は 5-1 の判定に使わない）
+# スクリプト：Evaluator の scratchpad の static05.js（読むだけ）と git コマンドの出力
+
+## 5-1 (a) git diff --stat 752291d HEAD -- flows/application-check mock
+ flows/application-check/verification-log.md | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+## 上の差分の中身：fa4a85e（main。人の決定）の verification-log.md の6行だけ。各行の違い（- と + の行で、違うのは次の語だけ）
+      1 [-CRLF、見出し1行＋**データ20行**、14列は契約の順、申込番号は-]{+CRLF、見出し1行＋**データ20行**、14列は合格基準書の順、申込番号は+}
+      3 [-の契約-]{+の合格基準書+}
+      1 [-契約-]{+合格基準書+}
+      1 [-契約の追補（人の判断）により、`f8d3b85`-]{+合格基準書の追補（人の判断）により、`f8d3b85`+}
+## git diff --stat 752291d HEAD -- flows/application-check/Main.txt（空なら何も出ない）
+## git diff --stat main HEAD -- flows/application-check mock（空なら何も出ない＝このブランチの資産4・モックは main と同じ）
+## git log --full-history 752291d..HEAD -- flows/application-check（A6 の基準 752291d 以降に資産4 に触れたコミット）
+fa4a85e flows: 資産4 の検証記録の用語を「契約」→「合格基準書」に統一（Main.txt は変更なし）
+01f8a79 Merge main into sprint/05-flow-notify（04e を取り込む）
+d59d7b1 「契約」を「合格基準書」に統一（contract.md → pass-criteria.md、過去分を含む）
+（経緯：この6行は、先にこのブランチの d59d7b1〔用語の統一。Generator のコミットではない〕で入り、01f8a79 のマージ後も残っていた〔git diff --stat 752291d 01f8a79 も同じ6行。git diff 01f8a79 HEAD -- flows/application-check は空〕。その後 fa4a85e で同じ内容が main に入り〔git diff --stat 752291d fa4a85e も同じ6行〕、488ab8a で取り込まれた。いまは上のとおり main と同じ。資産4 の Main.txt・README.md・reference.md とモック〔コミット済みの内容〕は 752291d と同じ）
+## git log ad55c6c..HEAD -- docs（Generator のコミット〔sprint05: 資産5…〕が含まれないこと）
+d59d7b1 「契約」を「合格基準書」に統一（contract.md → pass-criteria.md、過去分を含む）
+ef3259a sprint05: 合格条件（契約）を作成、docs を Teams 毎回投稿・失敗時通知に更新
+## Generator のコミット（sprint05: の資産5 の実装・修正）が触ったファイル
+1c93b3f:
+flows/application-check-notify/Main.txt
+flows/application-check-notify/README.md
+flows/application-check-notify/reference.md
+flows/application-check-notify/verification-log.md
+52a1ef6:
+flows/application-check-notify/Main.txt
+flows/application-check-notify/README.md
+flows/application-check-notify/reference.md
+flows/application-check-notify/verification-log.md
+aff84e9:
+flows/application-check-notify/Main.txt
+flows/application-check-notify/README.md
+flows/application-check-notify/reference.md
+flows/application-check-notify/verification-log.md
+## git diff --stat aff84e9 HEAD -- flows/application-check-notify/Main.txt（空なら何も出ない）
+## 作業ツリーの未コミットの変更（参考）
+ M mock/data/dummy.json
+ M worklog/2026-10-21.md
+?? evidence/05-flow-notify/
+
+== 基本
+マーカー行の数(資産5): 1  行番号: 291
+アクション行(#・空行・END を除く): 197  うち @@ の注釈の行: 11  除くと: 186
+資産4(752291d) のアクション行: 107
+
+== 5-2 (a) 手順0〜4
+資産5 手順0〜4 行数: 140 (L11〜L150) 資産4: 140 (L5〜L144) 文字単位で同じ: true
+
+== 5-2 (b) ErrorEnd：資産4の行 7 行が資産5の ErrorEnd に同じ順で含まれる: true
+資産5 ErrorEnd で資産4に無い行:
+  + IF NotifyOnError = $'''YES''' THEN
+  + DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTim
+  + Text.ConvertDateTimeToText.FromCustomDateTime DateTime: ErrorDateTime CustomFormat: $'''yyyy/MM/dd H
+  + # 止まった手順の名前（StepMessage の先頭の「手順◯◯」の部分。例：手順2-1）
+  + Text.Replace.ReplaceTextWithRegex Text: $'''%StepMessage%''' TextToFind: $'''(?s)^(手順[0-9〜-]+).*$'''
+  + Text.Replace.ReplaceTextWithRegex Text: $'''%ErrorDetail%''' TextToFind: $'''\\r?\\n''' IgnoreCase: 
+  + @@connectionDisplayName: '<Teams 接続参照名>'
+  + External.InvokeCloudConnector Connection: '<Teams 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerA
+  + ON ERROR
+  + END
+資産4 の手順4 の後〜LABEL ErrorEnd の前:
+        SET StepMessage TO $'''手順4：CSV ファイルを書き出せませんでした。同じ名前のファイルを Excel 等で開いていないか確認してください'''
+        File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\\%HistoryFileName%''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+        File.WriteToCSVFile.WriteCSV VariableToWrite: CurrentTable CSVFile: $'''%WorkFolder%\\latest.csv''' CsvFileEncoding: File.CSVEncoding.UTF8 IncludeColumnNames: True IfFileExists: File.IfFileExists.Overwrite ColumnsSeparator: File.CSVColumnsSeparator.Comma
+    END
+    # ===== スプリント05：手順5〜6 はここ（次の「手順7」のブラウザを閉じるアクションの前）に追加する =====
+    # 手順7. 終了（正常時）
+    WebAutomation.CloseWebBrowser BrowserInstance: Browser
+    EXIT Code: 0
+    # ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない）=====
+資産5 の手順7〜LABEL ErrorEnd の前:
+    # 手順7. 終了（正常時）
+    WebAutomation.CloseWebBrowser BrowserInstance: Browser
+    EXIT Code: 0
+    # ===== エラー時（各ブロックのエラー時処理と不一致の判定からここへ移動する。CSV は書き出さない・SharePoint にも保存しない）=====
+CloseWebBrowser の行: 267,287
+
+== 5-2 (f) Click
+資産5 Click 行: 68,121,142  資産4(752291d): 62,115,136
+  資産5 L68 と資産4 L62 が行頭の空白を除いて同じ: true  要素: appmask['LoginPage']['login-button']
+  資産5 L121 と資産4 L115 が行頭の空白を除いて同じ: true  要素: appmask['ListPage']['detail-button']
+  資産5 L142 と資産4 L136 が行頭の空白を除いて同じ: true  要素: appmask['DetailPage']['back-to-list-button']
+MouseClick: True の行: 0  MouseClick の無い Click: 0
+  L68 の8引数がこの並び: true
+  L121 の8引数がこの並び: true
+  L142 の8引数がこの並び: true
+
+== 5-2 (f)(b) aff84e9 とその親 63f4a5f の Main.txt
+アクション行の数 親: 197  aff84e9: 197
+違うアクション行（アクション行の何番目か）: 46,80,96  → aff84e9 の行番号: 68,121,142
+全体の行数 親: 327  aff84e9: 327
+  違う行 L44: コメント行
+  違う行 L68: アクション行
+  違う行 L121: アクション行
+  違う行 L142: アクション行
+マーカー行以降が文字単位で同じ: true
+aff84e9 と作業ツリーの Main.txt が同じ: true
+
+== 5-2 (c) UI 要素
+外側の JSON.parse: OK、Repository の JSON.parse: OK
+Repository が資産4(752291d)と文字単位で同じ: true
+画面: LoginPage,ListPage,DetailPage  要素数: 8
+CustomSelector: {"login-id":"#login-id","login-password":"#login-password","login-button":"#login-button","application-table-loaded":"#application-table[data-loaded=\"true\"]","application-count":"#application-count","detail-button":"button[data-action=\"detail\"][data-application-no=\"%CurrentNo%\"]","application-detail-loaded":"#application-detail[data-loaded=\"true\"]","back-to-list-button":"#back-to-list-button"}
+InstanceId 重複: 0
+appmask の参照 延べ: 13  種類: 8  参照だけ: なし  定義だけ: なし
+ConnectionReferences: [{"ConnectorId":"/providers/Microsoft.PowerApps/apis/shared_sharepointonline","DisplayName":"<SharePoint 接続参照名>","LogicalName":"<SharePoint 接続参照ID>","ConnectionName":"<SharePoint 接続名>"},{"ConnectorId":"/providers/Microsoft.PowerApps/apis/shared_teams","DisplayName":"<Teams 接続参照名>","LogicalName":"<Teams 接続参照ID>","ConnectionName":"<Teams 接続名>"}]
+ConnectionString: ""
+
+== 5-2 (d) 構文
+開始(BLOCK/IF/LOOP/ON ERROR/ON BLOCK ERROR): 51  END: 51  最後の深さ: 0  途中で負: 0
+三連引用符の数: 318  偶数: true
+% が奇数の行: なし
+% で参照し定義の無い変数: なし
+
+== 5-9 ON ERROR
+  L55 ← L54: UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  L59 ← L58: WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Contr
+  L62 ← L61: WebAutomation.PopulateTextField.PopulateTextField BrowserInstance: Browser Contr
+  L65 ← L64: WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''functio
+  L69 ← L68: WebAutomation.Click.Click BrowserInstance: Browser Control: appmask['LoginPage']
+  L72 ← L71: WAIT (WebAutomation.WaitForWebPageContent.WebPageToContainElement BrowserInstanc
+  L119 ← L118: UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  L140 ← L139: UIAutomation.FocusWindow.FocusByInstanceOrHandle WindowInstance: Browser.Handle
+  L170 ← L169: External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/p
+  L283 ← L282: External.InvokeCloudConnector Connection: '<Teams 接続参照ID>' ConnectorId: '/provid
+  L288 ← L287: WebAutomation.CloseWebBrowser BrowserInstance: Browser
+ON ERROR の数: 11  ON BLOCK ERROR の数: 9  NEXT ACTION: 0
+
+== 5-3・5-5・5-7 順序
+GetFileContentByPath: 169  BLOCK Step5b: 197  ConvertToBinary: 219,228  CreateFile: 223,232  PostMessageToConversation: 264,282  LABEL ErrorEnd: 270
+CreateFile の @body: HistoryBinary,LatestBinary  ConvertToBinary の出力: HistoryBinary,LatestBinary
+GOTO ErrorEnd の数: 15
+SET PreviousExists の行: 162,179,193
+PostMessage を設定する行: 245,257,260
+HistoryFileLink の組み立て: SET HistoryFileLink TO $'''%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%'''
+@@path / @@folderPath: @@path: '%SharePointFolder%/latest.csv' | @@folderPath: '%SharePointFolder%' | @@folderPath: '%SharePointFolder%'
+
+== 5-8 GOTO ErrorEnd（ブロックのエラー時以外）の直前の StepMessage
+  L84: 手順1-3〜1-4
+  L87: 手順1-4〜1-5
+  L108: 手順2-2
+  L130: 手順3-4
+  L134: 手順3-3
+  L182: 手順5-1
+StepMessage の手順名: 手順0 / 手順1-1〜1-2 / 手順1-3〜1-4 / 手順1-4〜1-5 / 手順1-5 / 手順2-1 / 手順2-2 / 手順3-1 / 手順3-2 / 手順3-3〜3-4 / 手順3-4 / 手順3-3 / 手順3-5 / 手順4 / 手順5-1 / 手順5-2 / 手順5-3 / 手順6
+
+== 5-11 アクション表
+アクション表の行数: 186  Main.txt のアクション行(@@ を除く): 186  No が1から連番: true
+種類の食い違い: 0
+README 行数 資産4: 118  資産5: 122  比: 1.03
+
+## 5-10・C4 の Grep（flows/application-check-notify/ の全ファイル）
+URL（http/https）:
+  Main.txt:17:http://localhost:8080'''
+  reference.md:202:http://localhost:8080
+  verification-log.md:52:http://localhost:8080
+メール形式: Main.txt:0 README.md:0 reference.md:0 verification-log.md:0
+GUID 形式: 11 件（Main.txt のみ。すべて Repository の UI 要素の InstanceId〔3画面＋8要素＝11〕で、資産4と同じ）
+sharepoint.com・onmicrosoft・tenant・ユーザー名を含むパス・token: Main.txt:0 README.md:0 reference.md:0 verification-log.md:0

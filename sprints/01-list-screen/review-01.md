@@ -4,7 +4,7 @@
 - 採点日: 2026-10-14（当日日付 `2026/10/14`）
 - 対象: ブランチ `sprint/01-list-screen`、コミット `8f35c05`
 - 環境: リポジトリのルートで `node mock/server.js`（Bash バックグラウンド起動）、Playwright MCP（Edge）で `http://localhost:8080/list.html` を操作
-- 採点開始時: リセット前の件数は **全 20 件**（`dummy.json` は `initial.json` と同一）。契約どおり `#demo-reset-button` → `#demo-reset-confirm-button` で初期化してから開始
+- 採点開始時: リセット前の件数は **全 20 件**（`dummy.json` は `initial.json` と同一）。合格基準書どおり `#demo-reset-button` → `#demo-reset-confirm-button` で初期化してから開始
 - 採点終了時: 画面からリセットし初期20件に戻した（`dummy.json` と `initial.json` が同一、`git status` で `mock/` に差分なし）。サーバー停止・ブラウザ終了済み
 
 | # | 合格条件 | 結果 | 根拠(evidence) | 指摘 |

@@ -1,7 +1,7 @@
-# スプリント契約 — 04b フロー前半の作り直し：UI 要素定義の同梱（`04b-flow-ui-elements`）
+# スプリント合格基準書 — 04b フロー前半の作り直し：UI 要素定義の同梱（`04b-flow-ui-elements`）
 
-> Evaluator が `docs/criteria.md`（スプリント04・共通条件）、`docs/screens.md`（1-1・S1〜S3）、`docs/flow.md`、`CLAUDE.md`、`sprints/04-flow-scrape/contract.md`・`review-01.md`、`main` ブランチ（`375b341`）の `flows/application-check/Main.txt`・`README.md`、人が PAD でコピーした見本 `input/pad-sample.txt`（既定セレクター）・`input/pad-sample-custom.txt`（カスタムセレクター）の構造をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント04・共通条件）、`docs/screens.md`（1-1・S1〜S3）、`docs/flow.md`、`CLAUDE.md`、`sprints/04-flow-scrape/pass-criteria.md`・`review-01.md`、`main` ブランチ（`375b341`）の `flows/application-check/Main.txt`・`README.md`、人が PAD でコピーした見本 `input/pad-sample.txt`（既定セレクター）・`input/pad-sample-custom.txt`（カスタムセレクター）の構造をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -46,7 +46,7 @@
 | 4b-5 | 【必須】**見本の実データを持ち込まない**：デコードした Repository 全体と `Main.txt` 全文に、見本の行固有の値・長い表示テキスト・自動生成の階層情報が無い。具体的には次の文字列が **0件**：`DM-20`（申込番号）、`detail-button-`（行ごとに変わる id）、`Button '詳細'`・`Body '`・`Main content '`・`Section '`（見本の自動生成の要素名・表示テキスト）、`business-area`・`table-wrap`（見本の階層に出てくる id・クラス）、見本の `ScreenshotPath`（`controlRepo-screenshots\…`）と `InstanceId`。UI 要素の `Name` は U1〜U22 の要素名そのもので、画面の `Name` は 4b-3 の3つ（見本の `Web Page 'http://…'` のような自動生成名を画面名・要素名に使わない）。各セレクターの `Elements` を持つ場合、その中の属性で `Ignore: false` のものは `Id` か `data-*` だけで、値は 4b-4 の CustomSelector と矛盾しない | Node スクリプト（各文字列の件数、`Elements` の `Ignore: false` 属性の一覧を出力） | 10 |
 | 4b-6 | **スクリーンショットの扱い**：見本の `ScreenShot`（Base64 PNG）を流用しない。画面・UI 要素の `ScreenShot` は「キーを省く／`null`／空文字」のいずれか、またはすべて同じ小さなダミー画像（Base64 をデコードすると PNG の先頭 `89 50 4E 47`、2KB 以下）。`ScreenshotPath` は省くか `null`。どの扱いにしたか、その結果 PAD の UI 要素ペインでプレビュー画像が表示されないこと、取り込みでスクリーンショットが必須と判明した場合の対処（4b-7 の予備手順へ進む、または PAD 上で UI 要素を開いて取り込み直す）が README に書かれている | Node スクリプト（各 `ScreenShot` の有無・長さ・先頭バイト、見本の Base64 との一致の有無）・Read（README） | 5 |
 | 4b-7 | 【必須】**README の更新**：README（`flows/application-check/README.md`）が次を満たす。(1) 「2. 準備」の UI 要素の登録が **貼り付けで自動的に登録される** 手順に変わり、貼り付け前に UI 要素を手で登録する手順（旧 2-2 の8ステップ）が通常の手順から外れている。「3. 貼り付け手順」の「2-2 の UI 要素をすべて登録しておく」も削除・変更されている。(2) 貼り付け手順に、`Main.txt` を **末尾の `# [ControlRepository][PowerAutomateDesktop]` と JSON まで含めて全文** コピーすること、新しいフロー（または同じ名前の UI 要素が無いフロー）に貼ること、貼り付け後に［UI 要素］ペインで `LoginPage`・`ListPage`・`DetailPage` の3画面・22要素ができていることと、U6（`detail-button`）を開いてカスタムセレクターに `%CurrentNo%` が残っていることを確かめる手順がある。(3) UI 要素表（U1〜U22：画面名・要素名・セレクター・用途）が確認用として残っている。(4) **予備手順**：貼り付けで UI 要素が登録されない・エラーになる場合に、UI 要素を手で登録してから（旧 2-2 と同等の具体さ：［UI 要素の追加］→ Ctrl＋クリック → 画面名・要素名の変更 → セレクター ビルダーのテキスト エディターで表のセレクターに置き換え）アクションを貼り付ける、またはアクション表から手作業で作る手順が残っている。(5) 「レビュー②で要確認」に「貼り付けだけで UI 要素が登録されること」「スクリーンショット無し（またはダミー）で取り込めること」が追加されている。(6) `Main.txt` 冒頭のコメントに「UI 要素は貼り付け前に手で登録する」旨の記述が残っていない | Read（README の該当節・`Main.txt` 冒頭） | 10 |
-| 4b-8 | 【必須】**回帰（スプリント04 の 4-1〜4-11）**：スプリント04 の合格条件 4-1〜4-11 が、本スプリント後の `flows/` でも引き続き満たされる。確認は次のとおり：(a) アクション行（1 の定義）を `main` の `Main.txt` と比べ、変更が無い、または変更があっても README のアクション表と同じ順・同じ数で1対1に対応し設定値が食い違わない（4-3）。開始と `END` の数・入れ子、`'''` の対、`%` の対、未定義の変数が無いことを再確認する。(b) 4-4・4-7〜4-11 の判定に使った記述（手順0〜4 と 7 の順序、`LOOP FOREACH CurrentNo IN ApplicationNos`、詳細ボタンのクリックで遷移、`data-loaded` 待機の `FOR 30`、14項目の順、CSV 2ファイルの設定、`ErrorEnd` とメッセージ文言）が残っている。(c) README の 4-2 の8節（前提・準備・貼り付け・変数・実行・エラー時・アクション表・CSV 出力例）がそろっている（準備の UI 要素の節は 4b-7 の形でよい）。(d) 4-5・4-6：`git diff main -- mock` が空で、全セレクター（22個の CustomSelector と JS 内の `#application-tbody tr[data-application-no]`）がスプリント04 review-01 で実画面照合済みの文字列と同じであれば、4-6 の照合結果を引き継ぐ。同じでないセレクターがある場合は、そのセレクターだけ Playwright MCP で該当画面を開き `document.querySelectorAll` の件数（スプリント04 契約 4-6 (a) と同じ基準）を確認する | `git diff main -- flows/application-check/Main.txt`・Node スクリプト（アクション行の抽出と数、構文チェック）・Read・Grep。必要な場合のみ Playwright MCP | 20 |
+| 4b-8 | 【必須】**回帰（スプリント04 の 4-1〜4-11）**：スプリント04 の合格条件 4-1〜4-11 が、本スプリント後の `flows/` でも引き続き満たされる。確認は次のとおり：(a) アクション行（1 の定義）を `main` の `Main.txt` と比べ、変更が無い、または変更があっても README のアクション表と同じ順・同じ数で1対1に対応し設定値が食い違わない（4-3）。開始と `END` の数・入れ子、`'''` の対、`%` の対、未定義の変数が無いことを再確認する。(b) 4-4・4-7〜4-11 の判定に使った記述（手順0〜4 と 7 の順序、`LOOP FOREACH CurrentNo IN ApplicationNos`、詳細ボタンのクリックで遷移、`data-loaded` 待機の `FOR 30`、14項目の順、CSV 2ファイルの設定、`ErrorEnd` とメッセージ文言）が残っている。(c) README の 4-2 の8節（前提・準備・貼り付け・変数・実行・エラー時・アクション表・CSV 出力例）がそろっている（準備の UI 要素の節は 4b-7 の形でよい）。(d) 4-5・4-6：`git diff main -- mock` が空で、全セレクター（22個の CustomSelector と JS 内の `#application-tbody tr[data-application-no]`）がスプリント04 review-01 で実画面照合済みの文字列と同じであれば、4-6 の照合結果を引き継ぐ。同じでないセレクターがある場合は、そのセレクターだけ Playwright MCP で該当画面を開き `document.querySelectorAll` の件数（スプリント04 合格基準書 4-6 (a) と同じ基準）を確認する | `git diff main -- flows/application-check/Main.txt`・Node スクリプト（アクション行の抽出と数、構文チェック）・Read・Grep。必要な場合のみ Playwright MCP | 20 |
 | 4b-9 | 共通条件 C1・C3・C4（下表。C1・C4 は【必須】） | 下表のとおり | 5 |
 
 ### 共通条件（4b-9 の内訳）
@@ -62,15 +62,15 @@
 | 重みの合計 | 100 |
 |-----------|-----|
 
-### criteria.md・スプリント04 契約との対応
+### criteria.md・スプリント04 合格基準書との対応
 
-| 元の条件 | 本契約 |
+| 元の条件 | 本合格基準書 |
 |----------|--------|
 | criteria 4-1 成果物がある（定義テキストと手順書） | 4b-1（形式）＋ 4b-7（手順書）＋ 4b-8 (a)(c) |
 | criteria 4-3 セレクター方針 | 4b-4（CustomSelector）＋ 4b-5（見本の値を持ち込まない）＋ 4b-8 (d) |
 | criteria 4-2・4-4〜4-7 | 4b-8 (b)（スプリント04 の判定を回帰確認） |
 | criteria 4-8 C4 | 4b-9（C1・C3 を追加、C4 は【必須】） |
-| スプリント04 契約 2-2「UI 要素リポジトリの定義を含める場合はセレクターが UI 要素表と一致」 | 4b-3・4b-4 |
+| スプリント04 合格基準書 2-2「UI 要素リポジトリの定義を含める場合はセレクターが UI 要素表と一致」 | 4b-3・4b-4 |
 
 ### 証跡ファイル（予定）
 

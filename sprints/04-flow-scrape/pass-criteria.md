@@ -1,7 +1,7 @@
-# スプリント契約 — 04 フロー前半（`04-flow-scrape`）
+# スプリント合格基準書 — 04 フロー前半（`04-flow-scrape`）
 
-> Evaluator が `docs/criteria.md`（スプリント04・共通条件）、`docs/flow.md`（0〜5）、`docs/screens.md`（1・1-1・1-2・2・S1〜S3）、`CLAUDE.md`、`sprints/03-detail-screen/contract.md`（書式）、現在の `mock/`（`login.html`・`list.html`・`detail.html`・`js/list.js`・`js/detail.js` の実際の `id` / `data-*`）をもとに作成。
-> 本契約は Evaluator と Generator の合意であり、スプリント中は変更しない。
+> Evaluator が `docs/criteria.md`（スプリント04・共通条件）、`docs/flow.md`（0〜5）、`docs/screens.md`（1・1-1・1-2・2・S1〜S3）、`CLAUDE.md`、`sprints/03-detail-screen/pass-criteria.md`（書式）、現在の `mock/`（`login.html`・`list.html`・`detail.html`・`js/list.js`・`js/detail.js` の実際の `id` / `data-*`）をもとに作成。
+> 本合格基準書は Evaluator と Generator の合意であり、スプリント中は変更しない。
 
 ---
 
@@ -86,7 +86,7 @@ Evaluator は PAD に貼り付けられないので、定義テキスト（Robin
 
 ### criteria.md との対応
 
-| criteria.md | 本契約 |
+| criteria.md | 本合格基準書 |
 |-------------|--------|
 | 4-1 成果物がある（15） | 4-1 ファイル構成（5）＋ 4-2 手順書の内容（10）＋ 4-3 構文の妥当性・アクション表（10） |
 | 4-2 手順0〜4 をすべて含む（20） | 4-4 手順の順序（5）＋ 4-9 14項目の取得（10） |
