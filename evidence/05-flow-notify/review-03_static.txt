@@ -1,0 +1,58 @@
+# 05 review-03 机上の確認（Evaluator、2026-11-05、HEAD 65f8e60）
+
+## git log -1
+65f8e60 sprint05: review-02 の差し戻し対応（verification-log に 5f136e3 の実機結果と人の確認、README の貼り付け・エラー全文・実行場所・Excel の指数表示の注意）
+
+## git diff 5f136e3 HEAD --stat
+ evidence/05-flow-notify/review-02_csv.txt          |  31 ++++
+ evidence/05-flow-notify/review-02_report.txt       |  68 +++++++
+ evidence/05-flow-notify/review-02_static.txt       | 202 +++++++++++++++++++++
+ flows/application-check-notify/README.md           |  21 ++-
+ flows/application-check-notify/reference.md        |  18 +-
+ flows/application-check-notify/verification-log.md | 111 +++++++----
+ sprints/05-flow-notify/review-02.md                |  79 ++++++++
+ 7 files changed, 483 insertions(+), 47 deletions(-)
+
+## git diff 5f136e3 HEAD -- flows/application-check-notify/Main.txt の行数（0＝変更なし）
+0
+
+## git diff main HEAD -- flows/application-check mock の行数（0＝資産4・モックは main と同じ）
+0
+
+## 行数（README 資産5 / 資産4）
+  146 flows/application-check-notify/README.md
+  117 flows/application-check/README.md
+  263 total
+
+## reference.md のアクション表の行（'| 数字 |' で始まる行の数。5f136e3 / HEAD）
+5f136e3: 200
+HEAD: 200
+
+## 古い記述の残り（実機で未確認・実機の貼り付けで確かめる・まだ・<コミット ID>）
+0
+
+## HistoryFileLink の出現（経緯・旧名の記載のみであること）
+0
+flows/application-check-notify/README.md:17:規あり・新規0件の3つ。失敗通知には付けない）。変数名は `HistoryFileLink`（旧名）→ `CsvFolderLin
+flows/application-check-notify/reference.md:30:SharePointFolder%` に変更（変数名を旧 `HistoryFileLink` から変え、ファイル名を付けない。5 
+flows/application-check-notify/reference.md:76:ける（`Main.txt` は入力の形を直さない）。旧名 `HistoryFileLink`（2026-11-04 までの版。履歴
+flows/application-check-notify/verification-log.md:45: **225 行目（No.144）の1行だけ**：`SET HistoryFileLink TO $'''%SharePointS
+flows/application-check-notify/verification-log.md:57:り・新規0件の3つに付け、失敗通知には付けない。変数名は `HistoryFileLink` → `CsvFolderLink`（
+flows/application-check-notify/verification-log.md:58:）** の `PostMessage` の末尾 `CSV：%HistoryFileLink%` を `CSV：%HistoryFi
+flows/application-check-notify/verification-log.md:62:字は `href` の中だけ）。`Main.txt` に `HistoryFileLink` は 0 件 |
+
+## Main.txt の SharePoint のファイル削除のアクション（DeleteFile 等）
+0
+
+## 実値の走査（URL・メール・GUID・onmicrosoft・ユーザー名を含むパス）
+flows/application-check-notify/README.md:73:https://
+flows/application-check-notify/reference.md:65:https://
+flows/application-check-notify/reference.md:76:https://
+flows/application-check-notify/reference.md:224:http://localhost:8080
+flows/application-check-notify/verification-log.md:44:https://
+flows/application-check-notify/verification-log.md:62:https://
+flows/application-check-notify/verification-log.md:62:https://
+flows/application-check-notify/verification-log.md:62:https://
+flows/application-check-notify/verification-log.md:85:http://localhost:8080
+flows/application-check-notify/verification-log.md:162:https://
+flows/application-check-notify/verification-log.md:241:https://
