@@ -27,8 +27,8 @@
 | D3 | 手順0〜4（アクション表 No.5〜103） | **変更なし**（順・内容とも資産4の No.1〜99 と同じ） | 回帰を起こさない |
 | D4 | 手順5-1（Step5a_GetPrevious） | 追加 | 前回の `latest.csv` の取得と初回判定 |
 | D5 | 手順5-2（Step5b_FindNew） | 追加 | 申込番号による新規案件の抽出 |
-| D6 | 手順5-3（Step5c_Save） | 追加。2026-11-04 に No.144 のリンクの組み立てを `%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%` に変更（間の「/」を外した。5 のリンクの説明） | SharePoint への保存（履歴ファイル → `latest.csv`）。リンクが「//」になって開けなかったため（review-01 の指摘1） |
-| D7 | 手順6（Step6_Notify） | 追加 | Teams への投稿（毎回1回） |
+| D6 | 手順5-3（Step5c_Save） | 追加。2026-11-04 に No.144 のリンクの組み立てを `%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%` に変更（間の「/」を外した）。2026-11-05 に No.144・145 を、CSV の保存場所（フォルダー）を指す `CsvFolderLink` ＝ `%SharePointSiteUrl%%SharePointFolder%` に変更（変数名を旧 `HistoryFileLink` から変え、ファイル名を付けない。5 のリンクの説明） | SharePoint への保存（履歴ファイル → `latest.csv`）。リンクが「//」になって開けなかったため（review-01 の指摘1）。履歴ファイルを指すリンクは、開くとダウンロードが始まったため（人の決定 2026-11-05） |
+| D7 | 手順6（Step6_Notify） | 追加。2026-11-05 に初回・新規あり・新規0件の `PostMessage`（No.157・167・170）の末尾を「CSV：<URL>」から「CSV：`%HistoryFileName%`」＋改行＋文字のリンク `<a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>` に変更（ほかの文言は変えていない） | Teams への投稿（毎回1回）。URL がクリックできる形になっていなかったため（人の決定 2026-11-05） |
 | D8 | 手順7（ブラウザーを閉じる・EXIT。No.172〜173） | 内容は同じ（資産4の No.100〜101）。位置は手順6 の後 | 資産4のコメント行「手順5〜6 はここ」の位置に D4〜D7 を入れた |
 | D9 | `ErrorEnd` | 追加：失敗通知（`NotifyOnError` が YES のとき、Teams に投稿）。**追加の位置は、エラー情報の取得・置換の後、画面のメッセージの前**。取得・置換・メッセージ・ブラウザーを閉じる処理は資産4と同じ行 | 失敗時の Teams 通知。通知が失敗しても止まらないよう、投稿の直後に個別のエラー時の設定を付けた |
 | D10 | 手順書 | 資産5の `README.md`・`reference.md`・`verification-log.md` を新規作成 | 資産4の分割に合わせる |
@@ -62,8 +62,8 @@
 
 | 変数 | 内容 | 設定場所（アクション表 No.） |
 |------|------|------------------------------|
-| `SharePointSiteUrl` | 保存先サイトの URL（**プレースホルダー**。リンクの組み立てに使う）。**末尾に「/」を付けない**。例 `https://<テナント>.sharepoint.com/sites/<サイト>` | 1 |
-| `SharePointFolder` | 保存先フォルダー（ライブラリを含むパス。**プレースホルダー**・直接入力）。**「/」で始め、末尾に「/」を付けない**。例 `/Shared Documents/<フォルダー>`（SharePoint のアクションの決まり。前の版の実機で動いた形）。SharePoint のアクション（No.111・143・148）とリンク（No.144）の両方に使う | 2 |
+| `SharePointSiteUrl` | 保存先サイトの URL（**プレースホルダー**。`CsvFolderLink` の組み立てに使う）。**末尾に「/」を付けない**。例 `https://<テナント>.sharepoint.com/sites/<サイト>` | 1 |
+| `SharePointFolder` | 保存先フォルダー（ライブラリを含むパス。**プレースホルダー**・直接入力）。**「/」で始め、末尾に「/」を付けない**。例 `/Shared Documents/<フォルダー>`（SharePoint のアクションの決まり。前の版の実機で動いた形）。SharePoint のアクション（No.111・143・148）と `CsvFolderLink`（No.144）の両方に使う | 2 |
 | `ChatRecipient` | 投稿先（作成者本人。**プレースホルダー**） | 3 |
 | `NotifyOnError` | 失敗通知を出すか（YES／NO）。手順6 に入るとき NO | 4・152 |
 | `PreviousExists` | 前回の `latest.csv` の有無（True／False）。無ければ初回扱い | 108・117・127 |
@@ -73,7 +73,7 @@
 | `PreviousNosKey` | `,申込番号,申込番号,…,` の形の文字（新規判定の比較用） | 109・126 |
 | `NewRows` | 新規案件（`CurrentTable` の行のうち、申込番号が前回に無いもの。14列） | 132〜137 |
 | `HistoryBinary`／`LatestBinary` | 保存用にバイナリへ変換した履歴ファイル／`latest.csv` | 142・147 |
-| `HistoryFileLink` | 履歴ファイルへのリンク。`%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%`（サイトの URL の直後に「/」で始まるフォルダーをつなぎ、「/」とファイル名を足す。空白は `%20` に置換）。例 `https://<テナント>.sharepoint.com/sites/<サイト>/Shared%20Documents/<フォルダー>/申込状況_YYYYMMDD_HHMM.csv`。入力が No.1・2 のルールと違う形だと、リンクが「//」になる・「/」が抜ける（`Main.txt` は入力の形を直さない） | 144・145 |
+| `CsvFolderLink` | CSV の保存場所（SharePoint のフォルダー）を開くリンク先。**履歴ファイルそのものは指さない**（開くとダウンロードが始まるため。`docs/flow.md` 1）。`%SharePointSiteUrl%%SharePointFolder%`（サイトの URL の直後に「/」で始まるフォルダーをつなぐ。ファイル名は付けない。空白は `%20` に置換）。例 `https://<テナント>.sharepoint.com/sites/<サイト>/Shared%20Documents/<フォルダー>`。投稿では `<a href=…>CSV の保存場所を開く</a>` の `href` の中にだけ使い、URL の文字は本文に出さない。入力が No.1・2 のルールと違う形だと、「//」になる・「/」が抜ける（`Main.txt` は入力の形を直さない）。旧名 `HistoryFileLink`（2026-11-04 までの版。履歴ファイルを指していた） | 144・145 |
 | `RunDateTimeText` | 取得日時の文字（`yyyy/MM/dd HH:mm`） | 154 |
 | `PostPattern`／`PostMessage` | 投稿のパターン（初回／新規あり／新規0件）／投稿する文 | 156〜170 |
 | `NewLines`／`NewIndex`／`NewLine`／`NewRow` | 新規あり の各案件の行を組み立てる | 161〜166 |
@@ -123,17 +123,18 @@
 
 ## 5. Teams の投稿文（毎回必ず1回。投稿先は作成者本人の個人チャット）
 
-改行は `<br>`（Teams の投稿の本文は HTML として扱われる。前の版の実機で、`<br>` の文字は見えずに改行されて表示された）。
+改行は `<br>`（Teams の投稿の本文は HTML として扱われる。前の版の実機で、`<br>` の文字は見えずに改行されて表示された）。リンクは HTML の `<a>` タグ（`Main.txt` では `<a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>`。`\"` は PAD の文字列の中での `"` の書き方。verification-log.md の 1-3）。下の表の［CSV の保存場所を開く］は、Teams 上でクリックできる文字のリンクを表す。
 
 | 場面 | 投稿文（`PostMessage`） |
 |------|-------------------------|
-| 初回 | 【申込状況チェック】初回実行のため、全 N 件を保存しました（比較する前回データがありません）（取得日時：yyyy/MM/dd HH:mm）<br><br>CSV：`<履歴ファイルへのリンク>` |
-| 新規あり | 【申込状況チェック】新規案件が N 件あります（取得日時：…／全 M 件）<br><br>1. 申込番号／お客さま名／申込種別／変更前容量 → 変更後容量／ステータス<br>2. …<br><br>CSV：`<履歴ファイルへのリンク>` |
-| 新規0件 | 【申込状況チェック】新規案件はありません（全 N 件を確認しました）（取得日時：…）<br><br>CSV：`<履歴ファイルへのリンク>` |
-| 失敗 | 【申込状況チェック】取得に失敗しました。手順◯◯ で停止（取得日時：…）<br>`StepMessage`<br>（PAD のエラー情報：ユーザー名を含むパスを伏せた版）。**リンクは付けない** |
+| 初回 | 【申込状況チェック】初回実行のため、全 N 件を保存しました（比較する前回データがありません）（取得日時：yyyy/MM/dd HH:mm）<br><br>CSV：申込状況_YYYYMMDD_HHMM.csv<br>［CSV の保存場所を開く］ |
+| 新規あり | 【申込状況チェック】新規案件が N 件あります（取得日時：…／全 M 件）<br><br>1. 申込番号／お客さま名／申込種別／変更前容量 → 変更後容量／ステータス<br>2. …<br><br>CSV：申込状況_YYYYMMDD_HHMM.csv<br>［CSV の保存場所を開く］ |
+| 新規0件 | 【申込状況チェック】新規案件はありません（全 N 件を確認しました）（取得日時：…）<br><br>CSV：申込状況_YYYYMMDD_HHMM.csv<br>［CSV の保存場所を開く］ |
+| 失敗 | 【申込状況チェック】取得に失敗しました。手順◯◯ で停止（取得日時：…）<br>`StepMessage`<br>（PAD のエラー情報：ユーザー名を含むパスを伏せた版）。**リンク・履歴ファイル名は付けない** |
 
-- リンクは履歴ファイルを指す（`latest.csv` ではない）。リンクは `%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%` で組み立てる（No.144。空白は `%20`：No.145）。`SharePointSiteUrl` は末尾に「/」なし、`SharePointFolder` は「/」で始まり末尾に「/」なし、という入力のルール（3 の変数の表、README の「3.」の表の 2・3）が前提。
-  - 経緯：前の版（`aff84e9`）は `%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%` で、`SharePointFolder` が「/」で始まるため `…/sites/<サイト>//Shared%20Documents/…` と「//」になり、実機で3回ともリンクを開けなかった（2026-10-21）。今の版は間の「/」を外した。**今の版のリンクが開けるかは実機で未確認**（verification-log.md の 4）。
+- 「CSV：」の後は**今回の履歴ファイル名（文字）**（`%HistoryFileName%`）。保存場所に履歴ファイルが並ぶので、どれが今回分か分かるようにする。
+- リンク［CSV の保存場所を開く］の行き先は **CSV の保存場所（SharePoint のフォルダー）だけ**で、履歴ファイル・`latest.csv` のファイルそのものは指さない（クリックしてもダウンロードは始まらず、フォルダーの一覧が開く想定）。リンク先は `CsvFolderLink` ＝ `%SharePointSiteUrl%%SharePointFolder%`（No.144。空白は `%20`：No.145）。`SharePointSiteUrl` は末尾に「/」なし、`SharePointFolder` は「/」で始まり末尾に「/」なし、という入力のルール（3 の変数の表、README の「3.」の表の 2・3）が前提。URL の文字は本文に出さない（`href` の中だけ）。
+  - 経緯：`aff84e9` は `%SharePointSiteUrl%/%SharePointFolder%/%HistoryFileName%` で「//」になり開けなかった（2026-10-21）。`456353a` は間の「/」を外して「//」は無くなった（2026-11-04 の実機）が、「CSV：<URL>」がクリックできる形にならず、開くと CSV のダウンロードが始まった（人の確認 2026-11-05）。人の決定（2026-11-05）で、今の版は履歴ファイル名を文字で書き、フォルダーを開く文字のリンクにした。**今の版で、文字のリンクになるか・フォルダーの一覧が開くか・ダウンロードが始まらないかは実機で未確認**（verification-log.md の 4-4・5）。
 - **失敗通知の「追加情報: {}」**：画面のメッセージに「追加情報: {}」と出る場合でも、**Teams の失敗通知では `{}` が表示されないことがある**（前の版の実機の 5-18 で「追加情報: ）」と表示された）。`Main.txt` は画面と同じ `ErrorDetail` から本文を作っており、`{}` を消す処理は無い。Teams のコネクタまたは Teams の表示で落ちたとみられる（推測）。手順名・メッセージ・エラー メッセージは届くので、そのままにしている。
 - 新規あり の各案件は、`NewRows` の列 0（申込番号）・2（お客さま名）・4（申込種別）・5（変更前容量）・6（変更後容量）・7（ステータス）を使う。
 - 取得日時は、正常時は `RunDateTime`、失敗時は失敗した時刻。
@@ -157,7 +158,7 @@
 
 ### 6-2. 貼り付け後の再設定（実機で試すこと）
 
-プレースホルダーのまま貼り付けると、エラー ペインに次の **7件** が出る（前の版 `aff84e9` の実機の結果、2026-10-21。今の版も PAD の行の番号は同じ）。**エラーが残ったままでも保存はできた**。7件とも下の再設定で消え、設定後はエラー 0 件・229 アクションで保存できた。
+プレースホルダーのまま貼り付けると、エラー ペインに次の **7件** が出る（`aff84e9` の実機の結果〔2026-10-21〕。`456353a` の実機〔2026-11-04〕でも同じ7件。今の版も PAD の行の番号は同じ）。**エラーが残ったままでも保存はできた**。7件とも下の再設定で消え、設定後はエラー 0 件・229 アクションで保存できた。
 
 | 件数 | エラーの文言 | PAD の行（アクション表 No.） | 消えるタイミング |
 |------|--------------|------------------------------|------------------|
@@ -189,7 +190,7 @@ PAD の行はデザイナーの左の番号で、コメントの行も数える�
 
 ### 6-3. 実機で確認したこと（C1〜C4。前の版 `aff84e9`、2026-10-21）
 
-今の版は、リンクの組み立て（No.144）とコメントのほかは前の版と同じなので、C1〜C4 の結果は今の版にも当てはまる見込み（今の版の実機の確認は verification-log.md の 4）。
+今の版は、リンクの組み立て（No.144・145）と投稿文（No.157・167・170）とコメントのほかは前の版と同じなので、C1〜C4 の結果は今の版にも当てはまる見込み（今の版の実機の確認は verification-log.md の 4）。
 
 | # | 内容 | 今の `Main.txt` | 実機の結果（だめだったときの直し方） |
 |---|------|-----------------|--------------------------------------|
@@ -353,8 +354,8 @@ PAD の行はデザイナーの左の番号で、コメントの行も数える�
 | 141 | 5-3 | Step5c_Save | 変数の設定 | `StepMessage` ＝ `手順5-3：SharePoint への履歴ファイルの保存に失敗しました（latest.csv…` | `StepMessage` | 新規 |
 | 142 | 5-3 | Step5c_Save | ファイルをバイナリ データに変換 | File: `%WorkFolder%\\%HistoryFileName%` BinaryData=> HistoryBinary | `HistoryBinary` | 新規 |
 | 143 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。@dataset: `<保存先サイト>` @folderPath: SharePointFolder @name: HistoryFileName @body: HistoryBinary @CreateFileResponse=> CreateFileResponse2 | — | 新規 |
-| 144 | 5-3 | Step5c_Save | 変数の設定 | `HistoryFileLink` ＝ `%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%`（サイトの URL とフォルダーの間に「/」を足さない。`SharePointFolder` が「/」で始まるルールのため。5 のリンクの説明） | `HistoryFileLink` | 新規 |
-| 145 | 5-3 | Step5c_Save | テキストを置換する | Text: HistoryFileLink TextToFind: `\\x20` IgnoreCase: False ReplaceWith: `%%20` ActivateEscapeSequences: False Result=> HistoryFileLink | `HistoryFileLink` | 新規 |
+| 144 | 5-3 | Step5c_Save | 変数の設定 | `CsvFolderLink` ＝ `%SharePointSiteUrl%%SharePointFolder%`（CSV の保存場所のフォルダー。ファイル名は付けない。サイトの URL とフォルダーの間に「/」を足さない。`SharePointFolder` が「/」で始まるルールのため。5 のリンクの説明） | `CsvFolderLink` | 新規 |
+| 145 | 5-3 | Step5c_Save | テキストを置換する | Text: CsvFolderLink TextToFind: `\\x20` IgnoreCase: False ReplaceWith: `%%20` ActivateEscapeSequences: False Result=> CsvFolderLink | `CsvFolderLink` | 新規 |
 | 146 | 5-3 | Step5c_Save | 変数の設定 | `StepMessage` ＝ `手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の…` | `StepMessage` | 新規 |
 | 147 | 5-3 | Step5c_Save | ファイルをバイナリ データに変換 | File: `%WorkFolder%\\latest.csv` BinaryData=> LatestBinary | `LatestBinary` | 新規 |
 | 148 | 5-3 | Step5c_Save | SharePoint コネクタのアクション（`CreateFile`） | 接続参照・サイト／投稿先はプレースホルダー。@dataset: `<保存先サイト>` @folderPath: SharePointFolder @name: `latest.csv` @body: LatestBinary @CreateFileResponse=> CreateFileResponse | — | 新規 |
@@ -366,7 +367,7 @@ PAD の行はデザイナーの左の番号で、コメントの行も数える�
 | 154 | 6 | Step6_Notify | datetime をテキストに変換 | DateTime: RunDateTime CustomFormat: `yyyy/MM/dd HH:mm` Result=> RunDateTimeText | `RunDateTimeText` | 新規 |
 | 155 | 6 | Step6_Notify | If | PreviousExists = False | — | 新規 |
 | 156 | 6 | Step6_Notify | 変数の設定 | `PostPattern` ＝ `初回` | `PostPattern` | 新規 |
-| 157 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】初回実行のため、全 %CurrentTable.RowsCount% 件…` | `PostMessage` | 新規 |
+| 157 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】初回実行のため、全 %CurrentTable.RowsCount% 件…<br><br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>` | `PostMessage` | 新規 |
 | 158 | 6 | Step6_Notify | Else | — | — | 新規 |
 | 159 | 6 | Step6_Notify | If | NewRows.RowsCount > 0 | — | 新規 |
 | 160 | 6 | Step6_Notify | 変数の設定 | `PostPattern` ＝ `新規あり` | `PostPattern` | 新規 |
@@ -376,10 +377,10 @@ PAD の行はデザイナーの左の番号で、コメントの行も数える�
 | 164 | 6 | Step6_Notify | 変数の設定 | `NewIndex` ＝ NewIndex + 1 | `NewIndex` | 新規 |
 | 165 | 6 | Step6_Notify | 変数の設定 | `NewLine` ＝ `%NewIndex%. %NewRow[0]%／%NewRow[2]%／%NewRow[4]…` | `NewLine` | 新規 |
 | 166 | 6 | Step6_Notify | 変数の設定 | `NewLines` ＝ NewLines + NewLine | `NewLines` | 新規 |
-| 167 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】新規案件が %NewRows.RowsCount% 件あります（取得日時…` | `PostMessage` | 新規 |
+| 167 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】新規案件が %NewRows.RowsCount% 件あります（取得日時…<br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>` | `PostMessage` | 新規 |
 | 168 | 6 | Step6_Notify | Else | — | — | 新規 |
 | 169 | 6 | Step6_Notify | 変数の設定 | `PostPattern` ＝ `新規0件` | `PostPattern` | 新規 |
-| 170 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount…` | `PostMessage` | 新規 |
+| 170 | 6 | Step6_Notify | 変数の設定 | `PostMessage` ＝ `【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount…<br><br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>` | `PostMessage` | 新規 |
 | 171 | 6 | Step6_Notify | Teams コネクタのアクション（`PostMessageToConversation`） | 接続参照・サイト／投稿先はプレースホルダー。@poster: `Flow bot` @location: `Chat with Flow bot` @'body/recipient': ChatRecipient @'body/messageBody': PostMessage @PostMessageToConversationResponse=> PostMessageToConversationResponse | — | 新規 |
 | 172 | 7 | — | Web ブラウザーを閉じる | BrowserInstance: Browser | — | 資産4 の No.100 と同じ |
 | 173 | 7 | — | フローを停止する（正常終了） | 終了コード：0 | — | 資産4 の No.101 と同じ |

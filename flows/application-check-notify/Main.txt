@@ -221,9 +221,9 @@ END
     @@folderPath: '%SharePointFolder%'
     @@connectionDisplayName: '<SharePoint 接続参照名>'
     External.InvokeCloudConnector Connection: '<SharePoint 接続参照ID>' ConnectorId: '/providers/Microsoft.PowerApps/apis/shared_sharepointonline' OperationId: 'CreateFile' @dataset: $'''<保存先サイト>''' @folderPath: SharePointFolder @name: HistoryFileName @body: HistoryBinary @CreateFileResponse=> CreateFileResponse2
-    # 履歴ファイルへのリンク（サイトの URL ＋ フォルダー ＋「/」＋ ファイル名。SharePointFolder は「/」で始まるので、サイトの URL との間に「/」を足さない。空白は %20 にする）
-    SET HistoryFileLink TO $'''%SharePointSiteUrl%%SharePointFolder%/%HistoryFileName%'''
-    Text.Replace.ReplaceTextWithRegex Text: HistoryFileLink TextToFind: $'''\\x20''' IgnoreCase: False ReplaceWith: $'''%%20''' ActivateEscapeSequences: False Result=> HistoryFileLink
+    # CSV の保存場所（SharePoint のフォルダー）を開くリンク先（サイトの URL ＋ フォルダー。ファイル名は付けない＝ダウンロードを始めない。SharePointFolder は「/」で始まるので、サイトの URL との間に「/」を足さない。空白は %20 にする）
+    SET CsvFolderLink TO $'''%SharePointSiteUrl%%SharePointFolder%'''
+    Text.Replace.ReplaceTextWithRegex Text: CsvFolderLink TextToFind: $'''\\x20''' IgnoreCase: False ReplaceWith: $'''%%20''' ActivateEscapeSequences: False Result=> CsvFolderLink
     SET StepMessage TO $'''手順5-3：履歴ファイルは SharePoint に保存しましたが、latest.csv の保存に失敗しました（latest.csv は前回のまま、または無い状態です）'''
     File.ConvertToBinary File: $'''%WorkFolder%\\latest.csv''' BinaryData=> LatestBinary
     @@dataset: '<サイト名> - <保存先サイト>'
@@ -242,7 +242,7 @@ END
     Text.ConvertDateTimeToText.FromCustomDateTime DateTime: RunDateTime CustomFormat: $'''yyyy/MM/dd HH:mm''' Result=> RunDateTimeText
     IF PreviousExists = False THEN
         SET PostPattern TO $'''初回'''
-        SET PostMessage TO $'''【申込状況チェック】初回実行のため、全 %CurrentTable.RowsCount% 件を保存しました（比較する前回データがありません）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileLink%'''
+        SET PostMessage TO $'''【申込状況チェック】初回実行のため、全 %CurrentTable.RowsCount% 件を保存しました（比較する前回データがありません）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>'''
     ELSE
         IF NewRows.RowsCount > 0 THEN
             SET PostPattern TO $'''新規あり'''
@@ -254,10 +254,10 @@ END
                 SET NewLine TO $'''%NewIndex%. %NewRow[0]%／%NewRow[2]%／%NewRow[4]%／%NewRow[5]% → %NewRow[6]%／%NewRow[7]%<br>'''
                 SET NewLines TO NewLines + NewLine
             END
-            SET PostMessage TO $'''【申込状況チェック】新規案件が %NewRows.RowsCount% 件あります（取得日時：%RunDateTimeText%／全 %CurrentTable.RowsCount% 件）<br><br>%NewLines%<br>CSV：%HistoryFileLink%'''
+            SET PostMessage TO $'''【申込状況チェック】新規案件が %NewRows.RowsCount% 件あります（取得日時：%RunDateTimeText%／全 %CurrentTable.RowsCount% 件）<br><br>%NewLines%<br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>'''
         ELSE
             SET PostPattern TO $'''新規0件'''
-            SET PostMessage TO $'''【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount% 件を確認しました）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileLink%'''
+            SET PostMessage TO $'''【申込状況チェック】新規案件はありません（全 %CurrentTable.RowsCount% 件を確認しました）（取得日時：%RunDateTimeText%）<br><br>CSV：%HistoryFileName%<br><a href=\"%CsvFolderLink%\">CSV の保存場所を開く</a>'''
         END
     END
     @@connectionDisplayName: '<Teams 接続参照名>'
