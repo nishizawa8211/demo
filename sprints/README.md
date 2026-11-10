@@ -11,6 +11,7 @@
 | 04d | ログインの停止対策（クリックのやり直し・Edge を前面に） | 完了 | 合格 95/100（review-02。4d-8 Edge の前面化の目視は未確認のまま終了：人の判断） | 1回 | 2026-10-19 | [合格基準書](04d-login-stability/pass-criteria.md) / [review-01](04d-login-stability/review-01.md) / [review-02](04d-login-stability/review-02.md) |
 | 04e | クリックの物理マウス操作をやめる（3か所に `MouseClick: False`） | 完了 | 合格 100/100（review-02。4e-12 は人の回答〔帯はログイン画面で表示〕による追記で合格） | 1回 | 2026-10-21 | [合格基準書](04e-click-no-mouse/pass-criteria.md) / [review-01](04e-click-no-mouse/review-01.md) / [review-02](04e-click-no-mouse/review-02.md) |
 | 05 | フロー後半（SharePoint 保存・比較・Teams 投稿）＝資産4＋α。付加価値 | 完了 | 合格 100/100（review-03。追補2〔リンクを保存場所のフォルダーへの文字のリンクに〕は人が承認 2026-11-05） | 3回 | 2026-11-05 | [合格基準書](05-flow-notify/pass-criteria.md) / [review-01](05-flow-notify/review-01.md) / [review-02](05-flow-notify/review-02.md) / [review-03](05-flow-notify/review-03.md) |
+| 06 | 初期データを20件から5件に（人の決定 2026-11-10） | 完了 | 合格 100/100（review-01。06-12 は PAD 11.2610.155.0 で実機確認、5件 約46秒） | 0回 | 2026-11-10 | [合格基準書](06-data-5items/pass-criteria.md) / [review-01](06-data-5items/review-01.md) |
 
 状態：未着手 / 合格基準書作成中 / 実装中 / 採点中 / 差し戻し中 / 完了 / 停止 / 保留
 
