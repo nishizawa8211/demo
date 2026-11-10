@@ -99,7 +99,7 @@ END
     WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() { var rows = document.querySelectorAll(\"#application-tbody tr[data-application-no]\"); var nos = []; for (var i = 0; i < rows.length; i++) { nos.push(rows[i].getAttribute(\"data-application-no\")); } return nos.join(\",\"); }''' Result=> ApplicationNosText
     Text.SplitText.SplitWithDelimiter Text: ApplicationNosText CustomDelimiter: $''',''' IsRegEx: False Result=> ApplicationNos
     SET StepMessage TO $'''手順2-2：一覧の件数表示（「全 N 件」）を取得できませんでした'''
-    # 件数表示の文字（例「全 20 件」）を Own Text で読み、数字の部分だけ取り出して数値にする（data-count 属性は PAD では空の文字が返るため）
+    # 件数表示の文字（例「全 5 件」）を Own Text で読み、数字の部分だけ取り出して数値にする（data-count 属性は PAD では空の文字が返るため）
     WebAutomation.GetDetailsOfElement BrowserInstance: Browser Control: appmask['ListPage']['application-count'] AttributeName: $'''Own Text''' AttributeValue=> DataCountText
     Text.ParseText.RegexParseForFirstOccurrence Text: DataCountText TextToFind: $'''[0-9]+''' StartingPosition: 0 IgnoreCase: False OccurrencePosition=> DataCountPosition Match=> DataCountDigits
     Text.ToNumber Text: DataCountDigits Number=> DataCount
