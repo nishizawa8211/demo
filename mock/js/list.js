@@ -140,7 +140,7 @@
       .then(function () {
         confirmBox.hidden = true;
         return loadList().then(function () {
-          demoMessage.textContent = '初期データ（20件）に戻しました';
+          demoMessage.textContent = '初期データ（5件）に戻しました';
         });
       })
       .catch(function () {

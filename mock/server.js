@@ -11,7 +11,7 @@ const PORT = 8080;
 const ROOT = __dirname; // mock/
 const DATA_DIR = path.join(ROOT, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'dummy.json');       // 現在のデータ（追加分もここに保存）
-const INITIAL_FILE = path.join(DATA_DIR, 'initial.json');  // 初期20件（リセット用・変更しない）
+const INITIAL_FILE = path.join(DATA_DIR, 'initial.json');  // 初期5件（リセット用・変更しない）
 const CANDIDATES_FILE = path.join(DATA_DIR, 'candidates.json'); // 追加候補（順番に使う）
 
 const MIME = {
